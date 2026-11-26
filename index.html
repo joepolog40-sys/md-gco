@@ -529,6 +529,10 @@ body.viewer .hud .hjump{font-size:22px}
 .jflash.on{animation:jfl 1.6s ease-out forwards}
 @keyframes jfl{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}12%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}25%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
 body.living .road{scroll-margin-top:70px}
+
+/* place réservée = hauteur réelle du panneau du bas (MD) */
+body:not(.viewer).living main,body:not(.viewer).idle main{padding-bottom:calc(var(--hudh,330px) + 16px)!important}
+body:not(.viewer).living .blk{scroll-margin-bottom:calc(var(--hudh,330px) + 12px)}
 </style>
 </head>
 <body>
@@ -1098,7 +1102,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=47;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=48;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
@@ -1275,6 +1279,8 @@ function setRep(on){rep=!!on&&viewer;document.body.classList.toggle('rep',rep);c
 
 // migration locale (sans envoi) : pré-refrain d'All Hail = une seule ligne sur la fiche
 if(!(state.mig||[]).includes('nl1')){state.songs.forEach(so=>so.id==='ahkj'&&so.sections.forEach(q=>{if(q.nash==='2 6 5 · 1 3 4')q.nash='2 6 5  1 3 4'}));state.mig=[...(state.mig||[]),'nl1'];LS.set('state',state)}
+// le contenu laisse toujours la place exacte du panneau du bas : rien n'est caché derrière
+(()=>{const h=$('#hud');if(!h)return;const set=()=>{const v=h.hidden||getComputedStyle(h).position!=='fixed'||h.getBoundingClientRect().top<4?0:Math.ceil(h.getBoundingClientRect().height);document.documentElement.style.setProperty('--hudh',v+'px')};try{new ResizeObserver(set).observe(h)}catch(e){}new MutationObserver(set).observe(h,{attributes:true,attributeFilter:['hidden']});new MutationObserver(set).observe(document.body,{attributes:true,attributeFilter:['class']});window.addEventListener('resize',set);set()})();
 if(HOSTED)document.body.classList.add('hosted');
 paintClk();paintPerc();
 renderAll();
