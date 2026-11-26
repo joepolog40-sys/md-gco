@@ -904,7 +904,7 @@ function NL(t){return esc(t).split(/\s+·\s+/).map(l=>`<span class="nl">${l}</sp
 function fitNash(root){(root||document).querySelectorAll('.blk .nash,.blk .chd').forEach(el=>{el.style.fontSize='';const w=el.clientWidth,sw=el.scrollWidth;if(w>0&&sw>w+1){const f=parseFloat(getComputedStyle(el).fontSize);el.style.fontSize=Math.max(11,Math.floor(f*w/sw*10)/10)+'px'}})}
 var fitT=0;function fitSoon(){cancelAnimationFrame(fitT);fitT=requestAnimationFrame(()=>fitNash())}window.addEventListener('resize',fitSoon);
 function paintNash(q,s){const el=$('#hNash');if(!el)return;const n=q&&q.nash?q.nash:'';el.hidden=!n;if(!n)return;const big=show(n,s.key),small=chords?n:toChords(n,s.key);
- el.innerHTML=`<b>${esc(big).split(/\s+·\s+/).join('<br>')}</b>${small!==big?`<span>${esc(small).split(/\s+·\s+/).join('<br>')}</span>`:''}`;el.style.color=`var(${KC[q.kind]||'--intro'})`}
+ el.innerHTML=`<b>${esc(big).split(/\s+·\s+/).join('<br>')}</b>${viewer&&small!==big?`<span>${esc(small).split(/\s+·\s+/).join('<br>')}</span>`:''}`;el.style.color=`var(${KC[q.kind]||'--intro'})`}
 // où tombe le drop : 0 = sur le 1 de la section, 1 = sur le dernier temps avant, 2 = l'avant-dernier, 0.5 = sur le « et » du dernier temps
 const DROPAT={1:'sur le 4 de la dernière mesure avant (par défaut)',0.5:'sur le « et » du 4',2:'sur le 3 de la dernière mesure avant',3:'sur le 2 de la dernière mesure avant',0:'sur le 1 de la section'};
 // dropAt = nombre de temps AVANT le 1 de la section (1 = sur le 4 de la dernière mesure d'avant ; 0 = sur le 1 ; négatif = dans la 1re mesure de la section ; demi-temps = « et »)
@@ -1096,7 +1096,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=45;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=46;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
