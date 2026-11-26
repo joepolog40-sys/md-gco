@@ -472,6 +472,15 @@ body.viewer #nav a[data-id="home"]{display:none}
 /* degrés : une ligne = une ligne de la fiche */
 .blk .nash .nl,.blk .chd .nl{display:block;white-space:pre}
 .blk .nash,.blk .chd{overflow:hidden}
+/* Répétition : la liste des chants sur sa propre ligne, tous visibles (pas cachés derrière les boutons) */
+body.viewer.rep nav.songs .navw{flex-wrap:wrap!important;overflow:visible!important}
+body.viewer.rep #nav{flex:1 1 100%!important;flex-wrap:wrap!important;overflow:visible!important;order:2}
+body.viewer.rep #nav a{font-size:13px;padding:6px 10px}
+body.viewer.rep .repbtn,body.viewer.rep .chordsbtn{order:1}
+/* barre du bas plus compacte au repos */
+body.viewer.rep.idle #hNext,body.viewer.rep.idle #hCall{display:none!important}
+body.viewer.rep.idle .hud .hnash b{font-size:30px}
+@media (orientation:portrait){body.viewer.rep.idle main{padding-bottom:260px!important}}
 </style>
 </head>
 <body>
@@ -1040,7 +1049,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=38;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=39;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
