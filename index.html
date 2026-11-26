@@ -663,7 +663,7 @@ function peches(s,si){const editing=EDIT.song===s.id;const P=s.intro;if(!P)retur
 const HOT=/DROP|STOP|SANS BATTERIE/i;const mmss=t=>t==null?'':`${Math.floor(t/60)}:${String(Math.round(t%60)).padStart(2,'0')}`;
 const ARW=q=>q.i1>q.i0+.4?'↗':q.i1<q.i0-.4?'↘':'';
 // repères d'édition : niveau de fin de la section d'avant et de début de la suivante, à la même échelle que la case modifiée
-function wGuides(S,i){const out=[],P=S.sections[i-1],N=S.sections[i+1];if(P){const x=IX(P);out.push({v:x[x.length-1][1],l:'fin '+P.name})}if(N){const v=IX(N)[0][1];if(!out.length||out[0].v!==v)out.push({v,l:'début '+N.name});else out[0].l+=' = début '+N.name}return out}
+function wGuides(S,i){const P=S.sections[i-1];if(!P)return [];const x=IX(P);return [{v:x[x.length-1][1],l:'fin '+P.name}]}
 function wm(q,si,i){const pl=IX(q).map(([f,v])=>`${(f*100).toFixed(1)},${100-v*10}`).join(' '),id=`g${si}_${i}_${editing?1:0}`,m=IMAX(q);
  return `<svg class="wm ${m>=9?'hot':''} ${m<=0?'zero':''}" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--c);stop-opacity:.5"/><stop offset="1" style="stop-color:var(--c);stop-opacity:.07"/></linearGradient></defs><polygon class="wf" points="0,100 ${pl} 100,100" fill="url(#${id})"/><polyline class="wl" points="${pl}" style="stroke:var(--c)" fill="none" stroke-width="3" vector-effect="non-scaling-stroke"/></svg>`}
 const wword=q=>`<span class="ww">${WORD(IMAX(q))} ${ARW(q)}</span>`;
