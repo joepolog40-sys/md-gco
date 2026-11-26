@@ -300,13 +300,14 @@ body.viewer .tools,body.viewer .status,body.viewer .chordsbtn,body.viewer .metro
 body.viewer #decide,body.viewer .blk,body.viewer .arc{pointer-events:none}
 body.viewer .blk{cursor:default}
 body.viewer #decide input{display:none}
+.role{display:inline-block;font-size:12px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--panel2);color:var(--mute);margin-bottom:4px}.role:empty{display:none}body:not(.viewer) .role{background:#1f8a3b;color:#fff}
 </style>
 </head>
 <body>
 <div id="mdroot" data-md>
 <header class="top wrap">
  <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
-  <div><h1 id="h1"></h1><div class="sub" id="sub"></div><div class="status" id="status"><span class="led"></span><span id="stxt">Chargement…</span></div></div>
+  <div><span id="role" class="role"></span><h1 id="h1"></h1><div class="sub" id="sub"></div><div class="status" id="status"><span class="led"></span><span id="stxt">Chargement…</span></div></div>
   <div class="tools">
    <button class="edit" id="bEdit" title="Modifier la feuille (répétition)">✏️ Mode édition</button>
    <button class="ed-only" id="bUndo" title="Annuler la dernière modification">↶ Annuler</button>
@@ -403,10 +404,11 @@ function applyRemote(d){try{const s=JSON.parse(d.json);if(!s||!s.songs)return;st
 const typing=()=>{const a=document.activeElement;return a&&a.closest&&a.closest('main,header')&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)};
 document.addEventListener('focusout',()=>setTimeout(()=>{if(pendingRemote&&!typing()){const p=pendingRemote;pendingRemote=null;if(p.rev>state.rev)applyRemote(p)}},50));
 const CFG=window.MDCFG||null,HOSTED=!!CFG;
-if(HOSTED&&CFG.ownerHash&&location.hash.length>1&&window.crypto&&crypto.subtle){const k=location.hash.slice(1);try{history.replaceState(null,'',location.pathname)}catch(e){}
- crypto.subtle.digest('SHA-256',new TextEncoder().encode(k)).then(b=>{const h=[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');if(h===CFG.ownerHash){LS.set('owner',true);readOnly=false;setViewer(false);renderAll();if(room)pushRemote()}})}
+function checkOwner(){if(!(HOSTED&&CFG.ownerHash&&location.hash.length>1&&window.crypto&&crypto.subtle))return;const k=location.hash.slice(1);try{history.replaceState(null,'',location.pathname)}catch(e){}
+ crypto.subtle.digest('SHA-256',new TextEncoder().encode(k)).then(b=>{const h=[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');if(h===CFG.ownerHash){LS.set('owner',true);readOnly=false;setViewer(false);renderAll();if(typeof room!=='undefined'&&room)pushRemote();try{toast('Mode MD activé sur cet appareil')}catch(e){}}})}
+checkOwner();window.addEventListener('hashchange',checkOwner);
 let inApp=false,viewer=HOSTED?!LS.get('owner',false):location.protocol!=='file:';
-function setViewer(v){viewer=v;document.body.classList.toggle('viewer',v);if(v){readOnly=true;if(editing){editing=false;renderAll()}}}
+function setViewer(v){viewer=v;document.body.classList.toggle('viewer',v);const rb=document.getElementById('role');if(rb)rb.textContent=HOSTED?(v?'👁 Mode musicien':'🎛 Mode MD'):'';if(v){readOnly=true;if(editing){editing=false;renderAll()}}}
 setViewer(viewer);
 (async()=>{if(HOSTED){status('warn','Connexion au relais…');return}if(!(window.claude&&window.claude.use)){status('ok','Fichier local : les modifications restent dans ce navigateur (💾 pour une copie)');return}
  inApp=true;status('warn','Connexion à la sauvegarde…');
