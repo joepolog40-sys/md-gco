@@ -402,6 +402,9 @@ body.viewer nav.songs .navw{justify-content:flex-start!important}
 .blk.lpinf::after{content:'∞';background:var(--red);color:#fff;font-size:28px;animation:lpb 1s ease-in-out infinite}
 body.viewer .hloop{font-size:24px}
 @media (orientation:landscape) and (max-height:520px){body.viewer .hud .hloop{font-size:17px}}
+.blk>.secedit{position:absolute!important;top:3px;right:3px;z-index:4!important;margin:0!important;font-size:12px}
+.blk .nm{padding-right:16px}.blk .nm{overflow-wrap:anywhere}
+body.living .blk .nm,body.viewer .blk .nm{padding-right:0}
 </style>
 </head>
 <body>
@@ -595,7 +598,7 @@ const norm=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''
 function vCall(q){const c=String(q.call||''),p=c.split('·').map(x=>x.trim()),first=norm(p[0]).split(' ')[0],nm=norm(q.name);if(p.length>1&&first&&(nm.startsWith(first)||nm.includes(first)||(first==='pre'&&q.kind==='prerefrain')))return p.slice(1).join(' · ');return c}
 function vDupNote(q){const n=norm(q.note),c=norm(q.call);return !!n&&(c.includes(n)||n===c)}
 function blockRO(s,q,i){const si=state.songs.indexOf(s);return `<div class="blk" tabindex="0" data-i="${i}" title="Intensité ${lvlTxt(q)} / 10 · ${WORD(Math.max(q.i0,q.i1))}" style="--g:${Math.max(+q.bars||1,4)};--c:var(${KC[q.kind]||'--intro'})">${wm(q,si,i)}
- <div class="nm">${esc(q.name)}<span>${esc(q.bars)} mes.<button class="ico secedit" data-edsec="${si}:${i}" title="Modifier cette section">✏️</button></span></div>${q.call?`<div class="call ${HOT.test(q.call)||q.mark==='drop'||q.mark==='stop'?'hot':''}">${esc(viewer?vCall(q):q.call)}</div>`:''}
+ <div class="nm">${esc(q.name)}<span>${esc(q.bars)} mes.</span></div><button class="ico secedit" data-edsec="${si}:${i}" title="Modifier cette section">✏️</button>${q.call?`<div class="call ${HOT.test(q.call)||q.mark==='drop'||q.mark==='stop'?'hot':''}">${esc(viewer?vCall(q):q.call)}</div>`:''}
  ${q.nash?`<div class="nash">${esc(show(q.nash,s.key))}</div>${viewer&&toChords(q.nash,s.key)!==q.nash?`<div class="chd">${esc(chords?q.nash:toChords(q.nash,s.key))}</div>`:''}`:''}${q.cue&&!(viewer&&norm(q.call).includes(norm(q.cue)))?`<div class="cue">« ${esc(q.cue)} »</div>`:''}${q.note&&!(viewer&&vDupNote(q))?`<div class="note">${esc(q.note)}</div>`:''}
  ${wword(q)}${q.t!=null?`<span class="tm">${mmss(q.t)}</span>`:''}
  <div class="lp">${(()=>{const L=live.loops[s.id+':'+i];return `<button data-loop="${s.id}:${i}:1" class="${typeof L==='number'?'on':''}" title="Refaire cette section 1× de plus (re-clic = annuler)">↻1</button><button data-loop="${s.id}:${i}:inf" class="${L==='inf'?'on':''}" title="Boucler cette section (re-clic = arrêter)">∞</button>`})()}<span class="pc"></span></div>
