@@ -342,6 +342,7 @@ body.idle .hud{border-top-color:#1f8a3b}
 .imp button.pre{height:48px;padding:0 10px;font-size:16px;flex-direction:column;word-spacing:.15em}.imp button.pre i{font-style:normal;color:var(--mute);font-size:11px}
 .imp button.pre small{font-size:11px}.imp button.pre.on{background:#e6a100;color:#111}.imp button.pre.on small,.imp button.pre.on i{color:#111}
 @media(max-width:600px){.imp .gl{min-width:100%}}
+body:not(.standby) #hImp{display:none!important}
 </style>
 </head>
 <body>
@@ -371,7 +372,7 @@ body.idle .hud{border-top-color:#1f8a3b}
   <div class="card"><h3>À trancher à la répé</h3><div id="decide"></div></div>
   <div class="card"><h3>Signes de main</h3><div class="sig" id="sig"></div>
    <div class="scale" id="scale"></div>
-   <p class="kbd" style="margin:10px 0 0">Clavier : <b>L = ▶ Play</b> (depuis la case choisie). En live : <b>Espace = refaire la section 1×</b> (re-appui = annuler) · Maj+Espace ou L = boucle ∞ · <b>F = standby</b> (le clic continue, clique la section de reprise, F pour repartir) · <b>X = panic</b> (clic coupé) · <b>I = impro</b> (degrés envoyés en direct) · fin de chant : le clic continue, <b>N</b> = chant suivant · Échap = stop · <b>Entrée ou C = caler le clic sur le 1</b> (à tout moment, standby compris) · ↑ ou D = début de la section · T = tap tempo · → ← section · Entrée = recaler sur le 1 · + − tempo. En live, clique une case pour y sauter. Le live part toujours du début du chant, après le décompte.</p></div>
+   <p class="kbd" style="margin:10px 0 0">Clavier : <b>L = ▶ Play</b> (depuis la case choisie). En live : <b>Espace = refaire la section 1×</b> (re-appui = annuler) · Maj+Espace ou L = boucle ∞ · <b>F = standby</b> (le clic continue, clique la section de reprise, F pour repartir) · <b>X = panic</b> (clic coupé) · <b>I = impro</b> (en standby : degrés envoyés en direct) · fin de chant : le clic continue, <b>N</b> = chant suivant · Échap = stop · <b>Entrée ou C = caler le clic sur le 1</b> (à tout moment, standby compris) · ↑ ou D = début de la section · T = tap tempo · → ← section · Entrée = recaler sur le 1 · + − tempo. En live, clique une case pour y sauter. Le live part toujours du début du chant, après le décompte.</p></div>
  </div>
  <div id="songs"></div>
  <div class="legend" id="legend"></div>
@@ -695,7 +696,7 @@ async function liveStart(id,from){if(live.follow)followStop();if(mid)toggleMetro
  try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>live.wl=w).catch(()=>{})}catch(e){}
  cur=id;document.body.classList.add('living');try{window.focus();$('#hud').focus({preventScroll:true})}catch(e){}renderSong(si);markNav();$('#hud').hidden=false;const ar=document.querySelector(`.arc[data-arc="${si}"]`);ar&&ar.scrollIntoView({block:'start',behavior:'smooth'});
  impPaintPad();leadSel(id)}
-function liveStop(silent){if(live.follow){followStop();return}live.sb=null;live.sbPending=null;document.body.classList.remove('standby','panic');document.querySelectorAll('.blk.target').forEach(b=>b.classList.remove('target'));schedStop();const was=live.on;if(was&&room)try{room.emit('stop',{})}catch(e){}live.on=false;live.view=null;document.body.classList.remove('living');$('#hud').hidden=true;
+function liveStop(silent){if(live.follow){followStop();return}impOpen(false);if(live.impro)impSet([]);live.sb=null;live.sbPending=null;document.body.classList.remove('standby','panic');document.querySelectorAll('.blk.target').forEach(b=>b.classList.remove('target'));schedStop();const was=live.on;if(was&&room)try{room.emit('stop',{})}catch(e){}live.on=false;live.view=null;document.body.classList.remove('living');$('#hud').hidden=true;
  try{live.wl&&live.wl.release()}catch(e){}live.wl=null;
  document.querySelectorAll('.blk.live').forEach(b=>b.classList.remove('live'));document.querySelectorAll('.arc .ph').forEach(p=>p.style.display='none');
  if(was&&!silent&&live.si!=null)renderSong(live.si);if(!silent)idleDraw()}
@@ -707,7 +708,7 @@ function liveBeat(t){const s=state.songs[live.si];if(!s||!live.on)return 0;const
   if(live.beat>=live.bpb){live.beat=0;live.bar++;const q=s.sections[live.sec];
    if(live.bar>=(+q.bars||1)){live.bar=0;const k=live.id+':'+live.sec,L=live.loops[k];
     if(L==='inf'){}else if(typeof L==='number'){if(L<=1)delete live.loops[k];else live.loops[k]=L-1;LS.set('loops',live.loops);SCH.q.push({t:t+per,run:paintLoops})}
-    else{live.sec++;if(live.sec>=s.sections.length){live.sec=s.sections.length-1;live.bar=0;live.beat=0;live.sb={mode:'click',target:0,end:true};live.sbPending=null;live.down=null;live.prevDown=null;SCH.q.push({t:t+per,run:()=>{document.body.classList.add('standby');paintSb();liveDraw(true);leadEmitSb()}})}}}}}
+    else{live.sec++;if(live.sec>=s.sections.length){live.sec=s.sections.length-1;live.bar=0;live.beat=0;live.sb={mode:'click',target:0,end:true};live.sbPending=null;live.down=null;live.prevDown=null;SCH.q.push({t:t+per,run:()=>{document.body.classList.add('standby');impOpen(true);paintSb();liveDraw(true);leadEmitSb()}})}}}}}
  if(!snap.count&&!snap.beat)leadEmit(snap,t-ac.currentTime);SCH.q.push({t,run:()=>{live.view=snap;liveDraw()}});return per}
 const curSec=()=>(live.view||live).sec;
 function liveJump(i){const s=state.songs[live.si];if(!s)return;live.sec=clamp(i,0,s.sections.length-1);live.bar=0;live.beat=0;live.count=0;live.ended=false;live.view={sec:live.sec,bar:0,beat:0,count:0};schedRestart()}
@@ -840,14 +841,14 @@ function standby(mode){if(!live.on||live.follow)return;
   if(mode==='panic'){live.sb.mode='panic';live.sbPending=null;schedStop()}else{live.sb.mode='click';live.beat=0;schedStart(liveBeat)}
   document.body.classList.toggle('panic',live.sb.mode==='panic');paintSb();liveDraw(true);leadEmitSb();flash();return}
  live.sb={mode,target:curSec()};live.sbPending=null;live.count=0;live.down=null;live.prevDown=null;if(mode==='panic')schedStop();
- document.body.classList.add('standby');document.body.classList.toggle('panic',mode==='panic');paintSb();liveDraw(true);leadEmitSb();flash()}
+ document.body.classList.add('standby');document.body.classList.toggle('panic',mode==='panic');impOpen(true);paintSb();liveDraw(true);leadEmitSb();flash()}
 function sbExit(){const tg=live.sb.target;
  if(live.sb.mode==='panic'){live.sb=null;live.sbPending=null;live.sec=tg;live.bar=0;live.beat=0;live.ended=false;live.countN=CIN()*live.bpb;live.count=live.countN;sbClear();schedStart(liveBeat);flash();return}
  const now=ac.currentTime-outLat(),g=.25*live.per,ok=d=>d!=null&&now>=d&&now-d<g;
  if(ok(live.down)||ok(live.prevDown)){live.sb=null;live.sbPending=null;live.sec=tg;live.bar=0;live.beat=0;live.count=0;live.ended=false;sbClear();schedRestart(ac.currentTime+.005);flash();return}
  live.sbPending=tg;paintSb();liveDraw(true);leadEmitSb();flash()}
 function sbTarget(i){const S=state.songs[live.si].sections;live.sb.target=clamp(i,0,S.length-1);if(live.sbPending!=null)live.sbPending=live.sb.target;liveDraw(true);leadEmitSb()}
-function sbClear(){document.body.classList.remove('standby','panic');document.querySelectorAll('.blk.target').forEach(b=>b.classList.remove('target'));paintSb();lastSec=-1;liveDraw(true);if(live.view)leadEmit({sec:live.sec,bar:0})}
+function sbClear(){impOpen(false);if(live.impro)impSet([]);document.body.classList.remove('standby','panic');document.querySelectorAll('.blk.target').forEach(b=>b.classList.remove('target'));paintSb();lastSec=-1;liveDraw(true);if(live.view)leadEmit({sec:live.sec,bar:0})}
 function paintSb(){const a=$('#hSb'),b=$('#hPanic');if(!a)return;const sb=live.sb;
  a.textContent=!sb?'⏸ Standby':sb.mode==='panic'?'⏸ Clic seul':live.sbPending!=null?'⏳ au prochain 1':'▶ Repartir';a.classList.toggle('on',!!sb&&sb.mode!=='panic');
  b.textContent=sb&&sb.mode==='panic'?'▶ Repartir':'⛔ Panic';b.classList.toggle('on',!!sb&&sb.mode==='panic')}
@@ -911,7 +912,8 @@ function impKey(k){let t=impTokens();const last=t[t.length-1]||'';
  if(k==='/'){if(last&&!last.endsWith('/')){t[t.length-1]=last+'/';impSet(t)}return}
  if(/^[1-7]$/.test(k)){const d=(impFlat?'♭':'')+k;impFlat=false;if(last.endsWith('/'))t[t.length-1]=last+d;else t.push(d);impSet(t);return}
  if(k==='m'){if(last&&!/m$/.test(last)){t[t.length-1]=last+'m';impSet(t)}return}}
-function impToggle(){const p=$('#imp');if(!p||viewer)return;p.hidden=!p.hidden;$('#hImp').classList.toggle('on',!p.hidden);impPaintPad()}
+function impToggle(){const p=$('#imp');if(!p||viewer||!live.sb)return;p.hidden=!p.hidden;$('#hImp').classList.toggle('on',!p.hidden);impPaintPad()}
+function impOpen(on){const p=$('#imp');if(!p||viewer)return;p.hidden=!on;$('#hImp')&&$('#hImp').classList.toggle('on',on);if(on)impPaintPad()}
 function impPaintPad(){const p=$('#imp');if(!p)return;const s=state.songs[live.si];const key=s?s.key:'C';
  p.innerHTML=`<div class="improw"><b class="impseq">${esc(live.impro||'—')}</b><span class="impchd">${live.impro?esc(toChords(live.impro,key)):'tape les degrés, ça part tout de suite chez les musiciens'}</span></div>
  <div class="improw keys">${['1','2','3','4','5','6','7'].map(k=>`<button data-imp="${k}">${k}<small>${esc(toChords(k,key))}</small></button>`).join('')}<button data-imp="♭" class="${impFlat?'on':''}">♭</button><button data-imp="/">/</button><button data-imp="bs">⌫</button><button data-imp="clr" class="clr">Effacer</button></div>
