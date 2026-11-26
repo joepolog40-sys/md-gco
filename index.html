@@ -528,6 +528,7 @@ body.viewer .hud .hjump{font-size:22px}
 .jflash{position:fixed;left:50%;top:30%;transform:translate(-50%,-50%) scale(.5);z-index:199;background:#e6a100;color:#111;font-family:'Barlow Condensed',Arial,sans-serif;font-weight:900;font-size:clamp(34px,8vw,90px);padding:14px 34px;border-radius:20px;box-shadow:0 10px 50px rgba(230,161,0,.7);opacity:0;pointer-events:none;text-transform:uppercase;white-space:nowrap;max-width:94vw;overflow:hidden;text-overflow:ellipsis}
 .jflash.on{animation:jfl 1.6s ease-out forwards}
 @keyframes jfl{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}12%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}25%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+body.living .road{scroll-margin-top:70px}
 </style>
 </head>
 <body>
@@ -762,8 +763,9 @@ function songHTML(s,si){const P=`songs.${si}`,editing=EDIT.song===s.id;
    </div></div>
  <div class="o" style="margin-top:6px">${esc(s.slot)} · ${esc(s.bpm)} BPM · ${esc(s.meter)}</div>${relTable(s)}${head}
  ${s.suggest?'<div class="sugg">Pas d\'analyse du live : structure du plan, intensités proposées par le MD.</div>':''}
- ${arc(s,si)}${peches(s,si)}
+ ${peches(s,si)}
  <div class="road">${s.sections.map((q,i)=>(editing||EDIT.sec===si+':'+i)?blockED(s,si,q,i):blockRO(s,q,i)).join('')}</div>${editing?`<div class="palette"><span>Ajouter :</span>${Object.keys(KL).map(k=>`<button class="pchip" style="--c:var(${KC[k]})" data-act="sec-new" data-s="${si}" data-k="${k}">+ ${KL[k]}</button>`).join('')}${clip?`<button class="pchip paste" data-act="paste" data-s="${si}">📋 Coller « ${esc(clip.name)} »</button>`:''}<span class="ehelp">⠿ glisser = déplacer (aussi vers un autre chant) · Alt/Ctrl + glisser = copier · tirer le bord droit = mesures · ○ ● dans la case = intensité</span></div>`:''}
+ ${arc(s,si)}
  <div class="cols">
   <div class="card"><h3>Grille basse${chords?' (accords)':' (Nashville)'} · ${esc(s.key)} ${editing?'':`<button class="ico" data-edsong="${s.id}" title="Modifier">✏️</button>`}</h3>${editing?s.bass.map(([k,v],i)=>`<div class="bline ed"><select data-f="${P}.bass.${i}.0" data-re="1">${Object.keys(KL).map(x=>`<option value="${x}" ${x===k?'selected':''}>${KL[x]}</option>`).join('')}</select><input class="nashin" style="--c:var(${KC[k]})" data-f="${P}.bass.${i}.1" value="${esc(v)}"><button class="mini" data-act="bass-del" data-s="${si}" data-i="${i}">✕</button></div>`).join('')+`<button class="mini" data-act="bass-add" data-s="${si}">+ ligne</button>`
    :s.bass.map(([k,v])=>`<div class="bl" style="--c:var(${KC[k]})"><small>${KL[k]}</small>${esc(show(v,s.key))}</div>`).join('')}</div>
@@ -982,7 +984,7 @@ async function liveStart(id,from){if(editing)setEdit(null);if(live.follow)follow
  live.jumpTo=null;live.glide=null;live.glideReq=false;live.per=60/(live.bpmOver&&live.bpmOver[id]||bpmOf(s));live.base=live.per;live.bpb=parseInt(s.meter)||4;live.countN=CIN()*live.bpb;live.count=live.countN;
  ensureAC();if(ac&&ac.state!=='running'){try{await ac.resume()}catch(e){}}live.impro='';pLvl=1;if(BUS.perc)setPercGain(.02);paintFade();schedStart(liveBeat);window.__mdLat={start:+(SCH.beats[0]-ac.currentTime).toFixed(4),out:+outLat().toFixed(4)};
  try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>live.wl=w).catch(()=>{})}catch(e){}
- cur=id;document.body.classList.add('living');try{window.focus();$('#hud').focus({preventScroll:true})}catch(e){}renderSong(si);markNav();$('#hud').hidden=false;const ar=document.querySelector(`.arc[data-arc="${si}"]`);ar&&ar.scrollIntoView({block:'start',behavior:'smooth'});
+ cur=id;document.body.classList.add('living');try{window.focus();$('#hud').focus({preventScroll:true})}catch(e){}renderSong(si);markNav();$('#hud').hidden=false;const ar=document.querySelector(`section.song[data-si="${si}"] .road`);ar&&ar.scrollIntoView({block:'start',behavior:'smooth'});
  impPaintPad();leadSel(id)}
 function liveStop(silent){if(live.follow){followStop();return}live.jumpTo=null;live.glide=null;live.glideReq=false;impOpen(false);if(live.impro)impSet([]);live.sb=null;live.sbPending=null;document.body.classList.remove('standby','panic');document.querySelectorAll('.blk.target').forEach(b=>b.classList.remove('target'));schedStop();const was=live.on;if(was&&room&&!viewer)try{room.emit('stop',{})}catch(e){}live.on=false;live.view=null;document.body.classList.remove('living');$('#hud').hidden=true;
  try{live.wl&&live.wl.release()}catch(e){}live.wl=null;
@@ -1096,7 +1098,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=46;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=47;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
@@ -1115,7 +1117,7 @@ function followPos(d){if(!d||!d.id||fol.optOut)return;if(HOSTED&&viewer&&+d.v>VE
  fol.sb=d.sb&&typeof d.sb==='object'?{mode:d.sb.mode==='panic'?'panic':'click',target:clamp(+d.sb.target||0,0,s.sections.length-1),pending:!!d.sb.pending,end:!!d.sb.end}:null;fol.impro=typeof d.impro==='string'?d.impro.slice(0,80):'';
  document.body.classList.toggle('standby',!!fol.sb);document.body.classList.toggle('panic',!!fol.sb&&fol.sb.mode==='panic');
  if(!fol.sb){document.querySelectorAll('.blk.target').forEach(b=>b.classList.remove('target'));const cin=clamp(+d.cin||0,0,4);live.countN=clamp(+d.cinN||0,0,4)*live.bpb;fol.a={sec,gl:!!d.gl,nb0:cin?-Math.round(cin*live.bpb):null,bar:cin?-cin:clamp(+d.bar||0,0,(+s.sections[sec].bars||1)-1),t0:performance.now()+clamp(+d.in||0,0,3)*1000-80}}
- if(start){cur=d.id;document.body.classList.add('living','following');$('#hud').hidden=false;renderSong(si);markNav();const ar=document.querySelector(`.arc[data-arc="${si}"]`);ar&&ar.scrollIntoView({block:'start',behavior:'smooth'});toast('👁 Tu suis le live du MD')}
+ if(start){cur=d.id;document.body.classList.add('living','following');$('#hud').hidden=false;renderSong(si);markNav();const ar=document.querySelector(`section.song[data-si="${si}"] .road`);ar&&ar.scrollIntoView({block:'start',behavior:'smooth'});toast('👁 Tu suis le live du MD')}
  paintLoops();if(!fol.raf)fol.raf=requestAnimationFrame(folTick)}
 function folTick(){if(!live.follow){fol.raf=null;return}if(fol.sb||!fol.a){if(fol.sb)sbDraw();if(performance.now()-fol.last>600000){followStop('Plus de signal du MD');return}fol.raf=requestAnimationFrame(folTick);return}const s=state.songs[live.si],a=fol.a;let n=Math.max(0,Math.floor((performance.now()-a.t0)/1000/live.per)),nb=(a.nb0!=null?a.nb0:a.bar*live.bpb)+n,bar=Math.floor(nb/live.bpb),beat=((nb%live.bpb)+live.bpb)%live.bpb;
  const bars=+s.sections[a.sec].bars||1;if(bar>=bars){bar=bars-1;beat=live.bpb-1}const v=live.view,cnt=bar<0?1:0,cb=bar<0?Math.round(live.countN/live.bpb)+bar:0;if(bar<0)bar=0;
@@ -1196,7 +1198,7 @@ function glideNext(){if(!live.on||live.follow)return;const i=state.songs.findInd
 function doGlide(t){const i=live.si,n=state.songs[i+1];live.glideReq=false;if(!n)return;
  const from=live.per,to=60/((live.bpmOver&&live.bpmOver[n.id])||bpmOf(n)),bpb=parseInt(n.meter)||4,K=Math.abs(60/to-60/from)<=2?1:2;
  const prev=i;live.sb=null;live.sbPending=null;live.jumpTo=null;live.id=n.id;live.si=i+1;live.sec=0;live.bar=0;live.beat=0;live.ended=false;live.bpb=bpb;live.countN=live.count=K*bpb;live.glide={from,to,n:K*bpb,i:0};live.down=null;live.prevDown=null;
- SCH.q.push({t,run:()=>{impOpen(false);if(live.impro)impSet([]);document.body.classList.remove('standby','panic');document.querySelectorAll('.blk.target').forEach(b=>b.classList.remove('target'));paintSb();lastSec=-1;cur=n.id;if(!viewer&&ownView!==n.id){ownView=n.id;LS.set('view',n.id)}if(viewer)selId=n.id;applySel();renderSong(prev);renderSong(live.si);markNav();leadSel(n.id);paintGlide();const ar=document.querySelector(`.arc[data-arc="${live.si}"]`);ar&&ar.scrollIntoView({block:'start',behavior:'smooth'})}})}
+ SCH.q.push({t,run:()=>{impOpen(false);if(live.impro)impSet([]);document.body.classList.remove('standby','panic');document.querySelectorAll('.blk.target').forEach(b=>b.classList.remove('target'));paintSb();lastSec=-1;cur=n.id;if(!viewer&&ownView!==n.id){ownView=n.id;LS.set('view',n.id)}if(viewer)selId=n.id;applySel();renderSong(prev);renderSong(live.si);markNav();leadSel(n.id);paintGlide();const ar=document.querySelector(`section.song[data-si="${live.si}"] .road`);ar&&ar.scrollIntoView({block:'start',behavior:'smooth'})}})}
 function paintGlide(){const b=$('#hGlide');if(!b)return;const i=state.songs.findIndex(x=>x.id===live.id);b.hidden=!(live.on&&!live.follow&&state.songs[i+1]);b.classList.toggle('on',!!live.glideReq);b.textContent=live.glideReq?'⤳ Au prochain 1…':'⤳ Enchaîner'}
 // ---------- Saut programmé : clic sur une autre case en live = on y va à la fin de la section en cours ----------
 function queueJump(i){if(!live.on||live.follow)return;const S=state.songs[live.si].sections;i=clamp(i,0,S.length-1);const cur=curSec();
