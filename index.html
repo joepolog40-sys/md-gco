@@ -639,7 +639,7 @@ function blockED(s,si,q,i){const p=`songs.${si}.sections.${i}`,a=100-q.i0*10,b=1
  <input class="i-nash nashin" data-f="${p}.nash" value="${esc(q.nash)}" placeholder="Degrés…">
  <input class="i-cue" data-f="${p}.cue" value="${esc(q.cue)}" placeholder="Repère paroles…">
  <input class="i-note" data-f="${p}.note" value="${esc(q.note)}" placeholder="Note…">
- ${q.mark==='drop'?`<div class="percsel"><label>Le drop tombe</label><select data-f="${p}.dropAt" data-num="1" data-re="1">${[0,.5,1,2,3].map(v=>`<option value="${v}" ${dAt(q)===v?'selected':''}>${v?DROPAT[v]:'sur le 1 de la section'}</option>`).join('')}</select></div>`:''}
+ ${q.mark==='drop'?`<div class="percsel"><label>Le drop tombe</label><select data-f="${p}.dropAt" data-num="1" data-re="1">${[1,.5,2,3,0].map(v=>`<option value="${v}" ${dAt(q)===v?'selected':''}>${DROPAT[v]}</option>`).join('')}</select></div>`:''}
  <div class="percsel"><label>Percu</label><select data-f="${p}.perc" data-re="1">${Object.entries(PATS).map(([k,v])=>`<option value="${k}" ${PK(q.perc||'none')===k?'selected':''}>${v.n}</option>`).join('')}</select></div>
  <div class="marks">${[['drop','DROP'],['stop','STOP'],['fill','fill'],['cresc','↗'],['descente','↘']].map(([m,l])=>`<button data-act="mark" data-s="${si}" data-i="${i}" data-m="${m}" class="${q.mark===m?'on':''}" title="${MARKS[m]}">${l}</button>`).join('')}</div>
  <div class="ebar"><span class="bars"><button data-act="bars" data-s="${si}" data-i="${i}" data-d="-1">−</button><b>${esc(q.bars)}</b><small>mes.</small><button data-act="bars" data-s="${si}" data-i="${i}" data-d="1">+</button></span><button data-act="sec-dup" data-s="${si}" data-i="${i}" title="Dupliquer (Ctrl+D)">⧉</button>${(q.pts||[]).length<3?`<button data-act="pts" data-d="1" data-s="${si}" data-i="${i}" title="Ajouter un point d'intensité au milieu de la section (3 max)">＋ point</button>`:''}${(q.pts||[]).length?`<button data-act="pts" data-d="-1" data-s="${si}" data-i="${i}" title="Enlever un point d'intensité">− point</button>`:''}<button data-act="copy" data-s="${si}" data-i="${i}" title="Copier (Ctrl+C), puis Coller dans un autre chant">📋</button>${EDIT.sec===si+':'+i&&EDIT.song!==s.id?`<button class="edone" data-edclose="1">✓ OK</button>`:''}</div>
@@ -798,8 +798,8 @@ const isDrop=q=>!!q&&(q.mark==='drop'||/\bDROP\b/i.test(q.call||''));const isSto
 function paintNash(q,s){const el=$('#hNash');if(!el)return;const n=q&&q.nash?q.nash:'';el.hidden=!n;if(!n)return;const big=show(n,s.key),small=chords?n:toChords(n,s.key);
  el.innerHTML=`<b>${esc(big)}</b>${small!==big?`<span>${esc(small)}</span>`:''}`;el.style.color=`var(${KC[q.kind]||'--intro'})`}
 // où tombe le drop : 0 = sur le 1 de la section, 1 = sur le dernier temps avant, 2 = l'avant-dernier, 0.5 = sur le « et » du dernier temps
-const DROPAT={0:'sur le 1',0.5:'sur le « et » du 4',1:'sur le 4 avant',2:'sur le 3 avant',3:'sur le 2 avant'};
-const dAt=q=>{const v=+((q&&q.dropAt)||0);return [0,.5,1,2,3].includes(v)?v:0};
+const DROPAT={1:'sur le 4 de la dernière mesure avant (par défaut)',0.5:'sur le « et » du 4',2:'sur le 3 de la dernière mesure avant',3:'sur le 2 de la dernière mesure avant',0:'sur le 1 de la section'};
+const dAt=q=>{if(!q||q.dropAt==null||q.dropAt==='')return 1;const v=+q.dropAt;return [0,.5,1,2,3].includes(v)?v:1};
 const dLbl=(q,bpb)=>{const v=dAt(q);if(!v)return 'sur le 1';if(v===.5)return `sur le « et » du ${bpb}`;return `sur le ${bpb-v+1} avant`};
 function paintDrop(q,nx,left,V,L){const el=$('#hDrop');if(!el)return;let txt='',cls='';const bpb=live.bpb||4,s=state.songs[live.si],S=s?s.sections:[],bars=+q.bars||1;
  if(V.count>0){el.hidden=true;return}
