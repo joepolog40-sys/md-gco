@@ -329,6 +329,7 @@ body.viewer nav.songs .navw{justify-content:flex-end}body.hosted #bFile{display:
 .hbtns .nxs{background:#1f8a3b!important;color:#fff!important;border-color:#1f8a3b!important;font-size:15px!important;padding:0 12px}.hbtns .nxs[hidden]{display:none}
 body.viewer .imp{display:none!important}
 @media(max-width:600px){.imp button{min-width:40px;height:44px;font-size:17px}.himpro b{font-size:24px}}
+.hbtns .sync{background:var(--ink)!important;color:var(--bg)!important;font-size:15px!important;padding:0 12px}
 </style>
 </head>
 <body>
@@ -358,7 +359,7 @@ body.viewer .imp{display:none!important}
   <div class="card"><h3>À trancher à la répé</h3><div id="decide"></div></div>
   <div class="card"><h3>Signes de main</h3><div class="sig" id="sig"></div>
    <div class="scale" id="scale"></div>
-   <p class="kbd" style="margin:10px 0 0">Clavier : <b>L = lancer le LIVE</b>. En live : <b>Espace = refaire la section 1×</b> (re-appui = annuler) · Maj+Espace ou L = boucle ∞ · <b>F = standby</b> (le clic continue, clique la section de reprise, F pour repartir) · <b>X = panic</b> (clic coupé) · <b>I = impro</b> (degrés envoyés en direct) · fin de chant : le clic continue, <b>N</b> = chant suivant · Échap = stop · Entrée = le 1 du groupe · ↑ ou D = début de la section · T = tap tempo · M = suivre au micro · → ← section · Entrée = recaler sur le 1 · + − tempo. En live, clique une case pour y sauter. Le live part toujours du début du chant, après le décompte.</p></div>
+   <p class="kbd" style="margin:10px 0 0">Clavier : <b>L = lancer le LIVE</b>. En live : <b>Espace = refaire la section 1×</b> (re-appui = annuler) · Maj+Espace ou L = boucle ∞ · <b>F = standby</b> (le clic continue, clique la section de reprise, F pour repartir) · <b>X = panic</b> (clic coupé) · <b>I = impro</b> (degrés envoyés en direct) · fin de chant : le clic continue, <b>N</b> = chant suivant · Échap = stop · <b>Entrée ou C = caler le clic sur le 1</b> (à tout moment, standby compris) · ↑ ou D = début de la section · T = tap tempo · M = suivre au micro · → ← section · Entrée = recaler sur le 1 · + − tempo. En live, clique une case pour y sauter. Le live part toujours du début du chant, après le décompte.</p></div>
  </div>
  <div id="songs"></div>
  <div class="legend" id="legend"></div>
@@ -373,7 +374,7 @@ body.viewer .imp{display:none!important}
    <button id="hNextSong" class="nxs" hidden title="Lancer le chant suivant (N)">▶ Chant suivant</button><button id="hImp" title="Indiquer une suite d'accords improvisée (I)">🎹 Impro</button><button id="hSb" class="sbb" title="Standby : tout s'arrête sauf le clic, choisis la section de reprise (F)">⏸ Standby</button><button id="hPanic" class="pnb" title="Panic : tout s'arrête, clic compris (X)">⛔ Panic</button>
    <button id="hPrev" title="Section précédente (←)">⏮</button><button id="hNextB" title="Section suivante (→)">⏭</button>
    <button id="hL1" title="Refaire la section 1× de plus (Espace)">↻1 <small>espace</small></button><button id="hLi" title="Boucler la section (Maj+Espace ou L)">∞</button>
-   <button id="hStart" title="On est au début de la section en cours (↑ ou D)">⤒ Début</button><button id="hSync" title="Appuie sur le 1 du groupe pour te recaler (Entrée)">⤓ 1</button><button id="hTap" title="Tape les noires avec le groupe (T) : tempo + calage">Tap</button><button id="hMic" title="Se caler automatiquement sur la grosse caisse au micro (M)">🎤 Suivre</button>
+   <button id="hStart" title="On est au début de la section en cours (↑ ou D)">⤒ Début</button><button id="hSync" class="sync" title="Appuie pile sur un 1 du groupe : le clic se cale dessus (Entrée ou C)">⤓ Caler le 1</button><button id="hTap" title="Tape les noires avec le groupe (T) : tempo + calage">Tap</button><button id="hMic" title="Se caler automatiquement sur la grosse caisse au micro (M)">🎤 Suivre</button>
    <span class="hbpm"><button id="hMinus">−</button><b id="hBpm"></b><small>BPM</small><button id="hPlus">+</button></span>
    <button id="hStop" class="stop" title="Arrêter (Échap)">■</button>
   </div></div>
@@ -556,7 +557,7 @@ function songHTML(s,si){const P=`songs.${si}`;
   <div class="card"><h3>Tips de MD</h3>${editing?`<div class="ed"><textarea data-lines="${P}.tips">${esc(s.tips.join('\n'))}</textarea><label>une ligne = un tip · **gras**</label><label>Ensuite →</label><textarea style="min-height:50px" data-f="${P}.next">${esc(s.next)}</textarea></div>`
    :`<ul class="tips">${s.tips.map(t=>`<li>${md(t)}</li>`).join('')}</ul><div class="next"><b>Ensuite →</b> ${md(s.next)}</div>`}</div>
  </div></section>`}
-function renderSong(si){const el=document.querySelector(`section.song[data-si="${si}"]`);if(!el)return;const tmp=document.createElement('div');tmp.innerHTML=songHTML(state.songs[si],si);el.replaceWith(tmp.firstElementChild);restoreHere();observe();if(live.on&&state.songs[si]&&state.songs[si].id===live.id)liveDraw(true)}
+function renderSong(si){const el=document.querySelector(`section.song[data-si="${si}"]`);if(!el)return;const tmp=document.createElement('div');tmp.innerHTML=songHTML(state.songs[si],si);el.replaceWith(tmp.firstElementChild);restoreHere();observe();applySel();if(live.on&&state.songs[si]&&state.songs[si].id===live.id)liveDraw(true)}
 function renderArc(si){const el=document.querySelector(`.arc[data-arc="${si}"]`);if(!el)return;const tmp=document.createElement('div');tmp.innerHTML=arc(state.songs[si],si);el.replaceWith(tmp.firstElementChild)}
 function restoreHere(){const h=LS.get('here',{});Object.entries(h).forEach(([id,i])=>{document.querySelectorAll(`#${id} .blk`).forEach(b=>b.classList.toggle('here',+b.dataset.i===i))})}
 let io=null;function observe(){if(!('IntersectionObserver' in window))return;if(io)io.disconnect();io=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){cur=en.target.id;markNav()}}),{rootMargin:'-40% 0px -55% 0px'});document.querySelectorAll('section.song').forEach(s=>io.observe(s))}
@@ -651,7 +652,7 @@ const outLat=()=>ac?(ac.outputLatency||ac.baseLatency||0):0;
 function drain(){if(!ac)return;const now=ac.currentTime-outLat();while(SCH.q.length&&SCH.q[0].t<=now)SCH.q.shift().run()}
 function pump(){if(!SCH.fn||!ac)return;drain();while(SCH.next<ac.currentTime+SCH.ahead){const p=SCH.fn(SCH.next);if(!p)return;SCH.beats.push(SCH.next);if(SCH.beats.length>8)SCH.beats.shift();SCH.next+=p}}
 function vis(){if(!SCH.fn)return;const now=ac.currentTime-outLat();while(SCH.q.length&&SCH.q[0].t<=now)SCH.q.shift().run();SCH.raf=requestAnimationFrame(vis)}
-function schedStart(fn){schedStop();ensureAC();if(!ac)return false;SCH.fn=fn;SCH.q=[];SCH.beats=[];SCH.next=ac.currentTime+.05;pump();SCH.iv=setInterval(pump,20);SCH.raf=requestAnimationFrame(vis);return true}
+function schedStart(fn){schedStop();ensureAC();if(!ac)return false;SCH.fn=fn;SCH.q=[];SCH.beats=[];SCH.next=ac.currentTime+.006;pump();SCH.iv=setInterval(pump,20);SCH.raf=requestAnimationFrame(vis);return true}
 function schedStop(){clearInterval(SCH.iv);cancelAnimationFrame(SCH.raf);SCH.q=[];SCH.fn=null;SCH.beats=[]}
 function schedRestart(t){if(!ac)return;SCH.q=[];SCH.beats=[];SCH.next=t??ac.currentTime+.01;pump()}
 document.addEventListener('visibilitychange',()=>{SCH.ahead=document.hidden?1.5:.12;pump()});
@@ -661,7 +662,7 @@ function toggleMetro(id){const stop=mid===id;if(mid&&!live.on)schedStop();mid=nu
 window.addEventListener('keydown',e=>{if(viewer)return;if(typing())return;const S=state.songs,si=S.findIndex(x=>x.id===cur);
  if(live.follow){if(e.key==='Escape'){fol.optOut=true;paintFollow();followStop()}return}
  if(live.on){const k=e.key.toLowerCase();if(k===' '&&e.shiftKey){e.preventDefault();setLoop(live.id,curSec(),'inf');flash();return}
- const H={' ':()=>{setLoop(live.id,curSec(),'1');flash()},pagedown:()=>{setLoop(live.id,curSec(),'1');flash()},pageup:()=>{setLoop(live.id,curSec(),'inf');flash()},escape:liveStop,s:liveStop,arrowright:()=>live.sb?sbTarget(live.sb.target+1):liveJump(curSec()+1),arrowleft:()=>live.sb?sbTarget(live.sb.target-1):liveJump(curSec()-1),f:()=>standby('click'),x:()=>standby('panic'),n:()=>{if(live.sb&&live.sb.end)startNext()},i:()=>impToggle(),l:()=>setLoop(live.id,curSec(),'inf'),r:()=>setLoop(live.id,curSec(),'1'),enter:liveResync,'1':liveResync,'+':()=>liveTempo(1),arrowup:liveSecStart,home:liveSecStart,d:liveSecStart,arrowdown:()=>{},t:liveTap,m:micToggle,'-':()=>liveTempo(-1)};e.stopImmediatePropagation();if(H[k]||/^(arrow|page|home|end| )/.test(k)){e.preventDefault()}if(H[k])H[k]();return}
+ const H={' ':()=>{setLoop(live.id,curSec(),'1');flash()},pagedown:()=>{setLoop(live.id,curSec(),'1');flash()},pageup:()=>{setLoop(live.id,curSec(),'inf');flash()},escape:liveStop,s:liveStop,arrowright:()=>live.sb?sbTarget(live.sb.target+1):liveJump(curSec()+1),arrowleft:()=>live.sb?sbTarget(live.sb.target-1):liveJump(curSec()-1),f:()=>standby('click'),x:()=>standby('panic'),n:()=>{if(live.sb&&live.sb.end)startNext()},i:()=>impToggle(),l:()=>setLoop(live.id,curSec(),'inf'),r:()=>setLoop(live.id,curSec(),'1'),enter:()=>liveResync(e),c:()=>liveResync(e),'1':()=>liveResync(e),'+':()=>liveTempo(1),arrowup:liveSecStart,home:liveSecStart,d:liveSecStart,arrowdown:()=>{},t:liveTap,m:micToggle,'-':()=>liveTempo(-1)};e.stopImmediatePropagation();if(H[k]||/^(arrow|page|home|end| )/.test(k)){e.preventDefault()}if(H[k])H[k]();return}
  if(e.key.toLowerCase()==='l'&&!editing){e.preventDefault();liveStart(cur);return}
 
 
@@ -677,9 +678,10 @@ function paintLoops(){document.querySelectorAll('[data-loop]').forEach(b=>{const
 async function liveStart(id){if(live.follow)followStop();if(mid)toggleMetro(mid);liveStop(true);const si=state.songs.findIndex(s=>s.id===id);const s=state.songs[si];if(!s)return;
  if(!viewer&&ownView!==id){ownView=id;LS.set('view',id);applySel();window.scrollTo({top:0})}live.on=true;live.id=id;live.si=si;live.sec=0;live.bar=0;live.beat=0;live.ended=false;live.view=null;
  live.per=60/(live.bpmOver&&live.bpmOver[id]||bpmOf(s));live.base=live.per;live.bpb=parseInt(s.meter)||4;live.countN=CIN()*live.bpb;live.count=live.countN;
- try{if(navigator.wakeLock)live.wl=await navigator.wakeLock.request('screen')}catch(e){}
+ ensureAC();if(ac&&ac.state!=='running'){try{await ac.resume()}catch(e){}}live.impro='';schedStart(liveBeat);window.__mdLat={start:+(SCH.beats[0]-ac.currentTime).toFixed(4),out:+outLat().toFixed(4)};
+ try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>live.wl=w).catch(()=>{})}catch(e){}
  cur=id;document.body.classList.add('living');try{window.focus();$('#hud').focus({preventScroll:true})}catch(e){}renderSong(si);markNav();$('#hud').hidden=false;const ar=document.querySelector(`.arc[data-arc="${si}"]`);ar&&ar.scrollIntoView({block:'start',behavior:'smooth'});
- live.impro='';impPaintPad();leadSel(id);schedStart(liveBeat)}
+ impPaintPad();leadSel(id)}
 function liveStop(silent){if(live.follow){followStop();return}live.sb=null;live.sbPending=null;document.body.classList.remove('standby','panic');document.querySelectorAll('.blk.target').forEach(b=>b.classList.remove('target'));schedStop();const was=live.on;if(was&&room)try{room.emit('stop',{})}catch(e){}live.on=false;live.view=null;document.body.classList.remove('living');$('#hud').hidden=true;
  try{live.wl&&live.wl.release()}catch(e){}live.wl=null;
  document.querySelectorAll('.blk.live').forEach(b=>b.classList.remove('live'));document.querySelectorAll('.arc .ph').forEach(p=>p.style.display='none');
@@ -696,7 +698,8 @@ function liveBeat(t){const s=state.songs[live.si];if(!s||!live.on)return 0;const
  if(!snap.count&&!snap.beat)leadEmit(snap,t-ac.currentTime);SCH.q.push({t,run:()=>{live.view=snap;liveDraw()}});return per}
 const curSec=()=>(live.view||live).sec;
 function liveJump(i){const s=state.songs[live.si];if(!s)return;live.sec=clamp(i,0,s.sections.length-1);live.bar=0;live.beat=0;live.count=0;live.ended=false;live.view={sec:live.sec,bar:0,beat:0,count:0};schedRestart()}
-function liveResync(){if(!live.on)return;const v=live.view||live;live.sec=v.sec;live.bar=v.count>0?0:v.bar;live.count=0;live.beat=0;live.ended=false;schedRestart(ac.currentTime+.005);flash()}
+function liveResync(e){if(!live.on||!ac||!SCH.fn)return;const age=e&&e.timeStamp?Math.max(0,Math.min(.1,(performance.now()-e.timeStamp)/1000)):0;const v=live.view||live;live.sec=v.sec;live.bar=v.count>0?0:v.bar;live.count=0;live.beat=0;live.ended=false;
+ const t1=ac.currentTime-outLat()-age;schedRestart(Math.max(t1,ac.currentTime-.08));window.__mdLat=Object.assign(window.__mdLat||{},{sync:+(SCH.beats[0]-ac.currentTime).toFixed(4)});flash()}
 function liveSecStart(){if(!live.on)return;live.sec=curSec();live.bar=0;live.beat=0;live.count=0;live.ended=false;schedRestart(ac.currentTime+.005);flash()}
 function liveTempo(d){const b=clamp(Math.round(60/live.per)+d,30,220);live.per=60/b;live.base=live.per;live.bpmOver=live.bpmOver||{};live.bpmOver[live.id]=b;liveDraw(true)}
 // tap tempo : tape les noires (T ou bouton Tap) → tempo + calage
@@ -740,7 +743,7 @@ function liveDraw(force){if(!live.on)return;if(live.sb||(live.follow&&fol.sb)){s
  $('#hL1').classList.toggle('on',typeof L==='number');$('#hLi').classList.toggle('on',L==='inf');
 }
 $('#hStop').onclick=()=>{if(live.follow){fol.optOut=true;paintFollow();followStop()}else liveStop()};$('#hPrev').onclick=()=>live.sb?sbTarget(live.sb.target-1):liveJump(curSec()-1);$('#hNextB').onclick=()=>live.sb?sbTarget(live.sb.target+1):liveJump(curSec()+1);$('#hSb').onclick=()=>standby('click');$('#hPanic').onclick=()=>standby('panic');
-$('#hL1').onclick=()=>setLoop(live.id,curSec(),'1');$('#hLi').onclick=()=>setLoop(live.id,curSec(),'inf');$('#hSync').onclick=liveResync;
+$('#hL1').onclick=()=>setLoop(live.id,curSec(),'1');$('#hLi').onclick=()=>setLoop(live.id,curSec(),'inf');$('#hSync').onclick=e=>liveResync(e);
 $('#hTap').onclick=liveTap;$('#hStart').onclick=liveSecStart;$('#hMic').onclick=micToggle;
 $('#hMinus').onclick=()=>liveTempo(-1);$('#hPlus').onclick=()=>liveTempo(1);
 
@@ -906,6 +909,7 @@ function paintImpro(){const el=$('#hImpro');if(!el)return;const seq=live.follow?
  el.hidden=!seq;if(!seq)return;const nash=seq,ch=s?toChords(seq,s.key):'';el.innerHTML=`🎹 IMPRO <b>${esc(chords?ch:nash)}</b><span>${esc(chords?nash:ch)}</span>`}
 (async()=>{for(let k=0;k<40&&!room;k++)await new Promise(r=>setTimeout(r,500));if(!room)return;room.on('impro',a=>{const d=unwrap(a);if(!d||!live.follow)return;fol.impro=typeof d.impro==='string'?d.impro.slice(0,80):'';paintImpro()})})();
 
+['pointerdown','keydown'].forEach(ev=>document.addEventListener(ev,()=>{if(!viewer)ensureAC()},{once:true,capture:true}));
 if(HOSTED)document.body.classList.add('hosted');
 paintClk();
 renderAll();
