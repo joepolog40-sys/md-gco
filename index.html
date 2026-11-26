@@ -296,7 +296,7 @@ body.following.standby .hbtns{display:flex}
 .anon{margin:8px 0;padding:8px 12px;border-radius:10px;background:var(--panel2);color:var(--mute);font-size:14px}
 
 /* mode musicien : lecture seule, aucun bouton */
-body.viewer .tools,body.viewer .status,body.viewer .chordsbtn,body.viewer .metro,body.viewer .blk .lp,body.viewer .palette,body.viewer #bFollow,body.viewer .hbtns,body.viewer .hrow .clkbox,body.viewer .clkbox{display:none!important}
+body.viewer .tools,body.viewer .status,body.viewer .metro,body.viewer .blk .lp,body.viewer .palette,body.viewer #bFollow,body.viewer .hbtns,body.viewer .hrow .clkbox,body.viewer .clkbox{display:none!important}
 body.viewer #decide,body.viewer .blk,body.viewer .arc{pointer-events:none}
 body.viewer .blk{cursor:default}
 body.viewer #decide input{display:none}
@@ -304,7 +304,7 @@ body.viewer #decide input{display:none}
 
 /* vue musicien : seulement le chant en cours, l'essentiel */
 body.viewer section.song:not(.vsel){display:none}
-body.viewer #ov,body.viewer .grid3,body.viewer #sched,body.viewer #team,body.viewer #legend,body.viewer nav.songs,body.viewer .sub,body.viewer .rel,body.viewer .sugg,body.viewer .blk .tm,body.viewer .sh .o,body.viewer section.song>.o,body.viewer .cols>.card:nth-child(n+2),body.viewer .peches .kbd{display:none!important}
+body.viewer #ov,body.viewer .grid3,body.viewer #sched,body.viewer #team,body.viewer #legend,body.viewer #nav,body.viewer .sub,body.viewer .rel,body.viewer .sugg,body.viewer .blk .tm,body.viewer .sh .o,body.viewer section.song>.o,body.viewer .cols>.card:nth-child(n+2),body.viewer .peches .kbd{display:none!important}
 body.viewer .cols{grid-template-columns:minmax(0,1fr)!important}
 body.viewer section.song{border-top:0;padding-top:4px}
 body.viewer .blk .nash{font-size:30px}
@@ -312,6 +312,23 @@ body.viewer .blk .nash{font-size:30px}
 body.viewer .blk .call{font-size:15px}body.viewer .blk .nm{font-size:16px}
 body.viewer header.top h1{font-size:20px}
 body.viewer header.top{padding-left:max(4vw,14px)}
+body.viewer nav.songs .navw{justify-content:flex-end}body.hosted #bFile{display:none}
+
+/* un chant à la fois (MD aussi) : plus de défilement d'un chant à l'autre */
+@media screen{body:not(.editing-all) section.song:not(.vsel){display:none}
+ body:not(.viewer):not(.home) #ov,body:not(.viewer):not(.home) .grid3{display:none}
+ body.home:not(.viewer) .legend{display:none}}
+#nav a[data-id="home"]{font-weight:800}
+
+.himpro{margin:4px 0;font-size:22px;font-weight:800;color:#e6a100;letter-spacing:.5px}.himpro b{font-size:30px;margin:0 8px;color:var(--ink);word-spacing:.25em}.himpro span{font-size:16px;color:var(--mute)}
+.imp{border-top:1px solid var(--line);margin-top:8px;padding-top:8px}.imp[hidden]{display:none}
+.improw{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0}.impseq{font-size:26px;word-spacing:.25em;min-width:120px}.impchd{color:var(--mute);font-weight:700}
+.imp button{font:inherit;font-weight:800;font-size:20px;min-width:52px;height:52px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.imp button small{font-size:11px;color:var(--mute);margin-top:2px}.imp button.on{background:#e6a100;color:#111}.imp button.clr{font-size:14px;color:var(--red)}
+.imp button.pre{font-size:15px;height:40px;padding:0 10px}
+.hbtns .nxs{background:#1f8a3b!important;color:#fff!important;border-color:#1f8a3b!important;font-size:15px!important;padding:0 12px}.hbtns .nxs[hidden]{display:none}
+body.viewer .imp{display:none!important}
+@media(max-width:600px){.imp button{min-width:40px;height:44px;font-size:17px}.himpro b{font-size:24px}}
 </style>
 </head>
 <body>
@@ -324,7 +341,6 @@ body.viewer header.top{padding-left:max(4vw,14px)}
    <button class="ed-only" id="bUndo" title="Annuler la dernière modification">↶ Annuler</button>
    <button id="bTheme" title="Mode scène sombre / clair">Mode scène</button>
    <span class="clkbox"></span>
-   <button id="bFollow" hidden title="Quand le MD lance le live, ton écran le suit automatiquement">👁 Suivre le MD : oui</button>
    <button id="bCount" title="Décompte d'une mesure avant le live">Décompte : off</button>
    <button id="bPrint">Imprimer</button>
    <button id="bFile" title="Enregistrer une copie .html avec tes modifications">💾 Fichier</button>
@@ -342,7 +358,7 @@ body.viewer header.top{padding-left:max(4vw,14px)}
   <div class="card"><h3>À trancher à la répé</h3><div id="decide"></div></div>
   <div class="card"><h3>Signes de main</h3><div class="sig" id="sig"></div>
    <div class="scale" id="scale"></div>
-   <p class="kbd" style="margin:10px 0 0">Clavier : ← → section · espace = métronome · <b>L = lancer le LIVE</b>. En live : <b>Espace = refaire la section 1×</b> (re-appui = annuler) · Maj+Espace ou L = boucle ∞ · <b>F = standby</b> (le clic continue, clique la section de reprise, F pour repartir) · <b>X = panic</b> (clic coupé) · Échap = stop · Entrée = le 1 du groupe · ↑ ou D = début de la section · T = tap tempo · M = suivre au micro · → ← section · Entrée = recaler sur le 1 · + − tempo. Clique une section pour y sauter.</p></div>
+   <p class="kbd" style="margin:10px 0 0">Clavier : <b>L = lancer le LIVE</b>. En live : <b>Espace = refaire la section 1×</b> (re-appui = annuler) · Maj+Espace ou L = boucle ∞ · <b>F = standby</b> (le clic continue, clique la section de reprise, F pour repartir) · <b>X = panic</b> (clic coupé) · <b>I = impro</b> (degrés envoyés en direct) · fin de chant : le clic continue, <b>N</b> = chant suivant · Échap = stop · Entrée = le 1 du groupe · ↑ ou D = début de la section · T = tap tempo · M = suivre au micro · → ← section · Entrée = recaler sur le 1 · + − tempo. En live, clique une case pour y sauter. Le live part toujours du début du chant, après le décompte.</p></div>
  </div>
  <div id="songs"></div>
  <div class="legend" id="legend"></div>
@@ -352,15 +368,16 @@ body.viewer header.top{padding-left:max(4vw,14px)}
  <div class="hrow"><span id="hSong" class="hsong"></span><span class="clkbox"></span><span id="hTime" class="htime"></span></div>
  <div class="hprog"><i id="hProg"></i></div>
  <div class="hmain">
-  <div class="hl"><div id="hSec" class="hsec"></div><div class="hsub"><span id="hBar"></span><span id="hBeats" class="hbeats"></span></div><div id="hCall" class="hcall"></div><div id="hNext" class="hnext"></div></div>
+  <div class="hl"><div id="hSec" class="hsec"></div><div class="hsub"><span id="hBar"></span><span id="hBeats" class="hbeats"></span></div><div id="hImpro" class="himpro" hidden></div><div id="hCall" class="hcall"></div><div id="hNext" class="hnext"></div></div>
   <div class="hbtns">
-   <button id="hSb" class="sbb" title="Standby : tout s'arrête sauf le clic, choisis la section de reprise (F)">⏸ Standby</button><button id="hPanic" class="pnb" title="Panic : tout s'arrête, clic compris (X)">⛔ Panic</button>
+   <button id="hNextSong" class="nxs" hidden title="Lancer le chant suivant (N)">▶ Chant suivant</button><button id="hImp" title="Indiquer une suite d'accords improvisée (I)">🎹 Impro</button><button id="hSb" class="sbb" title="Standby : tout s'arrête sauf le clic, choisis la section de reprise (F)">⏸ Standby</button><button id="hPanic" class="pnb" title="Panic : tout s'arrête, clic compris (X)">⛔ Panic</button>
    <button id="hPrev" title="Section précédente (←)">⏮</button><button id="hNextB" title="Section suivante (→)">⏭</button>
    <button id="hL1" title="Refaire la section 1× de plus (Espace)">↻1 <small>espace</small></button><button id="hLi" title="Boucler la section (Maj+Espace ou L)">∞</button>
    <button id="hStart" title="On est au début de la section en cours (↑ ou D)">⤒ Début</button><button id="hSync" title="Appuie sur le 1 du groupe pour te recaler (Entrée)">⤓ 1</button><button id="hTap" title="Tape les noires avec le groupe (T) : tempo + calage">Tap</button><button id="hMic" title="Se caler automatiquement sur la grosse caisse au micro (M)">🎤 Suivre</button>
    <span class="hbpm"><button id="hMinus">−</button><b id="hBpm"></b><small>BPM</small><button id="hPlus">+</button></span>
    <button id="hStop" class="stop" title="Arrêter (Échap)">■</button>
   </div></div>
+ <div id="imp" class="imp" hidden></div>
 </div>
 <div id="toast" class="toast"></div>
 </div>
@@ -377,6 +394,7 @@ const $=s=>document.querySelector(s);
 const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const md=v=>esc(v).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
 const LS={get(k,d){try{const v=localStorage.getItem('md29:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('md29:'+k,JSON.stringify(v))}catch(e){}}};
+let ownView=(()=>{const v=(()=>{try{return JSON.parse(localStorage.getItem('md29:view'))}catch(e){return null}})();return v||'home'})();
 const CIN=()=>{const v=LS.get('countin2',2);return [0,1,2].includes(v)?v:2};
 let state=(()=>{const c=LS.get('state',null);return c&&c.rev>=(ORIG.rev||0)?c:JSON.parse(JSON.stringify(ORIG))})();
 let chords=LS.get('chords',false),theme=LS.get('theme','dark'),sound=LS.get('sound',true),editing=false,readOnly=false;
@@ -446,7 +464,7 @@ function renderHead(){const M=state.meta;
   $('#team').innerHTML=`<div class="ed card" style="flex:1"><label>Équipe (une ligne : nom — rôle)</label><textarea data-lines="meta.team" data-split="team">${esc(M.team.map(([n,r])=>`${n} — ${r}`).join('\n'))}</textarea></div>`}
  else{$('#sched').innerHTML=M.schedule.map(([d,h,w])=>`<span class="chip"><b>${esc(d)} ${esc(h)}</b> · ${esc(w)}</span>`).join('');
   $('#team').innerHTML=M.team.map(([n,r])=>`<span class="chip ${/pas encore|absent|\?/.test(r)?'warn':''}"><b>${esc(n)}</b> · ${esc(r)}</span>`).join('')}
- $('#nav').innerHTML=state.songs.map(s=>`<a href="#${s.id}" data-id="${s.id}" class="${s.id===cur?'cur':''}">${s.n}. ${esc(s.title)}<span class="k">${esc(s.key)}</span></a>`).join('');
+ $('#nav').innerHTML=`<a href="#home" data-id="home" class="${ownView==='home'?'cur':''}">☰ Vue d'ensemble</a>`+state.songs.map(s=>`<a href="#${s.id}" data-id="${s.id}" class="${s.id===ownView?'cur':''}">${s.n}. ${esc(s.title)}<span class="k">${esc(s.key)}</span></a>`).join('');
  ['#bChords2'].forEach(id=>{const b=$(id);b.classList.toggle('on',chords);b.textContent=chords?'G C D ⇄ 1 4 5':'1 4 5 ⇄ G C D'});
  $('#bEdit').classList.toggle('on',editing);$('#bEdit').textContent=editing?'✓ Terminer l\'édition':'✏️ Mode édition';
  $('#bTheme').classList.toggle('on',theme==='dark');document.body.classList.toggle('editing',editing);document.documentElement.dataset.theme=theme}
@@ -498,7 +516,7 @@ function wm(q,si,i){const a=100-q.i0*10,b=100-q.i1*10,id=`g${si}_${i}_${editing?
 const wword=q=>`<span class="ww">${WORD(Math.max(q.i0,q.i1))} ${ARW(q)}</span>`;
 function blockRO(s,q,i){const si=state.songs.indexOf(s);return `<div class="blk" tabindex="0" data-i="${i}" title="Intensité ${lvlTxt(q)} / 10 · ${WORD(Math.max(q.i0,q.i1))}" style="--g:${Math.max(+q.bars||1,4)};--c:var(${KC[q.kind]||'--intro'})">${wm(q,si,i)}
  <div class="nm">${esc(q.name)}<span>${esc(q.bars)} mes.</span></div>${q.call?`<div class="call ${HOT.test(q.call)||q.mark==='drop'||q.mark==='stop'?'hot':''}">${esc(q.call)}</div>`:''}
- ${q.nash?`<div class="nash">${esc(show(q.nash,s.key))}</div>${viewer?`<div class="chd">${esc(toChords(q.nash,s.key))}</div>`:''}`:''}${q.cue?`<div class="cue">« ${esc(q.cue)} »</div>`:''}${q.note?`<div class="note">${esc(q.note)}</div>`:''}
+ ${q.nash?`<div class="nash">${esc(show(q.nash,s.key))}</div>${viewer?`<div class="chd">${esc(chords?q.nash:toChords(q.nash,s.key))}</div>`:''}`:''}${q.cue?`<div class="cue">« ${esc(q.cue)} »</div>`:''}${q.note?`<div class="note">${esc(q.note)}</div>`:''}
  ${wword(q)}${q.t!=null?`<span class="tm">${mmss(q.t)}</span>`:''}
  <div class="lp">${(()=>{const L=live.loops[s.id+':'+i];return `<button data-loop="${s.id}:${i}:1" class="${typeof L==='number'?'on':''}" title="Refaire cette section 1× de plus (re-clic = annuler)">↻1</button><button data-loop="${s.id}:${i}:inf" class="${L==='inf'?'on':''}" title="Boucler cette section (re-clic = arrêter)">∞</button>`})()}<span class="pc"></span></div>
  <div class="prog"><i></i></div></div>`}
@@ -526,7 +544,7 @@ function songHTML(s,si){const P=`songs.${si}`;
  <div class="sh"><div class="n">${s.n}</div><div><h2>${esc(s.title)}</h2><div class="o">${s.orig?esc(s.orig)+' · ':''}${esc(s.ref)}</div></div>
   <div class="badges"><div class="badge"><small>Tona</small><span class="big">${esc(s.key)}</span></div>${editing?`<div class="badge bpmed"><small>BPM</small><div class="bstep"><button data-act="bpm" data-s="${si}" data-d="-1">−</button><span class="big">${esc(String(s.bpm).match(/\d+/)?.[0]||'')}</span><button data-act="bpm" data-s="${si}" data-d="1">+</button></div></div>`:`<div class="badge"><small>BPM</small><span class="big">${esc(String(s.bpm).split(' ')[0])}</span></div>`}
    <div class="badge"><small>Durée</small><span class="big" style="font-size:22px">${esc(String(s.dur).replace('≈ ',''))}</span></div><div class="badge"><small>Lead</small><span class="big" style="font-size:22px">${esc(s.lead)}</span></div>
-   <div class="metro"><button class="livebtn" data-live="${s.id}" title="Lancer le suivi live (décompte 1 mesure)">${live.on&&live.id===s.id?'■ Stop':'● LIVE'}</button><button data-metro="${s.id}">${mid===s.id?'■':'▶'} ${esc(String(s.bpm).split(' ')[0])}</button><span class="dot" id="dot-${s.id}"></span></div></div></div>
+   <div class="metro"><button class="livebtn" data-live="${s.id}" title="Lancer le live depuis le début (L)">${live.on&&live.id===s.id?'■ Stop':'● LIVE'}</button></div></div></div>
  <div class="o" style="margin-top:6px">${esc(s.slot)} · ${esc(s.bpm)} BPM · ${esc(s.meter)}</div>${relTable(s)}${head}
  ${s.suggest?'<div class="sugg">Pas d\'analyse du live : structure du plan, intensités proposées par le MD.</div>':''}
  ${arc(s,si)}${peches(s,si)}
@@ -542,7 +560,7 @@ function renderSong(si){const el=document.querySelector(`section.song[data-si="$
 function renderArc(si){const el=document.querySelector(`.arc[data-arc="${si}"]`);if(!el)return;const tmp=document.createElement('div');tmp.innerHTML=arc(state.songs[si],si);el.replaceWith(tmp.firstElementChild)}
 function restoreHere(){const h=LS.get('here',{});Object.entries(h).forEach(([id,i])=>{document.querySelectorAll(`#${id} .blk`).forEach(b=>b.classList.toggle('here',+b.dataset.i===i))})}
 let io=null;function observe(){if(!('IntersectionObserver' in window))return;if(io)io.disconnect();io=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){cur=en.target.id;markNav()}}),{rootMargin:'-40% 0px -55% 0px'});document.querySelectorAll('section.song').forEach(s=>io.observe(s))}
-function markNav(){document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('cur',a.dataset.id===cur))}
+function markNav(){document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('cur',a.dataset.id===(viewer?cur:ownView)))}
 function renderAll(){renderHead();renderOverview();renderSide();$('#songs').innerHTML=state.songs.map(songHTML).join('');restoreHere();observe();applySel();if(live.on)liveDraw(true)}
 // ---------- events ----------
 document.addEventListener('input',e=>{const t=e.target;if(!t.closest('main,header'))return;
@@ -564,9 +582,9 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-live],[dat
  if(live.on&&!live.follow&&!editing){const sec=t.closest('section.song');const i=t.dataset.arcsel??t.closest('.blk')?.dataset.i;if(sec&&sec.id===live.id&&i!=null){live.sb?sbTarget(+i):liveJump(+i);return}}
  if(t.dataset.metro){toggleMetro(t.dataset.metro);return}
  if(t.dataset.pk){pushUndo();const[si,k]=t.dataset.pk.split(':').map(Number);const P=state.songs[si].intro;const b=Math.floor(k/16)+1,p=k%16;const ix=P.hits.findIndex(h=>h[0]===b&&h[1]===p);if(ix>=0)P.hits.splice(ix,1);else P.hits.push([b,p]);commit();renderSong(si);return}
- if(t.dataset.arcsel!=null&&!editing){const sec=t.closest('section');setHere(sec.id,+t.dataset.arcsel);return}
+ if(t.dataset.arcsel!=null&&!editing)return;
  const a=t.dataset.act;
- if(!a){if(t.classList.contains('blk')){if(editing)selectBlk(+t.dataset.si,+t.dataset.i);else setHere(t.closest('section').id,+t.dataset.i)}return}
+ if(!a){if(t.classList.contains('blk')){if(editing)selectBlk(+t.dataset.si,+t.dataset.i);}return}
  const si=+t.dataset.s,i=+t.dataset.i,S=si>=0?state.songs[si]:null;pushUndo();lastUndoAt=0;
  if(a==='lv'){const v=clamp(num(get(t.dataset.p))+num(t.dataset.d),0,10);setP(t.dataset.p,v);commit();renderSong(+t.dataset.p.split('.')[1]);return}
  if(a==='bpm'){S.bpm=String(S.bpm).replace(/\d+/,n=>clamp(+n+num(t.dataset.d),30,220));if(live.on&&live.id===S.id){live.per=60/bpmOf(S);live.base=live.per;if(live.bpmOver)delete live.bpmOver[S.id]}commit();renderSong(si);renderOverview();return}
@@ -640,14 +658,13 @@ document.addEventListener('visibilitychange',()=>{SCH.ahead=document.hidden?1.5:
 function toggleMetro(id){const stop=mid===id;if(mid&&!live.on)schedStop();mid=null;document.querySelectorAll('[data-metro]').forEach(b=>b.textContent=b.textContent.replace(/^[▶■]/,'▶'));if(stop)return;
  if(live.on)liveStop(true);const s=state.songs.find(x=>x.id===id),bpm=num(String(s.bpm).split(' ')[0])||80;mid=id;beatN=0;const btn=document.querySelector(`[data-metro="${id}"]`);if(btn)btn.textContent=btn.textContent.replace(/^[▶■]/,'■');
  schedStart(t=>{const down=beatN%4===0;clickAt(t,down);SCH.q.push({t,run:()=>{const dot=document.getElementById('dot-'+id);if(dot){dot.className='dot '+(down?'down':'beat');setTimeout(()=>dot&&(dot.className='dot'),90)}}});beatN++;return 60/bpm})}
-window.addEventListener('keydown',e=>{if(viewer){if(live.follow&&e.key==='Escape'){fol.optOut=true;paintFollow();followStop()}return}if(typing())return;const S=state.songs,si=S.findIndex(x=>x.id===cur);
+window.addEventListener('keydown',e=>{if(viewer)return;if(typing())return;const S=state.songs,si=S.findIndex(x=>x.id===cur);
  if(live.follow){if(e.key==='Escape'){fol.optOut=true;paintFollow();followStop()}return}
  if(live.on){const k=e.key.toLowerCase();if(k===' '&&e.shiftKey){e.preventDefault();setLoop(live.id,curSec(),'inf');flash();return}
- const H={' ':()=>{setLoop(live.id,curSec(),'1');flash()},pagedown:()=>{setLoop(live.id,curSec(),'1');flash()},pageup:()=>{setLoop(live.id,curSec(),'inf');flash()},escape:liveStop,s:liveStop,arrowright:()=>live.sb?sbTarget(live.sb.target+1):liveJump(curSec()+1),arrowleft:()=>live.sb?sbTarget(live.sb.target-1):liveJump(curSec()-1),f:()=>standby('click'),x:()=>standby('panic'),l:()=>setLoop(live.id,curSec(),'inf'),r:()=>setLoop(live.id,curSec(),'1'),enter:liveResync,'1':liveResync,'+':()=>liveTempo(1),arrowup:liveSecStart,home:liveSecStart,d:liveSecStart,arrowdown:()=>{},t:liveTap,m:micToggle,'-':()=>liveTempo(-1)};e.stopImmediatePropagation();if(H[k]||/^(arrow|page|home|end| )/.test(k)){e.preventDefault()}if(H[k])H[k]();return}
+ const H={' ':()=>{setLoop(live.id,curSec(),'1');flash()},pagedown:()=>{setLoop(live.id,curSec(),'1');flash()},pageup:()=>{setLoop(live.id,curSec(),'inf');flash()},escape:liveStop,s:liveStop,arrowright:()=>live.sb?sbTarget(live.sb.target+1):liveJump(curSec()+1),arrowleft:()=>live.sb?sbTarget(live.sb.target-1):liveJump(curSec()-1),f:()=>standby('click'),x:()=>standby('panic'),n:()=>{if(live.sb&&live.sb.end)startNext()},i:()=>impToggle(),l:()=>setLoop(live.id,curSec(),'inf'),r:()=>setLoop(live.id,curSec(),'1'),enter:liveResync,'1':liveResync,'+':()=>liveTempo(1),arrowup:liveSecStart,home:liveSecStart,d:liveSecStart,arrowdown:()=>{},t:liveTap,m:micToggle,'-':()=>liveTempo(-1)};e.stopImmediatePropagation();if(H[k]||/^(arrow|page|home|end| )/.test(k)){e.preventDefault()}if(H[k])H[k]();return}
  if(e.key.toLowerCase()==='l'&&!editing){e.preventDefault();liveStart(cur);return}
 
- if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&!editing){e.preventDefault();let i=LS.get('here',{})[cur]??-1;i=clamp(i+(e.key==='ArrowRight'?1:-1),0,S[si].sections.length-1);setHere(cur,i);const b=document.querySelector(`#${cur} .blk[data-i="${i}"]`);b&&b.scrollIntoView({block:'nearest',behavior:'smooth'})}
- if(e.key===' '){e.preventDefault();toggleMetro(cur)}
+
  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'&&editing){e.preventDefault();$('#bUndo').click()}},true);
 // ---------- LIVE ----------
 var live={on:false,id:null,sec:0,bar:0,beat:0,count:0,bpm:80,bpb:4,t0:0,n:0,tm:null,loops:LS.get('loops',{}),wl:null};
@@ -658,11 +675,11 @@ function setLoop(id,i,m){const k=id+':'+i,L=live.loops[k];
 function flash(){const h=$('#hud');h.classList.remove('flash');void h.offsetWidth;h.classList.add('flash')}
 function paintLoops(){document.querySelectorAll('[data-loop]').forEach(b=>{const[id,i,m]=b.dataset.loop.split(':');const L=live.loops[id+':'+i];b.classList.toggle('on',m==='inf'?L==='inf':typeof L==='number')})}
 async function liveStart(id){if(live.follow)followStop();if(mid)toggleMetro(mid);liveStop(true);const si=state.songs.findIndex(s=>s.id===id);const s=state.songs[si];if(!s)return;
- const h=LS.get('here',{})[id];live.on=true;live.id=id;live.si=si;live.sec=(h!=null&&h<s.sections.length)?h:0;live.bar=0;live.beat=0;live.ended=false;live.view=null;
+ if(!viewer&&ownView!==id){ownView=id;LS.set('view',id);applySel();window.scrollTo({top:0})}live.on=true;live.id=id;live.si=si;live.sec=0;live.bar=0;live.beat=0;live.ended=false;live.view=null;
  live.per=60/(live.bpmOver&&live.bpmOver[id]||bpmOf(s));live.base=live.per;live.bpb=parseInt(s.meter)||4;live.countN=CIN()*live.bpb;live.count=live.countN;
  try{if(navigator.wakeLock)live.wl=await navigator.wakeLock.request('screen')}catch(e){}
  cur=id;document.body.classList.add('living');try{window.focus();$('#hud').focus({preventScroll:true})}catch(e){}renderSong(si);markNav();$('#hud').hidden=false;const ar=document.querySelector(`.arc[data-arc="${si}"]`);ar&&ar.scrollIntoView({block:'start',behavior:'smooth'});
- leadSel(id);schedStart(liveBeat)}
+ live.impro='';impPaintPad();leadSel(id);schedStart(liveBeat)}
 function liveStop(silent){if(live.follow){followStop();return}live.sb=null;live.sbPending=null;document.body.classList.remove('standby','panic');document.querySelectorAll('.blk.target').forEach(b=>b.classList.remove('target'));schedStop();const was=live.on;if(was&&room)try{room.emit('stop',{})}catch(e){}live.on=false;live.view=null;document.body.classList.remove('living');$('#hud').hidden=true;
  try{live.wl&&live.wl.release()}catch(e){}live.wl=null;
  document.querySelectorAll('.blk.live').forEach(b=>b.classList.remove('live'));document.querySelectorAll('.arc .ph').forEach(p=>p.style.display='none');
@@ -675,10 +692,10 @@ function liveBeat(t){const s=state.songs[live.si];if(!s||!live.on)return 0;const
   if(live.beat>=live.bpb){live.beat=0;live.bar++;const q=s.sections[live.sec];
    if(live.bar>=(+q.bars||1)){live.bar=0;const k=live.id+':'+live.sec,L=live.loops[k];
     if(L==='inf'){}else if(typeof L==='number'){if(L<=1)delete live.loops[k];else live.loops[k]=L-1;LS.set('loops',live.loops);SCH.q.push({t:t+per,run:paintLoops})}
-    else{live.sec++;if(live.sec>=s.sections.length){live.ended=true;SCH.q.push({t:t+per,run:()=>liveStop()})}}}}}
+    else{live.sec++;if(live.sec>=s.sections.length){live.sec=s.sections.length-1;live.bar=0;live.beat=0;live.sb={mode:'click',target:0,end:true};live.sbPending=null;live.down=null;live.prevDown=null;SCH.q.push({t:t+per,run:()=>{document.body.classList.add('standby');paintSb();liveDraw(true);leadEmitSb()}})}}}}}
  if(!snap.count&&!snap.beat)leadEmit(snap,t-ac.currentTime);SCH.q.push({t,run:()=>{live.view=snap;liveDraw()}});return per}
 const curSec=()=>(live.view||live).sec;
-function liveJump(i){const s=state.songs[live.si];if(!s)return;live.sec=clamp(i,0,s.sections.length-1);live.bar=0;live.beat=0;live.count=0;live.ended=false;schedRestart()}
+function liveJump(i){const s=state.songs[live.si];if(!s)return;live.sec=clamp(i,0,s.sections.length-1);live.bar=0;live.beat=0;live.count=0;live.ended=false;live.view={sec:live.sec,bar:0,beat:0,count:0};schedRestart()}
 function liveResync(){if(!live.on)return;const v=live.view||live;live.sec=v.sec;live.bar=v.count>0?0:v.bar;live.count=0;live.beat=0;live.ended=false;schedRestart(ac.currentTime+.005);flash()}
 function liveSecStart(){if(!live.on)return;live.sec=curSec();live.bar=0;live.beat=0;live.count=0;live.ended=false;schedRestart(ac.currentTime+.005);flash()}
 function liveTempo(d){const b=clamp(Math.round(60/live.per)+d,30,220);live.per=60/b;live.base=live.per;live.bpmOver=live.bpmOver||{};live.bpmOver[live.id]=b;liveDraw(true)}
@@ -702,7 +719,7 @@ function onOnset(t){if(!live.on||live.count>0||!SCH.fn)return;const per=live.per
 function paintMic(){const b=$('#hMic');if(!b)return;b.classList.toggle('on',MIC.on);const ok=MIC.on&&performance.now()-MIC.lock<2500;b.classList.toggle('lock',ok);b.textContent=MIC.on?(ok?'🎤 calé':'🎤 écoute…'):'🎤 Suivre'}
 setInterval(()=>MIC.on&&paintMic(),700);
 let lastSec=-1;
-function liveDraw(force){if(!live.on)return;if(live.sb||(live.follow&&fol.sb)){sbDraw();return}const V=live.view||{sec:live.sec,bar:live.bar,beat:live.beat,count:live.count};const s=state.songs[live.si],S=s.sections,q=S[V.sec],bars=+q.bars||1,bpb=live.bpb;
+function liveDraw(force){if(!live.on)return;if(live.sb||(live.follow&&fol.sb)){sbDraw();return}paintImpro();{const nb=$('#hNextSong');if(nb)nb.hidden=true}const V=live.view||{sec:live.sec,bar:live.bar,beat:live.beat,count:live.count};const s=state.songs[live.si],S=s.sections,q=S[V.sec],bars=+q.bars||1,bpb=live.bpb;
  const fr=(V.bar*bpb+(V.count>0?0:V.beat+1))/(bars*bpb);
  const root=document.getElementById(s.id);if(!root)return;
  if(force||lastSec!==V.sec||!root.querySelector('.blk.live')){root.querySelectorAll('.blk').forEach(b=>b.classList.toggle('live',+b.dataset.i===V.sec));
@@ -715,7 +732,7 @@ function liveDraw(force){if(!live.on)return;if(live.sb||(live.follow&&fol.sb)){s
  $('#hSong').textContent=`${live.follow?'👁 Tu suis le MD · ':''}${s.n}. ${s.title} · ${s.key}`;$('#hSec').textContent=q.name;$('#hSec').style.color=`var(${KC[q.kind]||'--intro'})`;
  $('#hBar').textContent=V.count>0?`Décompte${(live.countN||0)>live.bpb?` · mes. ${(V.cbar||0)+1}/${Math.round(live.countN/live.bpb)}`:''} · ${V.beat+1}`:`mes. ${V.bar+1} / ${bars}`;
  $('#hBeats').innerHTML=Array.from({length:bpb},(_,k)=>`<i class="${V.count>0?(k===V.beat?'on c':''):(k===V.beat?'on':'')}${k===0?' one':''}"></i>`).join('');
- $('#hCall').textContent=[q.call,show(q.nash,s.key),viewer&&q.nash?toChords(q.nash,s.key):''].filter(Boolean).join(' · ');
+ $('#hCall').textContent=[q.call,show(q.nash,s.key),viewer&&q.nash?(chords?q.nash:toChords(q.nash,s.key)):''].filter(Boolean).join(' · ');
  $('#hNext').innerHTML=L==='inf'?`<b class="loopi">∞ en boucle</b> · Maj+Espace pour sortir`:typeof L==='number'?`<b class="loopi">↻ encore ${L}×</b> (Espace = annuler) puis → ${esc(nx?nx.name:'fin')}`:nx?`→ <b>${esc(nx.name)}</b> dans ${left} mes.${nx.call?` · ${esc(nx.call)}`:''}`:`→ <b>fin</b> dans ${left} mes.`;
  $('#hNext').classList.toggle('soon',!L&&left<=2&&V.count===0);
  $('#hProg').style.width=(done/tot*100).toFixed(1)+'%';$('#hBpm').textContent=Math.round(60/live.per);
@@ -774,22 +791,22 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-let room=null;const fol={optOut:LS.get('noFollow',false),last:0,raf:null,a:null};
+let room=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
   room.on('data',d=>{if(!d||!(+d.rev>state.rev))return;if(typing())pendingRemote=d;else applyRemote(d)});status('ok',viewer?'Connecté · en attente du MD':'Connecté · tout s\'enregistre et part à l\'équipe');
   setTimeout(()=>{if(!viewer&&state.rev>(ORIG.rev||0))pushRemote()},1500)}
  else{if(!(window.claude&&window.claude.use))return;try{room=await window.claude.use('room')}catch(e){}}if(!room)return;
- $('#bFollow').hidden=false;paintFollow();
+
  room.on('pos',(a)=>followPos(unwrap(a)));room.on('stop',()=>{if(live.follow)followStop('Le MD a arrêté le live')})})();
 function leadEmit(snap,lead,extra){if(!room||live.follow)return;const s=state.songs[live.si];if(!s)return;const lp={};Object.keys(live.loops).forEach(k=>{if(k.startsWith(s.id+':'))lp[k]=live.loops[k]});
- try{room.emit('pos',{id:s.id,sec:snap.sec,bar:snap.bar,bpb:live.bpb,per:live.per,loops:lp,in:Math.max(0,Math.min(3,+lead||0)),...(extra||{})})}catch(e){}}
+ try{room.emit('pos',{id:s.id,sec:snap.sec,bar:snap.bar,bpb:live.bpb,per:live.per,loops:lp,impro:live.impro||'',in:Math.max(0,Math.min(3,+lead||0)),...(extra||{})})}catch(e){}}
 function paintFollow(){const b=$('#bFollow');if(!b)return;b.textContent=fol.optOut?'👁 Suivre le MD : non':'👁 Suivre le MD : oui';b.classList.toggle('on',!fol.optOut)}
-$('#bFollow').onclick=()=>{fol.optOut=!fol.optOut;LS.set('noFollow',fol.optOut);paintFollow();if(fol.optOut&&live.follow)followStop()};
+
 function followPos(d){if(!d||!d.id||fol.optOut)return;if(live.on&&!live.follow)return;const si=state.songs.findIndex(s=>s.id===d.id);if(si<0)return;
  const s=state.songs[si],start=!live.follow||live.si!==si;live.follow=true;live.on=true;live.id=d.id;live.si=si;live.bpb=clamp(+d.bpb||4,2,12);live.per=clamp(+d.per||.75,.25,2);
  live.loops=(d.loops&&typeof d.loops==='object')?d.loops:{};const sec=clamp(+d.sec||0,0,s.sections.length-1);fol.last=performance.now();
- fol.sb=d.sb&&typeof d.sb==='object'?{mode:d.sb.mode==='panic'?'panic':'click',target:clamp(+d.sb.target||0,0,s.sections.length-1),pending:!!d.sb.pending}:null;
+ fol.sb=d.sb&&typeof d.sb==='object'?{mode:d.sb.mode==='panic'?'panic':'click',target:clamp(+d.sb.target||0,0,s.sections.length-1),pending:!!d.sb.pending,end:!!d.sb.end}:null;fol.impro=typeof d.impro==='string'?d.impro.slice(0,80):'';
  document.body.classList.toggle('standby',!!fol.sb);document.body.classList.toggle('panic',!!fol.sb&&fol.sb.mode==='panic');
  if(!fol.sb){document.querySelectorAll('.blk.target').forEach(b=>b.classList.remove('target'));const cin=clamp(+d.cin||0,0,4);live.countN=clamp(+d.cinN||0,0,4)*live.bpb;fol.a={sec,bar:cin?-cin:clamp(+d.bar||0,0,(+s.sections[sec].bars||1)-1),t0:performance.now()+clamp(+d.in||0,0,3)*1000-80}}
  if(start){cur=d.id;document.body.classList.add('living','following');$('#hud').hidden=false;renderSong(si);markNav();const ar=document.querySelector(`.arc[data-arc="${si}"]`);ar&&ar.scrollIntoView({block:'start',behavior:'smooth'});toast('👁 Tu suis le live du MD')}
@@ -818,15 +835,16 @@ function sbClear(){document.body.classList.remove('standby','panic');document.qu
 function paintSb(){const a=$('#hSb'),b=$('#hPanic');if(!a)return;const sb=live.sb;
  a.textContent=!sb?'⏸ Standby':sb.mode==='panic'?'⏸ Clic seul':live.sbPending!=null?'⏳ au prochain 1':'▶ Repartir';a.classList.toggle('on',!!sb&&sb.mode!=='panic');
  b.textContent=sb&&sb.mode==='panic'?'▶ Repartir':'⛔ Panic';b.classList.toggle('on',!!sb&&sb.mode==='panic')}
-function leadEmitSb(){if(!room||live.follow||!live.sb)return;const s=state.songs[live.si];try{room.emit('pos',{id:s.id,bpb:live.bpb,per:live.per,sb:{mode:live.sb.mode,target:live.sb.target,pending:live.sbPending!=null}})}catch(e){}}
+function leadEmitSb(){if(!room||live.follow||!live.sb)return;const s=state.songs[live.si];try{room.emit('pos',{id:s.id,bpb:live.bpb,per:live.per,sb:{mode:live.sb.mode,target:live.sb.target,pending:live.sbPending!=null,end:!!live.sb.end},impro:live.impro||''})}catch(e){}}
 function sbDraw(){const s=state.songs[live.si];if(!s)return;const S=s.sections,sb=live.follow?fol.sb:live.sb;if(!sb)return;const tq=S[sb.target]||S[0],panic=sb.mode==='panic',pend=live.follow?sb.pending:live.sbPending!=null;
  $('#hSong').textContent=`${live.follow?'👁 Tu suis le MD · ':''}${s.n}. ${s.title} · ${s.key}`;
- $('#hSec').textContent=panic?'⛔ PANIC':'⏸ STANDBY';$('#hSec').style.color=panic?'var(--red)':'#e6a100';
+ $('#hSec').textContent=panic?'⛔ PANIC':sb.end?'■ FIN DU CHANT':'⏸ STANDBY';$('#hSec').style.color=panic?'var(--red)':'#e6a100';
  $('#hBar').textContent=panic?'clic coupé':pend?'reprise au prochain 1':'le clic continue';
  const V=live.view;$('#hBeats').innerHTML=panic||live.follow?'':Array.from({length:live.bpb},(_,k)=>`<i class="${V&&V.sb&&k===V.beat?'on':''}${k===0?' one':''}"></i>`).join('');
  $('#hCall').textContent=`Reprise : ${tq.name}${tq.call?' · '+tq.call:''}${tq.nash?' · '+show(tq.nash,s.key):''}`;
  $('#hNext').innerHTML=live.follow?(pend?'<b>On repart au prochain 1</b>':'Le MD a mis en pause · attends son signe'):panic?'Clique la section de reprise (ou ← →) · <b>X</b> = repartir sur ton appui (ou F = remettre le clic)':pend?`<b>${esc(tq.name)}</b> démarre au prochain 1`:'Clique la section de reprise (ou ← →) · <b>F</b> = repartir au prochain 1';
- $('#hNext').classList.toggle('soon',!!pend);
+ if(sb.end&&!pend){const nx=state.songs[state.songs.indexOf(s)+1];$('#hNext').innerHTML=live.follow?'Fin du chant · le clic continue · attends le signe du MD':`${nx?`Chant suivant : <b>${esc(nx.title)}</b> → <b>N</b> ou ▶ Chant suivant · `:''}<b>F</b> = reprendre ce chant au début`}
+ $('#hNext').classList.toggle('soon',!!pend);const nb=$('#hNextSong');if(nb)nb.hidden=!(sb.end&&!live.follow&&state.songs[state.songs.indexOf(s)+1]);paintImpro();
  const root=document.getElementById(s.id);if(root)root.querySelectorAll('.blk').forEach(b=>b.classList.toggle('target',+b.dataset.i===sb.target))}
 
 // ---------- publier la feuille pour l'équipe (lien public, sans compte) ----------
@@ -850,14 +868,45 @@ async function mqttBus(){if(!window.mqtt||!CFG.mqtt)return null;const T=CFG.topi
 
 // ---------- musiciens : un seul chant à l'écran (celui du MD) ----------
 let selId=null;
-function applySel(){if(!viewer)return;const id=selId||(state.songs[0]&&state.songs[0].id);let hit=false;
+function applySel(){if(!viewer){const home=ownView==='home';document.body.classList.toggle('home',home);document.querySelectorAll('section.song').forEach(x=>x.classList.toggle('vsel',x.id===ownView));if(!home)cur=ownView;markNav();return}
+ const id=selId||(state.songs[0]&&state.songs[0].id);let hit=false;
  document.querySelectorAll('section.song').forEach(x=>{const on=x.id===id;x.classList.toggle('vsel',on);if(on)hit=true});
  if(!hit){const f=document.querySelector('section.song');f&&f.classList.add('vsel')}}
 function showSong(id){if(!id||!state.songs.some(s=>s.id===id))return;const ch=selId!==id;selId=id;applySel();if(ch&&viewer)window.scrollTo({top:0})}
 function leadSel(id){if(!room||viewer||live.follow||!id)return;try{room.emit('sel',{id},true)}catch(e){}}
-document.addEventListener('click',e=>{const a=e.target.closest('#nav a,.overview a.sc');if(a&&!viewer){const id=(a.dataset.id||a.getAttribute('href')||'').replace('#','');leadSel(id)}});
+document.addEventListener('click',e=>{const a=e.target.closest('#nav a,.overview a.sc');if(!a||viewer)return;e.preventDefault();const id=(a.dataset.id||a.getAttribute('href')||'').replace('#','');goView(id)});
+function goView(id){if(id!=='home'&&!state.songs.some(s=>s.id===id))return;ownView=id;LS.set('view',id);applySel();window.scrollTo({top:0});if(id!=='home')leadSel(id);
+ const a=document.querySelector(`#nav a[data-id="${id}"]`);a&&a.scrollIntoView({inline:'center',block:'nearest'})}
 (async()=>{for(let k=0;k<40&&!room;k++)await new Promise(r=>setTimeout(r,500));if(!room)return;room.on('sel',a=>{const d=unwrap(a);if(d&&d.id)showSong(String(d.id))});room.on('pos',a=>{const d=unwrap(a);if(d&&d.id&&viewer)showSong(String(d.id))})})();
 
+function nextSong(){if(viewer)return;const i=state.songs.findIndex(x=>x.id===live.id),n=state.songs[i+1];if(!n)return;goView(n.id);toast(`Chant suivant : ${n.title} · ● LIVE ou L pour lancer`)}
+
+// ---------- fin de chant / impro ----------
+function startNext(){const i=state.songs.findIndex(x=>x.id===live.id),n=state.songs[i+1];if(n)liveStart(n.id)}
+$('#hNextSong').onclick=startNext;
+const PRESETS=['1 5 6 4','6 4 1 5','1 4 6 5','4 5 6','1 4','4 1 5 6','6 5 4'];
+function impTokens(){return (live.impro||'').split(' ').filter(Boolean)}
+function impSet(t){live.impro=t.join(' ').slice(0,80);impPaintPad();paintImpro();if(room&&!live.follow&&!viewer)try{room.emit('impro',{id:live.id,impro:live.impro})}catch(e){}}
+let impFlat=false;
+function impKey(k){let t=impTokens();const last=t[t.length-1]||'';
+ if(k==='clr'){impFlat=false;impSet([]);return}
+ if(k==='bs'){if(!last)return;const l=last.slice(0,-1);if(l&&l!=='♭')t[t.length-1]=l;else t.pop();impSet(t);return}
+ if(k==='♭'){impFlat=!impFlat;impPaintPad();return}
+ if(k==='/'){if(last&&!last.endsWith('/')){t[t.length-1]=last+'/';impSet(t)}return}
+ if(/^[1-7]$/.test(k)){const d=(impFlat?'♭':'')+k;impFlat=false;if(last.endsWith('/'))t[t.length-1]=last+d;else t.push(d);impSet(t);return}
+ if(k==='m'){if(last&&!/m$/.test(last)){t[t.length-1]=last+'m';impSet(t)}return}}
+function impToggle(){const p=$('#imp');if(!p||viewer)return;p.hidden=!p.hidden;$('#hImp').classList.toggle('on',!p.hidden);impPaintPad()}
+function impPaintPad(){const p=$('#imp');if(!p)return;const s=state.songs[live.si];const key=s?s.key:'C';
+ p.innerHTML=`<div class="improw"><b class="impseq">${esc(live.impro||'—')}</b><span class="impchd">${live.impro?esc(toChords(live.impro,key)):'tape les degrés, ça part tout de suite chez les musiciens'}</span></div>
+ <div class="improw keys">${['1','2','3','4','5','6','7'].map(k=>`<button data-imp="${k}">${k}<small>${esc(toChords(k,key))}</small></button>`).join('')}<button data-imp="♭" class="${impFlat?'on':''}">♭</button><button data-imp="/">/</button><button data-imp="bs">⌫</button><button data-imp="clr" class="clr">Effacer</button></div>
+ <div class="improw">${PRESETS.map(x=>`<button class="pre" data-pre="${x}">${x}</button>`).join('')}</div>`}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-imp],[data-pre]');if(!b||viewer)return;if(b.dataset.imp)impKey(b.dataset.imp);else impSet(b.dataset.pre.split(' '))});
+$('#hImp').onclick=impToggle;
+function paintImpro(){const el=$('#hImpro');if(!el)return;const seq=live.follow?(fol.impro||''):(live.impro||'');const s=state.songs[live.si];
+ el.hidden=!seq;if(!seq)return;const nash=seq,ch=s?toChords(seq,s.key):'';el.innerHTML=`🎹 IMPRO <b>${esc(chords?ch:nash)}</b><span>${esc(chords?nash:ch)}</span>`}
+(async()=>{for(let k=0;k<40&&!room;k++)await new Promise(r=>setTimeout(r,500));if(!room)return;room.on('impro',a=>{const d=unwrap(a);if(!d||!live.follow)return;fol.impro=typeof d.impro==='string'?d.impro.slice(0,80):'';paintImpro()})})();
+
+if(HOSTED)document.body.classList.add('hosted');
 paintClk();
 renderAll();
 }
