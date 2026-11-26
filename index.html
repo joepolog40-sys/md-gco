@@ -467,6 +467,7 @@ body.living .blk .prog{display:none}
 body.living .blk.live::before{opacity:1}
 body.standby .blk.live::before{border-right-color:rgba(255,255,255,.25)}
 body.viewer #nav a[data-id="home"]{display:none}
+.cols{grid-template-columns:minmax(0,1fr)!important}
 </style>
 </head>
 <body>
@@ -706,9 +707,6 @@ function songHTML(s,si){const P=`songs.${si}`,editing=EDIT.song===s.id;
  <div class="cols">
   <div class="card"><h3>Grille basse${chords?' (accords)':' (Nashville)'} · ${esc(s.key)} ${editing?'':`<button class="ico" data-edsong="${s.id}" title="Modifier">✏️</button>`}</h3>${editing?s.bass.map(([k,v],i)=>`<div class="bline ed"><select data-f="${P}.bass.${i}.0" data-re="1">${Object.keys(KL).map(x=>`<option value="${x}" ${x===k?'selected':''}>${KL[x]}</option>`).join('')}</select><input class="nashin" style="--c:var(${KC[k]})" data-f="${P}.bass.${i}.1" value="${esc(v)}"><button class="mini" data-act="bass-del" data-s="${si}" data-i="${i}">✕</button></div>`).join('')+`<button class="mini" data-act="bass-add" data-s="${si}">+ ligne</button>`
    :s.bass.map(([k,v])=>`<div class="bl" style="--c:var(${KC[k]})"><small>${KL[k]}</small>${esc(show(v,s.key))}</div>`).join('')}</div>
-  <div class="card"><h3>Batterie · pour Micaël ${editing?'':`<button class="ico" data-edsong="${s.id}" title="Modifier">✏️</button>`}</h3>${editing?`<div class="ed"><textarea data-lines="${P}.drums">${esc(s.drums.join('\n'))}</textarea><label>une ligne = un groove</label></div>`:`<ol class="dl">${s.drums.map(d=>`<li>${esc(d)}</li>`).join('')}</ol>`}</div>
-  <div class="card"><h3>Tips de MD ${editing?'':`<button class="ico" data-edsong="${s.id}" title="Modifier">✏️</button>`}</h3>${editing?`<div class="ed"><textarea data-lines="${P}.tips">${esc(s.tips.join('\n'))}</textarea><label>une ligne = un tip · **gras**</label><label>Ensuite →</label><textarea style="min-height:50px" data-f="${P}.next">${esc(s.next)}</textarea></div>`
-   :`<ul class="tips">${s.tips.map(t=>`<li>${md(t)}</li>`).join('')}</ul><div class="next"><b>Ensuite →</b> ${md(s.next)}</div>`}</div>
  </div></section>`}
 function renderSong(si){const el=document.querySelector(`section.song[data-si="${si}"]`);if(!el)return;const tmp=document.createElement('div');tmp.innerHTML=songHTML(state.songs[si],si);el.replaceWith(tmp.firstElementChild);restoreHere();observe();applySel();if(!live.on)idleDraw();if(live.on&&state.songs[si]&&state.songs[si].id===live.id)liveDraw(true)}
 function renderArc(si){const el=document.querySelector(`.arc[data-arc="${si}"]`);if(!el)return;const tmp=document.createElement('div');tmp.innerHTML=arc(state.songs[si],si);el.replaceWith(tmp.firstElementChild)}
