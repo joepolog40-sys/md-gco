@@ -516,6 +516,18 @@ body.viewer .shoutb,body.idle .shoutb{display:none!important}
 .shout{position:fixed;left:50%;top:18%;transform:translate(-50%,0) scale(.6);z-index:200;max-width:92vw;text-align:center;background:linear-gradient(135deg,#ff5a1f,#e60000);color:#fff;font-family:'Barlow Condensed',Arial,sans-serif;font-weight:900;font-size:clamp(28px,6vw,64px);line-height:1.05;padding:18px 28px;border-radius:18px;box-shadow:0 10px 40px rgba(230,0,0,.6);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
 .shout.on{opacity:1;transform:translate(-50%,0) scale(1);animation:shk .35s ease-in-out 0s 6}
 @keyframes shk{25%{transform:translate(-50%,0) rotate(-2deg) scale(1.04)}75%{transform:translate(-50%,0) rotate(2deg) scale(1.04)}}
+
+/* saut programmé : très visible */
+.hjump{display:block;margin:4px 0;padding:8px 14px;border-radius:12px;font-weight:900;font-size:26px;line-height:1.1;background:#e6a100;color:#111;border:3px solid var(--jc,#e6a100);box-shadow:0 0 18px rgba(230,161,0,.6)}
+.hjump[hidden]{display:none}.hjump b{font-size:1.15em;text-transform:uppercase}.hjump small{font-size:.7em;font-weight:800;margin-left:6px}
+.hjump.soon{animation:lpb .45s ease-in-out infinite}
+body.viewer .hud .hjump{font-size:22px}
+.blk.jt{outline:5px solid #e6a100!important;outline-offset:3px;box-shadow:0 0 0 9px rgba(230,161,0,.35),0 0 28px rgba(230,161,0,.8)!important;animation:jtp .8s ease-in-out infinite;z-index:3}
+.blk.jt .nm::after{content:'⤳ ON Y VA';position:absolute;left:50%;top:-2px;transform:translateX(-50%);background:#e6a100;color:#111;font-size:12px;font-weight:900;padding:1px 8px;border-radius:0 0 8px 8px;white-space:nowrap}
+@keyframes jtp{50%{outline-color:rgba(230,161,0,.35);box-shadow:0 0 0 4px rgba(230,161,0,.2)}}
+.jflash{position:fixed;left:50%;top:30%;transform:translate(-50%,-50%) scale(.5);z-index:199;background:#e6a100;color:#111;font-family:'Barlow Condensed',Arial,sans-serif;font-weight:900;font-size:clamp(34px,8vw,90px);padding:14px 34px;border-radius:20px;box-shadow:0 10px 50px rgba(230,161,0,.7);opacity:0;pointer-events:none;text-transform:uppercase;white-space:nowrap;max-width:94vw;overflow:hidden;text-overflow:ellipsis}
+.jflash.on{animation:jfl 1.6s ease-out forwards}
+@keyframes jfl{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}12%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}25%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
 </style>
 </head>
 <body>
@@ -555,7 +567,7 @@ body.viewer .shoutb,body.idle .shoutb{display:none!important}
  <div class="hrow"><span id="hSong" class="hsong"></span><span class="clkbox"></span><span class="percbox"></span><span id="hTime" class="htime"></span></div>
  <div class="hprog"><i id="hProg"></i></div>
  <div class="hmain">
-  <div class="hl"><div id="hSec" class="hsec"></div><div class="hsub"><span id="hBar"></span><span id="hBeats" class="hbeats"></span></div><div id="hDrop" class="hdrop" hidden></div><div id="hLoop" class="hloop" hidden></div><div id="hImpro" class="himpro" hidden></div><div id="hNash" class="hnash" hidden></div><div id="hCall" class="hcall"></div><div id="hNext" class="hnext"></div></div>
+  <div class="hl"><div id="hSec" class="hsec"></div><div class="hsub"><span id="hBar"></span><span id="hBeats" class="hbeats"></span></div><div id="hJump" class="hjump" hidden></div><div id="hDrop" class="hdrop" hidden></div><div id="hLoop" class="hloop" hidden></div><div id="hImpro" class="himpro" hidden></div><div id="hNash" class="hnash" hidden></div><div id="hCall" class="hcall"></div><div id="hNext" class="hnext"></div></div>
   <div class="hbtns">
    <button id="hPlay" class="play" title="Lancer depuis la section choisie (L)">▶ Play</button>
    <button id="hShout" class="shoutb" title="Message géant chez tous les musiciens (M)">🔥 Vas-y Mic, envoie du pâté, faut que ça masse là !</button><button id="hGlide" class="gld" hidden title="Passer direct au chant suivant : le clic glisse vers le nouveau tempo (G)">⤳ Enchaîner</button><button id="hNextSong" class="nxs" hidden title="Lancer le chant suivant (N)">▶ Chant suivant</button><button id="hImp" title="Indiquer une suite d'accords improvisée (I)">🎹 Impro</button><button id="hFade" class="fade" title="Fondu des percus (P)">🥁 Fade out</button><button id="hSb" class="sbb" title="Standby : tout s'arrête sauf le clic, choisis la section de reprise (F)">⏸ Standby</button><button id="hPanic" class="pnb" title="Panic : tout s'arrête, clic compris (X)">⛔ Panic</button>
@@ -567,7 +579,7 @@ body.viewer .shoutb,body.idle .shoutb{display:none!important}
   </div></div>
  <div id="imp" class="imp" hidden></div>
 </div>
-<div id="toast" class="toast"></div><div id="shout" class="shout"></div>
+<div id="toast" class="toast"></div><div id="shout" class="shout"></div><div id="jflash" class="jflash"></div>
 <button id="edDone" class="eddone" data-edclose="1" title="Terminer la modification (Échap)">✓ Terminer</button>
 </div>
 <script data-md src="mqtt.min.js"></script>
@@ -982,7 +994,7 @@ function liveBeat(t){if(live.glideReq&&live.beat===0&&live.count<=0&&!(live.sb&&
  if(live.count>0){const e=live.countN-live.count;const gl=!!live.glide;if(live.glide){const G=live.glide;G.i++;per=G.from+(G.to-G.from)*Math.min(1,G.i/G.n);live.per=per;if(G.i>=G.n){live.per=live.base=G.to;live.glide=null}}snap={sec:live.sec,bar:0,beat:e%live.bpb,count:live.count,cbar:Math.floor(e/live.bpb),glide:gl?1:0};if(e%live.bpb===0||snap.glide)leadEmit({sec:live.sec,bar:0},t-ac.currentTime,{cin:(live.countN-e)/live.bpb,cinN:live.countN/live.bpb,gl:gl?1:0});clickAt(t,e%live.bpb===0);live.count--}
  else{snap={sec:live.sec,bar:live.bar,beat:live.beat,count:0};clickAt(t,live.beat===0);percBeat(t,s.sections[live.sec],live.beat,per,live.bpb);live.beat++;
   if(live.beat>=live.bpb){live.beat=0;live.bar++;const q=s.sections[live.sec];
-   if(live.bar>=(+q.bars||1)){live.bar=0;if(live.jumpTo!=null){live.sec=clamp(live.jumpTo,0,s.sections.length-1);live.jumpTo=null;SCH.q.push({t:t+per,run:()=>{paintJump();liveDraw(true)}})}else{const k=live.id+':'+live.sec,L=live.loops[k];
+   if(live.bar>=(+q.bars||1)){live.bar=0;if(live.jumpTo!=null){live.sec=clamp(live.jumpTo,0,s.sections.length-1);live.jumpTo=null;const jn=s.sections[live.sec].name;SCH.q.push({t,run:()=>{paintJump();liveDraw(true);jumpFlash(jn)}})}else{const k=live.id+':'+live.sec,L=live.loops[k];
     if(L==='inf'){}else if(typeof L==='number'){if(L<=1)delete live.loops[k];else live.loops[k]=L-1;LS.set('loops',live.loops);SCH.q.push({t:t+per,run:paintLoops})}
     else{live.sec++;if(live.sec>=s.sections.length){live.sec=s.sections.length-1;live.bar=0;live.beat=0;live.sb={mode:'click',target:0,end:true};live.sbPending=null;live.down=null;live.prevDown=null;SCH.q.push({t:t+per,run:()=>{document.body.classList.add('standby');paintSb();liveDraw(true);leadEmitSb()}})}}}}}}
  if(!snap.count&&!snap.beat)leadEmit(snap,t-ac.currentTime);SCH.q.push({t,run:()=>{live.view=snap;liveDraw()}});return per}
@@ -1027,7 +1039,7 @@ function liveDraw(force){if(!live.on)return;if(live.sb||(live.follow&&fol.sb)){s
  $('#hBeats').innerHTML=Array.from({length:bpb},(_,k)=>`<i class="${V.count>0?(k===V.beat?'on c':''):(k===V.beat?'on':'')}${k===0?' one':''}"></i>`).join('');
  $('#hCall').textContent=q.call||'';paintNash(q,s);
  $('#hNext').innerHTML=JT!=null&&S[JT]&&V.count===0?`<b class="jumpi">⤳ SAUT → ${esc(S[JT].name)}</b> à la fin de la section · dans ${left} mes.`:L==='inf'?(live.follow?'<b class="loopi">∞ en boucle</b> · on sort sur signe du MD':'<b class="loopi">∞ en boucle</b> · Maj+Espace pour sortir'):typeof L==='number'?`<b class="loopi">↻ encore ${L}×</b> ${live.follow?'':'(Espace = annuler)'} puis → ${esc(nx?nx.name:'fin')}`:nx?`→ <b>${esc(nx.name)}</b> dans ${left} mes.${nx.call?` · ${esc(nx.call)}`:''}`:`→ <b>fin</b> dans ${left} mes.`;
- $('#hNext').classList.toggle('soon',(JT!=null||!L)&&left<=2&&V.count===0);paintDrop(q,nx,left,V,L);
+ $('#hNext').classList.toggle('soon',(JT!=null||!L)&&left<=2&&V.count===0);paintDrop(q,nx,left,V,L);paintJumpHud(JT!=null&&V.count===0?S[JT]:null,(bars-V.bar)*bpb-V.beat-1,bpb);
  $('#hProg').style.width=(done/tot*100).toFixed(1)+'%';$('#hBpm').textContent=Math.round(60/live.per);
  const sec=done*bpb*live.per,tsec=tot*bpb*live.per;$('#hTime').textContent=`${mmss(sec)} / ${mmss(tsec)}`;
  $('#hL1').classList.toggle('on',typeof L==='number');$('#hLi').classList.toggle('on',L==='inf');
@@ -1084,7 +1096,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=44;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=45;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
@@ -1099,7 +1111,7 @@ function paintFollow(){const b=$('#bFollow');if(!b)return;b.textContent=fol.optO
 
 function followPos(d){if(!d||!d.id||fol.optOut)return;if(HOSTED&&viewer&&+d.v>VER){const k='md29:rl';if(sessionStorage.getItem(k)!==String(d.v)){sessionStorage.setItem(k,String(d.v));location.replace(location.pathname+'?v='+d.v);return}}if(live.on&&!live.follow)return;const si=state.songs.findIndex(s=>s.id===d.id);if(si<0)return;
  const s=state.songs[si],start=!live.follow||live.si!==si;live.follow=true;live.on=true;live.id=d.id;live.si=si;live.bpb=clamp(+d.bpb||4,2,12);live.per=clamp(+d.per||.75,.25,2);
- live.loops=(d.loops&&typeof d.loops==='object')?d.loops:{};if(d.jt!=null){const nj=+d.jt>=0?+d.jt:null;if(nj!==fol.jt){fol.jt=nj;paintJump()}}const sec=clamp(+d.sec||0,0,s.sections.length-1);fol.last=performance.now();
+ live.loops=(d.loops&&typeof d.loops==='object')?d.loops:{};if(fol.jt!=null&&+d.sec===fol.jt&&!(+d.cin)){jumpFlash(s.sections[fol.jt].name)}if(d.jt!=null){const nj=+d.jt>=0?+d.jt:null;if(nj!==fol.jt){fol.jt=nj;paintJump()}}const sec=clamp(+d.sec||0,0,s.sections.length-1);fol.last=performance.now();
  fol.sb=d.sb&&typeof d.sb==='object'?{mode:d.sb.mode==='panic'?'panic':'click',target:clamp(+d.sb.target||0,0,s.sections.length-1),pending:!!d.sb.pending,end:!!d.sb.end}:null;fol.impro=typeof d.impro==='string'?d.impro.slice(0,80):'';
  document.body.classList.toggle('standby',!!fol.sb);document.body.classList.toggle('panic',!!fol.sb&&fol.sb.mode==='panic');
  if(!fol.sb){document.querySelectorAll('.blk.target').forEach(b=>b.classList.remove('target'));const cin=clamp(+d.cin||0,0,4);live.countN=clamp(+d.cinN||0,0,4)*live.bpb;fol.a={sec,gl:!!d.gl,nb0:cin?-Math.round(cin*live.bpb):null,bar:cin?-cin:clamp(+d.bar||0,0,(+s.sections[sec].bars||1)-1),t0:performance.now()+clamp(+d.in||0,0,3)*1000-80}}
@@ -1191,6 +1203,9 @@ function queueJump(i){if(!live.on||live.follow)return;const S=state.songs[live.s
  if(i===cur&&live.jumpTo==null){toast('C’est la section en cours');return}
  if(live.jumpTo===i||i===cur){live.jumpTo=null;toast('Saut annulé')}else{live.jumpTo=i;toast(`⤳ « ${S[i].name} » à la fin de « ${S[cur].name} » · reclique pour annuler`)}
  paintJump();liveDraw(true);if(room&&!viewer)try{room.emit('jump',{id:live.id,jt:live.jumpTo!=null?live.jumpTo:-1})}catch(e){}flash()}
+function paintJumpHud(T,rem,bpb){const el=$('#hJump');if(!el)return;if(!T||!live.on){el.hidden=true;return}el.hidden=false;
+ const txt=rem>=bpb?`dans ${Math.ceil((rem+1)/bpb)} mes.`:rem>0?`dans ${rem} temps`:'MAINTENANT';el.innerHTML=`⤳ SAUT → <b>${esc(T.name)}</b> <small>${txt}</small>`;el.classList.toggle('soon',rem<bpb);el.style.setProperty('--jc',`var(${KC[T.kind]||'--intro'})`)}
+function jumpFlash(name){const el=$('#jflash');if(!el)return;el.textContent='⤳ '+name;el.classList.remove('on');void el.offsetWidth;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1600)}
 function paintJump(){document.querySelectorAll('.blk.jt').forEach(b=>b.classList.remove('jt'));const j=live.follow?fol.jt:live.jumpTo;if(j==null||!live.on)return;const s=state.songs[live.si];const b=s&&document.querySelector(`#${s.id} .blk[data-i="${j}"]`);b&&b.classList.add('jt')}
 // ---------- « Vas-y Mic » : message géant chez tous les musiciens ----------
 const SHOUT='🔥 Vas-y Mic, envoie du pâté, faut que ça masse là !';
