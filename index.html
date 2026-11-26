@@ -498,6 +498,9 @@ body.viewer.rep.idle .hud .hnash b{font-size:30px}
  .blk .chd{font-size:17px}
  .road{gap:8px}
 }
+/* Répétition : structure complète avec les intensités (cliquable pour choisir la section) */
+body.viewer.rep .arc{display:block!important;pointer-events:auto!important}
+body.viewer.rep .arc [data-arcsel]{cursor:pointer}
 </style>
 </head>
 <body>
@@ -661,7 +664,7 @@ function renderSide(){const M=state.meta,editing=EDIT.side;
  $('#scale').innerHTML='<span>Intensités :</span>'+[[0,'silence'],['1-2','très doux'],['3-4','doux'],['5-6','moyen'],['7-8','fort'],['9-10','max']].map(([a,b])=>`<span><b>${a}</b> ${b}</span>`).join('');
  $('#legend').innerHTML=Object.keys(KL).map(k=>`<span><i style="background:var(${KC[k]})"></i>${KL[k]}</span>`).join('')}
 // ---------- song pieces ----------
-function arc(s,si){const editing=EDIT.song===s.id,tot=s.sections.reduce((a,b)=>a+(+b.bars||1),0)||1,W=1200,H=editing?150:104,top=14,base=H-22,X=b=>8+b/tot*(W-16),Y=v=>base-(v/10)*(base-top);
+function arc(s,si){const editing=EDIT.song===s.id,tot=s.sections.reduce((a,b)=>a+(+b.bars||1),0)||1,W=viewer?620:1200,H=editing?150:viewer?150:104,top=14,base=H-22,X=b=>8+b/tot*(W-16),Y=v=>base-(v/10)*(base-top);
  let x=0,g='';const here=LS.get('here',{})[s.id];
  [0,5,10].forEach(v=>g+=`<line x1="8" x2="${W-8}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" stroke-dasharray="${v?'3 4':''}"/><text x="${W-6}" y="${Y(v)-2}" text-anchor="end" font-size="10" fill="var(--mute)">${v}</text>`);
  s.sections.forEach((q,i)=>{const b=+q.bars||1,x0=X(x),x1=X(x+b),c=`var(${KC[q.kind]||'--intro'})`;
@@ -1002,7 +1005,7 @@ function liveDraw(force){if(!live.on)return;if(live.sb||(live.follow&&fol.sb)){s
  root.querySelectorAll('.blk').forEach(b=>{const i=+b.dataset.i,p=b.querySelector('.prog i'),pc=b.querySelector('.pc');if(!p)return;
   const v=i<V.sec?1:i>V.sec?0:fr;p.style.width=(v*100).toFixed(1)+'%';b.style.setProperty('--pf',i===V.sec?v.toFixed(3):0);if(pc)pc.textContent=i===V.sec?(V.count>0?'décompte':`${V.bar+1}/${bars}`):''});
  const tot=S.reduce((a,b)=>a+(+b.bars||1),0)||1,done=S.slice(0,V.sec).reduce((a,b)=>a+(+b.bars||1),0)+fr*bars;
- const ph=root.querySelector('.arc .ph');if(ph){ph.style.display='block';ph.style.left=((8+done/tot*1184)/1200*100)+'%'}
+ const ph=root.querySelector('.arc .ph');if(ph){ph.style.display='block';{const AW=viewer?620:1200;ph.style.left=((8+done/tot*(AW-16))/AW*100)+'%'}}
  const L=live.loops[s.id+':'+V.sec],nx=S[V.sec+1],left=bars-V.bar;paintLoopBadge(s,V.sec,L);
  $('#hSong').textContent=live.follow?'👁 En direct avec le MD':`${s.n}. ${s.title} · ${s.key}`;$('#hSec').textContent=q.name;$('#hSec').style.color=`var(${KC[q.kind]||'--intro'})`;
  $('#hBar').textContent=V.count>0?`Décompte${(live.countN||0)>live.bpb?` · mes. ${(V.cbar||0)+1}/${Math.round(live.countN/live.bpb)}`:''} · ${V.beat+1}`:`mes. ${V.bar+1} / ${bars}`;
@@ -1066,7 +1069,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=40;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=41;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
