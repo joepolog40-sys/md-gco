@@ -653,7 +653,7 @@ function clickAt(t,acc){if(!sound||!ac)return;acc=acc&&CLK.accent;const v=CLK.vo
  else if(CLK.type==='cloche'){const f=acc?1:.82;tone(t,'square',560*f,.16*v,.16);tone(t,'square',845*f,.16*v,.16)}}catch(e){}}
 function clkUI(){return `<span class="clk"><button data-clk="snd" class="${sound?'on':''}">${sound?'🔊':'🔇'} Clic</button><select data-clk="type" title="Son du clic">${Object.entries(CLKS).map(([k,l])=>`<option value="${k}" ${k===CLK.type?'selected':''}>${l}</option>`).join('')}</select><button data-clk="acc" class="${CLK.accent?'on':''}" title="Accent sur le 1">${CLK.accent?'Accent 1 : oui':'Accent 1 : non'}</button><input data-clk="vol" type="range" min="0.1" max="1" step="0.05" value="${CLK.vol}" title="Volume du clic"></span>`}
 function paintClk(){document.querySelectorAll('.clkbox').forEach(b=>b.innerHTML=clkUI())}
-function previewClk(){ensureAC();if(!ac)return;const t=ac.currentTime+.03,p=.32;const was=sound;sound=true;for(let k=0;k<4;k++)clickAt(t+k*p,k===0);sound=was}
+function previewClk(){if(live.on||SCH.fn)return;ensureAC();if(!ac)return;const t=ac.currentTime+.03,p=.32;const was=sound;sound=true;for(let k=0;k<4;k++)clickAt(t+k*p,k===0);sound=was}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-clk]');if(!b||b.tagName==='SELECT'||b.tagName==='INPUT')return;
  if(b.dataset.clk==='snd'){sound=!sound;LS.set('sound',sound);if(sound)ensureAC()}else if(b.dataset.clk==='acc'){CLK.accent=!CLK.accent;LS.set('clk',CLK);previewClk()}paintClk()});
 document.addEventListener('change',e=>{const b=e.target.closest('[data-clk]');if(!b)return;if(b.dataset.clk==='type'){CLK.type=b.value;LS.set('clk',CLK);previewClk();paintClk()}if(b.dataset.clk==='vol'){CLK.vol=+b.value;LS.set('clk',CLK);previewClk()}});
