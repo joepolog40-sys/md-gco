@@ -481,6 +481,23 @@ body.viewer.rep .repbtn,body.viewer.rep .chordsbtn{order:1}
 body.viewer.rep.idle #hNext,body.viewer.rep.idle #hCall{display:none!important}
 body.viewer.rep.idle .hud .hnash b{font-size:30px}
 @media (orientation:portrait){body.viewer.rep.idle main{padding-bottom:260px!important}}
+/* cases de section plus grandes et lisibles */
+@media screen{
+ .blk{min-width:150px;min-height:170px}
+ .blk .nash{font-size:30px}
+ .blk .nm{font-size:16.5px}
+ .blk .call{font-size:15px}
+ .blk .chd{font-size:15px}
+ .blk .cue,.blk .note{font-size:13px}
+}
+@media screen and (min-width:900px){
+ .blk{min-width:200px;min-height:200px;padding:9px 12px 10px}
+ .blk .nash{font-size:36px}
+ .blk .nm{font-size:18px}
+ .blk .call{font-size:16.5px}
+ .blk .chd{font-size:17px}
+ .road{gap:8px}
+}
 </style>
 </head>
 <body>
@@ -1049,7 +1066,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=39;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=40;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
