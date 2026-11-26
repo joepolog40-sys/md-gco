@@ -540,6 +540,11 @@ body.idle #hGlideEnd{display:none!important}
 .tonext.on{background:#e6a100;color:#111;border-color:#e6a100}
 .nbadge{align-self:flex-start;margin-top:5px;font-size:12.5px;font-weight:900;background:#e6a100;color:#111;border-radius:999px;padding:2px 9px}
 body.viewer .nbadge{font-size:15px}
+
+/* MD : ces commandes passent par le clavier seulement */
+body:not(.viewer) #hPrev,body:not(.viewer) #hNextB,body:not(.viewer) #hL1,body:not(.viewer) #hLi,body:not(.viewer) #hStart,body:not(.viewer) #hSync,body:not(.viewer) #hTap{display:none!important}
+.hkeys{order:99;flex-basis:100%;font-size:11.5px;color:var(--mute);font-weight:700;line-height:1.2}
+body.viewer .hkeys,body.idle .hkeys{display:none!important}
 </style>
 </head>
 <body>
@@ -587,7 +592,7 @@ body.viewer .nbadge{font-size:15px}
    <button id="hL1" title="Refaire la section 1× de plus (Espace)">↻1 <small>espace</small></button><button id="hLi" title="Boucler la section (Maj+Espace ou L)">∞</button>
    <button id="hStart" title="On est au début de la section en cours (↑ ou D)">⤒ Début</button><button id="hSync" class="sync" title="Appuie pile sur un 1 du groupe : le clic se cale dessus (Entrée ou C)">⤓ Caler le 1</button><button id="hTap" title="Tape les noires avec le groupe (T) : tempo + calage">Tap</button>
    <span class="hbpm"><button id="hMinus">−</button><b id="hBpm"></b><small>BPM</small><button id="hPlus">+</button></span>
-   <button id="hStop" class="stop" title="Arrêter (Échap)">■</button>
+   <span class="hkeys">← → section · Espace ↻1 · Maj+Espace ∞ · D début · Entrée caler le 1 · T tap</span><button id="hStop" class="stop" title="Arrêter (Échap)">■</button>
   </div></div>
  <div id="imp" class="imp" hidden></div>
 </div>
@@ -1111,7 +1116,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=50;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=51;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
