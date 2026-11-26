@@ -425,6 +425,14 @@ body.living:not(.viewer) main{padding-bottom:330px}
 .dbadge{align-self:flex-start;font-size:11.5px;font-weight:900;background:var(--red);color:#fff;border-radius:999px;padding:1px 8px;margin-top:4px}
 .hdrop.beat{font-size:28px}
 .hbtns .fade{font-size:15px!important;padding:0 12px}.hbtns .fade[hidden]{display:none}.hbtns .fade.on{background:#e6a100!important;color:#111!important}
+
+.dpick{border:1px solid var(--line);border-radius:10px;padding:6px;margin:4px 0;background:var(--panel)}
+.dpick .dl{font-size:12px;color:var(--mute);margin-bottom:4px}.dpick .dl b{color:var(--red)}
+.drow{display:flex;gap:4px;align-items:stretch}.dbar{flex:1;min-width:0}.dbar small{display:block;font-size:10px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dbar>div{display:grid;grid-template-columns:repeat(8,1fr);gap:2px}.dsep{width:3px;background:var(--ink);border-radius:2px;margin:12px 1px 0}
+.dcell{font:inherit;font-size:11px;font-weight:700;padding:5px 0;border-radius:5px;border:1px solid var(--line);background:var(--panel2);color:var(--mute);cursor:pointer;min-width:0}
+.dcell.b{color:var(--ink)}.dcell.on{background:var(--red);border-color:var(--red);color:#fff}
+.blk.ed{min-width:300px!important;flex-basis:300px}
 </style>
 </head>
 <body>
@@ -625,7 +633,7 @@ function vDupNote(q){const n=norm(q.note),c=norm(q.call);return !!n&&(c.includes
 function blockRO(s,q,i){const si=state.songs.indexOf(s);return `<div class="blk" tabindex="0" data-i="${i}" title="Intensité ${lvlTxt(q)} / 10 · ${WORD(Math.max(q.i0,q.i1))}" style="--g:${Math.max(+q.bars||1,4)};--c:var(${KC[q.kind]||'--intro'})">${wm(q,si,i)}
  <div class="nm">${esc(q.name)}<span>${esc(q.bars)} mes.</span></div><button class="ico secedit" data-edsec="${si}:${i}" title="Modifier cette section">✏️</button>${q.call?`<div class="call ${HOT.test(q.call)||q.mark==='drop'||q.mark==='stop'?'hot':''}">${esc(viewer?vCall(q):q.call)}</div>`:''}
  ${q.nash?`<div class="nash">${esc(show(q.nash,s.key))}</div>${viewer&&toChords(q.nash,s.key)!==q.nash?`<div class="chd">${esc(chords?q.nash:toChords(q.nash,s.key))}</div>`:''}`:''}${q.cue&&!(viewer&&norm(q.call).includes(norm(q.cue)))?`<div class="cue">« ${esc(q.cue)} »</div>`:''}${q.note&&!(viewer&&vDupNote(q))?`<div class="note">${esc(q.note)}</div>`:''}
- ${q.perc&&PK(q.perc)!=='none'&&PATS[PK(q.perc)]?`<span class="pbadge">${PATS[PK(q.perc)].ico} ${esc(PATS[PK(q.perc)].n)}</span>`:''}${isDrop(q)&&dAt(q)?`<span class="dbadge">⬇ ${esc(dLbl(q,parseInt(s.meter)||4))}</span>`:''}${wword(q)}${q.t!=null?`<span class="tm">${mmss(q.t)}</span>`:''}
+ ${q.perc&&PK(q.perc)!=='none'&&PATS[PK(q.perc)]?`<span class="pbadge">${PATS[PK(q.perc)].ico} ${esc(PATS[PK(q.perc)].n)}</span>`:''}${isDrop(q)?`<span class="dbadge">⬇ ${esc(dShort(q,parseInt(s.meter)||4))}</span>`:''}${wword(q)}${q.t!=null?`<span class="tm">${mmss(q.t)}</span>`:''}
  <div class="lp">${(()=>{const L=live.loops[s.id+':'+i];return `<button data-loop="${s.id}:${i}:1" class="${typeof L==='number'?'on':''}" title="Refaire cette section 1× de plus (re-clic = annuler)">↻1</button><button data-loop="${s.id}:${i}:inf" class="${L==='inf'?'on':''}" title="Boucler cette section (re-clic = arrêter)">∞</button>`})()}<span class="pc"></span></div>
  <div class="prog"><i></i></div></div>`}
 let sel=null,clip=LS.get('clip',null);
@@ -639,7 +647,7 @@ function blockED(s,si,q,i){const p=`songs.${si}.sections.${i}`,a=100-q.i0*10,b=1
  <input class="i-nash nashin" data-f="${p}.nash" value="${esc(q.nash)}" placeholder="Degrés…">
  <input class="i-cue" data-f="${p}.cue" value="${esc(q.cue)}" placeholder="Repère paroles…">
  <input class="i-note" data-f="${p}.note" value="${esc(q.note)}" placeholder="Note…">
- ${q.mark==='drop'?`<div class="percsel"><label>Le drop tombe</label><select data-f="${p}.dropAt" data-num="1" data-re="1">${[1,.5,2,3,0].map(v=>`<option value="${v}" ${dAt(q)===v?'selected':''}>${DROPAT[v]}</option>`).join('')}</select></div>`:''}
+ ${q.mark==='drop'?dropPicker(s,si,i,q):''}
  <div class="percsel"><label>Percu</label><select data-f="${p}.perc" data-re="1">${Object.entries(PATS).map(([k,v])=>`<option value="${k}" ${PK(q.perc||'none')===k?'selected':''}>${v.n}</option>`).join('')}</select></div>
  <div class="marks">${[['drop','DROP'],['stop','STOP'],['fill','fill'],['cresc','↗'],['descente','↘']].map(([m,l])=>`<button data-act="mark" data-s="${si}" data-i="${i}" data-m="${m}" class="${q.mark===m?'on':''}" title="${MARKS[m]}">${l}</button>`).join('')}</div>
  <div class="ebar"><span class="bars"><button data-act="bars" data-s="${si}" data-i="${i}" data-d="-1">−</button><b>${esc(q.bars)}</b><small>mes.</small><button data-act="bars" data-s="${si}" data-i="${i}" data-d="1">+</button></span><button data-act="sec-dup" data-s="${si}" data-i="${i}" title="Dupliquer (Ctrl+D)">⧉</button>${(q.pts||[]).length<3?`<button data-act="pts" data-d="1" data-s="${si}" data-i="${i}" title="Ajouter un point d'intensité au milieu de la section (3 max)">＋ point</button>`:''}${(q.pts||[]).length?`<button data-act="pts" data-d="-1" data-s="${si}" data-i="${i}" title="Enlever un point d'intensité">− point</button>`:''}<button data-act="copy" data-s="${si}" data-i="${i}" title="Copier (Ctrl+C), puis Coller dans un autre chant">📋</button>${EDIT.sec===si+':'+i&&EDIT.song!==s.id?`<button class="edone" data-edclose="1">✓ OK</button>`:''}</div>
@@ -701,6 +709,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-live],[dat
  if(a==='bars'){const q=S.sections[i];q.bars=clamp((+q.bars||1)+num(t.dataset.d),1,64);commit();renderSong(si);renderOverview();return}
  if(a==='pts'){const q=S.sections[i];const n=Math.max(0,Math.min(3,(q.pts||[]).length+num(t.dataset.d)));const ev=f=>{const P=IX(q);for(let k=1;k<P.length;k++){if(f<=P[k][0]){const[a0,v0]=P[k-1],[a1,v1]=P[k];return v0+(v1-v0)*(f-a0)/((a1-a0)||1)}}return q.i1};
   if(n)q.pts=Array.from({length:n},(_,k)=>Math.round(ev((k+1)/(n+1))*2)/2);else delete q.pts;commit();renderSong(si);renderOverview();return}
+ if(a==='dropat'){S.sections[i].dropAt=num(t.dataset.v);commit();renderSong(si);return}
  if(a==='mark'){const q=S.sections[i];q.mark=q.mark===t.dataset.m?'none':t.dataset.m;commit();renderSong(si);return}
  if(a==='copy'){doCopy(si,i);return}
  if(a==='paste'){doPaste(si);return}
@@ -799,21 +808,31 @@ function paintNash(q,s){const el=$('#hNash');if(!el)return;const n=q&&q.nash?q.n
  el.innerHTML=`<b>${esc(big)}</b>${small!==big?`<span>${esc(small)}</span>`:''}`;el.style.color=`var(${KC[q.kind]||'--intro'})`}
 // où tombe le drop : 0 = sur le 1 de la section, 1 = sur le dernier temps avant, 2 = l'avant-dernier, 0.5 = sur le « et » du dernier temps
 const DROPAT={1:'sur le 4 de la dernière mesure avant (par défaut)',0.5:'sur le « et » du 4',2:'sur le 3 de la dernière mesure avant',3:'sur le 2 de la dernière mesure avant',0:'sur le 1 de la section'};
-const dAt=q=>{if(!q||q.dropAt==null||q.dropAt==='')return 1;const v=+q.dropAt;return [0,.5,1,2,3].includes(v)?v:1};
-const dLbl=(q,bpb)=>{const v=dAt(q);if(!v)return 'sur le 1';if(v===.5)return `sur le « et » du ${bpb}`;return `sur le ${bpb-v+1} avant`};
-function paintDrop(q,nx,left,V,L){const el=$('#hDrop');if(!el)return;let txt='',cls='';const bpb=live.bpb||4,s=state.songs[live.si],S=s?s.sections:[],bars=+q.bars||1;
+// dropAt = nombre de temps AVANT le 1 de la section (1 = sur le 4 de la dernière mesure d'avant ; 0 = sur le 1 ; négatif = dans la 1re mesure de la section ; demi-temps = « et »)
+const dAt=q=>{if(!q||q.dropAt==null||q.dropAt==='')return 1;const v=Math.round(+q.dropAt*2)/2;return isFinite(v)&&v<=8&&v>-8?v:1};
+const dPos=(at,bpb)=>{const p=-at,pos=p<0?p+bpb:p;return {end:p<0,beat:Math.floor(pos)+1,and:pos%1!==0}};
+const dLbl=(q,bpb)=>{const d=dPos(dAt(q),bpb);return `${d.end?'fin de la section d’avant':'début de la section'}, sur le ${d.beat}${d.and?' &':''}`};
+const dShort=(q,bpb)=>{const d=dPos(dAt(q),bpb);return `${d.end?'fin':'début'} · ${d.beat}${d.and?'&':''}`};
+function paintDrop(q,nx,left,V,L){const el=$('#hDrop');if(!el)return;let txt='',cls='';const bpb=live.bpb||4,bars=+q.bars||1;
  if(V.count>0){el.hidden=true;return}
- const remain=(bars-V.bar)*bpb-V.beat; // temps restants avant la section suivante (temps en cours compris)
+ const remain=(bars-V.bar)*bpb-V.beat,into=V.bar*bpb+V.beat; // temps restants dans la section / temps écoulés dans la section
  const nd=!L&&nx&&isDrop(nx)?nx:null,ns=!L&&nx&&!nd&&isStop(nx)?nx:null;
- if(nd){const at=dAt(nd),beatsTo=remain-Math.ceil(at);
-  if(beatsTo<=0){txt='⬇ DROP';cls='now'}
-  else if(beatsTo<=bpb){txt=`⬇ DROP dans ${beatsTo} temps · ${dLbl(nd,bpb)}`;cls='soon beat'}
-  else if(remain<=2*bpb){txt=`⬇ DROP dans ${Math.ceil(beatsTo/bpb)} mes. · ${dLbl(nd,bpb)} (${nd.name})`;cls='soon'}}
- else if(isDrop(q)&&V.bar===0&&V.beat<=1){txt='⬇ DROP';cls='now'}
- else if(ns&&remain<=bpb){txt=`■ STOP dans ${remain} temps · ${ns.name}`;cls='soon stop'}
- else if(ns&&remain<=2*bpb){txt=`■ STOP dans ${Math.ceil(remain/bpb)} mes. · ${ns.name}`;cls='soon stop'}
- else if(isStop(q)&&V.bar===0){txt='■ STOP';cls='now stop'}
+ const say=(b,qq)=>b<=bpb?`⬇ DROP dans ${b} temps · ${dShort(qq,bpb)}`:`⬇ DROP dans ${Math.ceil(b/bpb)} mes. · ${dShort(qq,bpb)} (${qq.name})`;
+ if(isDrop(q)&&dAt(q)<=0){const k=Math.ceil(-dAt(q));const to=k-into;          // drop dans la 1re mesure de cette section
+  if(to>0&&to<=2*bpb){txt=say(to,q);cls=to<=bpb?'soon beat':'soon'}else if(to<=0&&to>-2){txt='⬇ DROP';cls='now'}}
+ if(!txt&&nd){const to=remain-Math.ceil(dAt(nd));                              // drop qui arrive (fin de cette section ou début de la suivante)
+  if(to<=0){txt='⬇ DROP';cls='now'}else if(to<=2*bpb){txt=say(to,nd);cls=to<=bpb?'soon beat':'soon'}}
+ if(!txt&&isDrop(q)&&dAt(q)>0&&into<2){txt='⬇ DROP';cls='now'}                 // tenir l'affichage 2 temps après un drop tombé juste avant
+ if(!txt&&ns&&remain<=bpb){txt=`■ STOP dans ${remain} temps · ${ns.name}`;cls='soon stop'}
+ else if(!txt&&ns&&remain<=2*bpb){txt=`■ STOP dans ${Math.ceil(remain/bpb)} mes. · ${ns.name}`;cls='soon stop'}
+ else if(!txt&&isStop(q)&&V.bar===0){txt='■ STOP';cls='now stop'}
  el.hidden=!txt;el.className='hdrop '+cls;el.textContent=txt;if(cls.startsWith('now')&&el.dataset.f!==txt+V.sec){el.dataset.f=txt+V.sec;flash()}}
+// sélecteur visuel : dernière mesure de la section d'avant | 1re mesure de la section, au demi-temps près
+function dropPicker(s,si,i,q){const bpb=parseInt(s.meter)||4,prev=s.sections[i-1],cur=dAt(q);let h='';
+ const cell=(at,lab,strong)=>`<button class="dcell${cur===at?' on':''}${strong?' b':''}" data-act="dropat" data-s="${si}" data-i="${i}" data-v="${at}" title="${esc(dLbl({dropAt:at},bpb))}">${lab}</button>`;
+ let a='';for(let k=0;k<bpb*2;k++){const p=-bpb+k/2;a+=cell(-p,k%2?'&':String(k/2+1),k%2===0)}
+ let b='';for(let k=0;k<bpb*2;k++){const p=k/2;b+=cell(-p,k%2?'&':String(k/2+1),k%2===0)}
+ return `<div class="dpick"><div class="dl">Le drop tombe où ? <b>${esc(dLbl(q,bpb))}</b></div><div class="drow"><div class="dbar"><small>fin de ${esc(prev?prev.name:'l’intro')}</small><div>${a}</div></div><div class="dsep"></div><div class="dbar"><small>début de ${esc(q.name)}</small><div>${b}</div></div></div></div>`}
 
 // fondu des percus en live (bouton ou touche P) : fade out sur 1 mesure, puis fade in
 let pLvl=1;
