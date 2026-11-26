@@ -803,7 +803,8 @@ async function previewPerc(k,songIdx){if(live.on)return;const P=PATS[PK(k)];if(!
  sound=was;PERC.on=on;setTimeout(()=>{bus('clk');bus('perc')},(bpb*2*per+.3)*1000)}
 document.addEventListener('change',e=>{const t=e.target;if(!t.dataset||!/\.perc$/.test(t.dataset.f||''))return;const m=t.dataset.f.match(/^songs\.(\d+)/);previewPerc(t.value,m?+m[1]:0)});
 
-const isDrop=q=>!!q&&(q.mark==='drop'||/\bDROP\b/i.test(q.call||''));const isStop=q=>!!q&&(q.mark==='stop'||/\bSTOP\b/i.test(q.call||''));
+// drop/stop = seulement la puce (le texte de l'appel n'est qu'une note)
+const isDrop=q=>!!q&&q.mark==='drop';const isStop=q=>!!q&&q.mark==='stop';
 function paintNash(q,s){const el=$('#hNash');if(!el)return;const n=q&&q.nash?q.nash:'';el.hidden=!n;if(!n)return;const big=show(n,s.key),small=chords?n:toChords(n,s.key);
  el.innerHTML=`<b>${esc(big)}</b>${small!==big?`<span>${esc(small)}</span>`:''}`;el.style.color=`var(${KC[q.kind]||'--intro'})`}
 // où tombe le drop : 0 = sur le 1 de la section, 1 = sur le dernier temps avant, 2 = l'avant-dernier, 0.5 = sur le « et » du dernier temps
