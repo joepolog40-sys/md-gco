@@ -338,6 +338,10 @@ body:not(.idle) #hPlay{display:none}
 .hbtns .play{background:#1f8a3b!important;color:#fff!important;border-color:#1f8a3b!important;font-size:20px!important;padding:0 22px;min-width:120px}
 .blk.pick{outline:3px solid #1f8a3b!important;outline-offset:1px}
 body.idle .hud{border-top-color:#1f8a3b}
+.imp .gl{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#e6a100;min-width:120px}
+.imp button.pre{height:48px;padding:0 10px;font-size:16px;flex-direction:column;word-spacing:.15em}.imp button.pre i{font-style:normal;color:var(--mute);font-size:11px}
+.imp button.pre small{font-size:11px}.imp button.pre.on{background:#e6a100;color:#111}.imp button.pre.on small,.imp button.pre.on i{color:#111}
+@media(max-width:600px){.imp .gl{min-width:100%}}
 </style>
 </head>
 <body>
@@ -896,7 +900,7 @@ function nextSong(){if(viewer)return;const i=state.songs.findIndex(x=>x.id===liv
 // ---------- fin de chant / impro ----------
 function startNext(){const i=state.songs.findIndex(x=>x.id===live.id),n=state.songs[i+1];if(n)liveStart(n.id)}
 $('#hNextSong').onclick=startNext;
-const PRESETS=['1 5 6 4','6 4 1 5','1 4 6 5','4 5 6','1 4','4 1 5 6','6 5 4'];
+const PRESETS=[['Intense',[[1,'6 3 5 2'],[2,'6 5 1/3 4'],[3,'2 6 1 5'],[4,'2 6 5 5']]],['Pas trop intense',[[6,'4 6 1 5'],[7,'4 1 5 6'],[8,'4 1 5 2']]],['Plein d\'espoir',[[11,'1 2 6 4'],[12,'1/3 4 6 5'],[13,'1 6 5 4'],[14,'1 4 1/3 4']]]];
 function impTokens(){return (live.impro||'').split(' ').filter(Boolean)}
 function impSet(t){live.impro=t.join(' ').slice(0,80);impPaintPad();paintImpro();if(room&&!live.follow&&!viewer)try{room.emit('impro',{id:live.id,impro:live.impro})}catch(e){}}
 let impFlat=false;
@@ -911,7 +915,7 @@ function impToggle(){const p=$('#imp');if(!p||viewer)return;p.hidden=!p.hidden;$
 function impPaintPad(){const p=$('#imp');if(!p)return;const s=state.songs[live.si];const key=s?s.key:'C';
  p.innerHTML=`<div class="improw"><b class="impseq">${esc(live.impro||'—')}</b><span class="impchd">${live.impro?esc(toChords(live.impro,key)):'tape les degrés, ça part tout de suite chez les musiciens'}</span></div>
  <div class="improw keys">${['1','2','3','4','5','6','7'].map(k=>`<button data-imp="${k}">${k}<small>${esc(toChords(k,key))}</small></button>`).join('')}<button data-imp="♭" class="${impFlat?'on':''}">♭</button><button data-imp="/">/</button><button data-imp="bs">⌫</button><button data-imp="clr" class="clr">Effacer</button></div>
- <div class="improw">${PRESETS.map(x=>`<button class="pre" data-pre="${x}">${x}</button>`).join('')}</div>`}
+ <div class="impgrp">${PRESETS.map(([g,L])=>`<div class="improw"><span class="gl">${esc(g)}</span>${L.map(([n,x])=>`<button class="pre${live.impro===x?' on':''}" data-pre="${x}"><i>${n}.</i> ${x}<small>${esc(toChords(x,key))}</small></button>`).join('')}</div>`).join('')}</div>`}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-imp],[data-pre]');if(!b||viewer)return;if(b.dataset.imp)impKey(b.dataset.imp);else impSet(b.dataset.pre.split(' '))});
 $('#hImp').onclick=impToggle;
 function paintImpro(){const el=$('#hImpro');if(!el)return;const seq=live.follow?(fol.impro||''):(live.impro||'');const s=state.songs[live.si];
