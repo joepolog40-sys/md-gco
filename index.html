@@ -397,7 +397,7 @@ body.viewer nav.songs .navw{justify-content:flex-start!important}
 .hloop.one{background:#e6a100;color:#111}
 .hloop.inf{background:var(--red);color:#fff;animation:lpb 1s ease-in-out infinite}
 @keyframes lpb{50%{opacity:.65}}
-.blk.lpone::after,.blk.lpinf::after{position:absolute;bottom:20px;right:8px;z-index:5;font-weight:900;font-size:22px;padding:2px 10px;border-radius:10px}
+.blk.lpone::after,.blk.lpinf::after{position:absolute;top:4px;right:4px;z-index:5;font-weight:900;font-size:22px;padding:2px 10px;border-radius:10px}
 .blk.lpone::after{content:'↻ 1×';background:#e6a100;color:#111}
 .blk.lpinf::after{content:'∞';background:var(--red);color:#fff;font-size:28px;animation:lpb 1s ease-in-out infinite}
 body.viewer .hloop{font-size:24px}
@@ -433,6 +433,8 @@ body.living:not(.viewer) main{padding-bottom:330px}
 .dcell{font:inherit;font-size:11px;font-weight:700;padding:5px 0;border-radius:5px;border:1px solid var(--line);background:var(--panel2);color:var(--mute);cursor:pointer;min-width:0}
 .dcell.b{color:var(--ink)}.dcell.on{background:var(--red);border-color:var(--red);color:#fff}
 .blk.ed{min-width:300px!important;flex-basis:300px}
+
+body.viewer .dbadge{font-size:16px;padding:4px 12px;margin-top:6px;box-shadow:0 0 0 2px rgba(255,255,255,.15)}
 </style>
 </head>
 <body>
@@ -543,7 +545,7 @@ const typing=()=>{const a=document.activeElement;return a&&a.closest&&a.closest(
 document.addEventListener('focusout',()=>setTimeout(()=>{if(pendingRemote&&!typing()){const p=pendingRemote;pendingRemote=null;if(p.rev>state.rev)applyRemote(p)}},50));
 const CFG=window.MDCFG||null,HOSTED=!!CFG;
 function checkOwner(){if(!(HOSTED&&CFG.ownerHash&&location.hash.length>1&&window.crypto&&crypto.subtle))return;const k=location.hash.slice(1);try{history.replaceState(null,'',location.pathname)}catch(e){}
- crypto.subtle.digest('SHA-256',new TextEncoder().encode(k)).then(b=>{const h=[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');if(h===CFG.ownerHash){LS.set('owner',true);readOnly=false;setViewer(false);renderAll();if(typeof room!=='undefined'&&room)pushRemote();try{toast('Mode MD activé sur cet appareil')}catch(e){}}})}
+ crypto.subtle.digest('SHA-256',new TextEncoder().encode(k)).then(b=>{const h=[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');if(h===CFG.ownerHash){LS.set('owner',true);readOnly=false;setViewer(false);renderAll();if(typeof room!=='undefined'&&room&&state.rev>remoteRev)pushRemote();try{toast('Mode MD activé sur cet appareil')}catch(e){}}})}
 checkOwner();window.addEventListener('hashchange',checkOwner);
 let inApp=false,viewer=location.protocol==='file:'?false:HOSTED?!LS.get('owner',false):true;
 function setViewer(v){const ch=viewer!==v;viewer=v;document.body.classList.toggle('viewer',v);const rb=document.getElementById('role');if(rb)rb.textContent=HOSTED?(v?'👁 Mode musicien':'🎛 Mode MD'):'';if(v){readOnly=true;if(editing){editing=false}}if(ch&&typeof renderAll==='function')try{renderAll()}catch(e){}}
@@ -633,7 +635,7 @@ function vDupNote(q){const n=norm(q.note),c=norm(q.call);return !!n&&(c.includes
 function blockRO(s,q,i){const si=state.songs.indexOf(s);return `<div class="blk" tabindex="0" data-i="${i}" title="Intensité ${lvlTxt(q)} / 10 · ${WORD(Math.max(q.i0,q.i1))}" style="--g:${Math.max(+q.bars||1,4)};--c:var(${KC[q.kind]||'--intro'})">${wm(q,si,i)}
  <div class="nm">${esc(q.name)}<span>${esc(q.bars)} mes.</span></div><button class="ico secedit" data-edsec="${si}:${i}" title="Modifier cette section">✏️</button>${q.call?`<div class="call ${HOT.test(q.call)||q.mark==='drop'||q.mark==='stop'?'hot':''}">${esc(viewer?vCall(q):q.call)}</div>`:''}
  ${q.nash?`<div class="nash">${esc(show(q.nash,s.key))}</div>${viewer&&toChords(q.nash,s.key)!==q.nash?`<div class="chd">${esc(chords?q.nash:toChords(q.nash,s.key))}</div>`:''}`:''}${q.cue&&!(viewer&&norm(q.call).includes(norm(q.cue)))?`<div class="cue">« ${esc(q.cue)} »</div>`:''}${q.note&&!(viewer&&vDupNote(q))?`<div class="note">${esc(q.note)}</div>`:''}
- ${q.perc&&PK(q.perc)!=='none'&&PATS[PK(q.perc)]?`<span class="pbadge">${PATS[PK(q.perc)].ico} ${esc(PATS[PK(q.perc)].n)}</span>`:''}${isDrop(q)?`<span class="dbadge">⬇ ${esc(dShort(q,parseInt(s.meter)||4))}</span>`:''}${wword(q)}${q.t!=null?`<span class="tm">${mmss(q.t)}</span>`:''}
+ ${q.perc&&PK(q.perc)!=='none'&&PATS[PK(q.perc)]?`<span class="pbadge">${PATS[PK(q.perc)].ico} ${esc(PATS[PK(q.perc)].n)}</span>`:''}${isDrop(q)?`<span class="dbadge">⬇ DROP · ${esc(dShort(q,parseInt(s.meter)||4))}</span>`:''}${wword(q)}${q.t!=null?`<span class="tm">${mmss(q.t)}</span>`:''}
  <div class="lp">${(()=>{const L=live.loops[s.id+':'+i];return `<button data-loop="${s.id}:${i}:1" class="${typeof L==='number'?'on':''}" title="Refaire cette section 1× de plus (re-clic = annuler)">↻1</button><button data-loop="${s.id}:${i}:inf" class="${L==='inf'?'on':''}" title="Boucler cette section (re-clic = arrêter)">∞</button>`})()}<span class="pc"></span></div>
  <div class="prog"><i></i></div></div>`}
 let sel=null,clip=LS.get('clip',null);
@@ -998,19 +1000,20 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-let room=null;const fol={optOut:false,last:0,raf:null,a:null};
+const VER=36;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+let room=null,remoteRev=0;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
-  room.on('data',d=>{if(!d||!(+d.rev>state.rev))return;if(typing())pendingRemote=d;else applyRemote(d)});status('ok',viewer?'Connecté · en attente du MD':'Connecté · tout s\'enregistre et part à l\'équipe');
-  setTimeout(()=>{if(!viewer&&state.rev>(ORIG.rev||0))pushRemote()},1500)}
+  room.on('data',d=>{if(d&&+d.rev>remoteRev)remoteRev=+d.rev;if(!d||!(+d.rev>state.rev))return;if(typing())pendingRemote=d;else applyRemote(d)});status('ok',viewer?'Connecté · en attente du MD':'Connecté · tout s\'enregistre et part à l\'équipe');
+  setTimeout(()=>{if(!viewer&&state.rev>(ORIG.rev||0)&&state.rev>remoteRev)pushRemote()},4000)}
  else{if(!(window.claude&&window.claude.use))return;try{room=await window.claude.use('room')}catch(e){}}if(!room)return;
 
  room.on('pos',(a)=>followPos(unwrap(a)));room.on('stop',()=>{if(live.follow)followStop('Le MD a arrêté le live')})})();
 function leadEmit(snap,lead,extra){if(!room||live.follow)return;const s=state.songs[live.si];if(!s)return;const lp={};Object.keys(live.loops).forEach(k=>{if(k.startsWith(s.id+':'))lp[k]=live.loops[k]});
- try{room.emit('pos',{id:s.id,sec:snap.sec,bar:snap.bar,bpb:live.bpb,per:live.per,loops:lp,impro:live.impro||'',in:Math.max(0,Math.min(3,+lead||0)),...(extra||{})})}catch(e){}}
+ try{room.emit('pos',{v:VER,id:s.id,sec:snap.sec,bar:snap.bar,bpb:live.bpb,per:live.per,loops:lp,impro:live.impro||'',in:Math.max(0,Math.min(3,+lead||0)),...(extra||{})})}catch(e){}}
 function paintFollow(){const b=$('#bFollow');if(!b)return;b.textContent=fol.optOut?'👁 Suivre le MD : non':'👁 Suivre le MD : oui';b.classList.toggle('on',!fol.optOut)}
 
-function followPos(d){if(!d||!d.id||fol.optOut)return;if(live.on&&!live.follow)return;const si=state.songs.findIndex(s=>s.id===d.id);if(si<0)return;
+function followPos(d){if(!d||!d.id||fol.optOut)return;if(HOSTED&&viewer&&+d.v>VER){const k='md29:rl';if(sessionStorage.getItem(k)!==String(d.v)){sessionStorage.setItem(k,String(d.v));location.replace(location.pathname+'?v='+d.v);return}}if(live.on&&!live.follow)return;const si=state.songs.findIndex(s=>s.id===d.id);if(si<0)return;
  const s=state.songs[si],start=!live.follow||live.si!==si;live.follow=true;live.on=true;live.id=d.id;live.si=si;live.bpb=clamp(+d.bpb||4,2,12);live.per=clamp(+d.per||.75,.25,2);
  live.loops=(d.loops&&typeof d.loops==='object')?d.loops:{};const sec=clamp(+d.sec||0,0,s.sections.length-1);fol.last=performance.now();
  fol.sb=d.sb&&typeof d.sb==='object'?{mode:d.sb.mode==='panic'?'panic':'click',target:clamp(+d.sb.target||0,0,s.sections.length-1),pending:!!d.sb.pending,end:!!d.sb.end}:null;fol.impro=typeof d.impro==='string'?d.impro.slice(0,80):'';
@@ -1042,7 +1045,7 @@ function sbClear(){impOpen(false);if(live.impro)impSet([]);document.body.classLi
 function paintSb(){const a=$('#hSb'),b=$('#hPanic');if(!a)return;const sb=live.sb;
  a.textContent=!sb?'⏸ Standby':sb.mode==='panic'?'⏸ Clic seul':live.sbPending!=null?'⏳ au prochain 1':'▶ Repartir';a.classList.toggle('on',!!sb&&sb.mode!=='panic');
  b.textContent=sb&&sb.mode==='panic'?'▶ Repartir':'⛔ Panic';b.classList.toggle('on',!!sb&&sb.mode==='panic')}
-function leadEmitSb(){if(!room||live.follow||!live.sb)return;const s=state.songs[live.si];try{room.emit('pos',{id:s.id,bpb:live.bpb,per:live.per,sb:{mode:live.sb.mode,target:live.sb.target,pending:live.sbPending!=null,end:!!live.sb.end},impro:live.impro||''})}catch(e){}}
+function leadEmitSb(){if(!room||live.follow||!live.sb)return;const s=state.songs[live.si];try{room.emit('pos',{v:VER,id:s.id,bpb:live.bpb,per:live.per,sb:{mode:live.sb.mode,target:live.sb.target,pending:live.sbPending!=null,end:!!live.sb.end},impro:live.impro||''})}catch(e){}}
 function sbDraw(){const s=state.songs[live.si];if(!s)return;const S=s.sections,sb=live.follow?fol.sb:live.sb;if(!sb)return;const tq=S[sb.target]||S[0],panic=sb.mode==='panic',pend=live.follow?sb.pending:live.sbPending!=null;
  $('#hSong').textContent=live.follow?'👁 En direct avec le MD':`${s.n}. ${s.title} · ${s.key}`;
  $('#hSec').textContent=panic?'⛔ PANIC':sb.end?'■ FIN DU CHANT':'⏸ STANDBY';$('#hSec').style.color=panic?'var(--red)':'#e6a100';
