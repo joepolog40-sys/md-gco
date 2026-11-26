@@ -410,6 +410,18 @@ body.living .blk .nm,body.viewer .blk .nm{padding-right:0}
 .pbadge{align-self:flex-start;font-size:11.5px;font-weight:800;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:1px 8px;margin-top:4px}
 .percsel{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--mute)}.percsel select{font:inherit;font-size:12.5px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:2px 4px}
 body.viewer .percbox{display:none!important}
+
+/* panneau live : degrés en grand, DROP/STOP bien visibles */
+.hnash{margin:2px 0 4px;line-height:1.05}.hnash b{font-family:'Barlow Condensed',Arial;font-weight:800;font-size:46px;word-spacing:.18em;letter-spacing:.5px}
+.hnash span{display:block;font-size:17px;font-weight:800;color:var(--mute);word-spacing:.15em}
+.hdrop{display:inline-block;margin:4px 0;padding:6px 14px;border-radius:10px;font-weight:900;font-size:24px;letter-spacing:.5px;background:var(--red);color:#fff}
+.hdrop[hidden]{display:none}.hdrop.soon{animation:lpb .5s ease-in-out infinite}.hdrop.now{font-size:34px}.hdrop.stop{background:#111;color:#fff;border:2px solid var(--red)}
+.blk.dropmark{box-shadow:inset 0 0 0 3px var(--red)}
+@media(max-width:600px){.hnash b{font-size:34px}.hdrop{font-size:19px}.hdrop.now{font-size:26px}}
+@media (orientation:landscape) and (max-height:520px){body.viewer .hud .hnash b{font-size:28px}}
+/* en-tête MD : plus d'horaires ni d'équipe sur les chants (seulement dans la vue d'ensemble) */
+body:not(.home) #sched,body:not(.home) #team,body:not(.home) .sub{display:none}
+body.living:not(.viewer) main{padding-bottom:330px}
 </style>
 </head>
 <body>
@@ -449,7 +461,7 @@ body.viewer .percbox{display:none!important}
  <div class="hrow"><span id="hSong" class="hsong"></span><span class="clkbox"></span><span class="percbox"></span><span id="hTime" class="htime"></span></div>
  <div class="hprog"><i id="hProg"></i></div>
  <div class="hmain">
-  <div class="hl"><div id="hSec" class="hsec"></div><div class="hsub"><span id="hBar"></span><span id="hBeats" class="hbeats"></span></div><div id="hLoop" class="hloop" hidden></div><div id="hImpro" class="himpro" hidden></div><div id="hCall" class="hcall"></div><div id="hNext" class="hnext"></div></div>
+  <div class="hl"><div id="hSec" class="hsec"></div><div class="hsub"><span id="hBar"></span><span id="hBeats" class="hbeats"></span></div><div id="hDrop" class="hdrop" hidden></div><div id="hLoop" class="hloop" hidden></div><div id="hImpro" class="himpro" hidden></div><div id="hNash" class="hnash" hidden></div><div id="hCall" class="hcall"></div><div id="hNext" class="hnext"></div></div>
   <div class="hbtns">
    <button id="hPlay" class="play" title="Lancer depuis la section choisie (L)">▶ Play</button>
    <button id="hNextSong" class="nxs" hidden title="Lancer le chant suivant (N)">▶ Chant suivant</button><button id="hImp" title="Indiquer une suite d'accords improvisée (I)">🎹 Impro</button><button id="hSb" class="sbb" title="Standby : tout s'arrête sauf le clic, choisis la section de reprise (F)">⏸ Standby</button><button id="hPanic" class="pnb" title="Panic : tout s'arrête, clic compris (X)">⛔ Panic</button>
@@ -743,32 +755,32 @@ let OUT=null;const BUS={};
 const PERC=Object.assign({on:true,vol:.7},LS.get('perc2',{}));
 function bus(k){if(!ac)return null;if(!BUS[k]){const p=ac.createStereoPanner?ac.createStereoPanner():null,g=ac.createGain();if(p){g.connect(p);p.connect(ac.destination)}else g.connect(ac.destination);BUS[k]={g,p}}
  const B=BUS[k];if(B.p)B.p.pan.value=PERC.on?(k==='clk'?-1:1):0;B.g.gain.value=k==='perc'?PERC.vol:1;return B.g}
+// sélection CCM / worship : jeu droit, accent sur le « et » (pas de 4e double croche appuyée = pas de feeling samba)
 const PATS={
  none:{n:'—',st:null},
- shk16:{n:'Shaker · doubles croches',ico:'🥚',snd:'shk',st:[.62,.36,.95,.36]},
- shk8:{n:'Shaker · croches',ico:'🥚',snd:'shk',st:[.55,1]},
- shk32:{n:'Shaker · triples croches',ico:'🥚',snd:'shk',st:[.6,.28,.42,.28,.95,.28,.42,.28]},
- shk6:{n:'Shaker · sextolets',ico:'🥚',snd:'shk',st:[.8,.3,.45,.7,.3,.45]},
- mar16:{n:'Maracas · doubles croches',ico:'🪇',snd:'mar',st:[.6,.35,.9,.35]},
- cab16:{n:'Cabasa · doubles croches',ico:'🎐',snd:'cab',st:[.6,.35,.85,.35]},
+ shk8:{n:'Shaker · croches (couplet)',ico:'🥚',snd:'shk',st:[.42,.8]},
+ shk16:{n:'Shaker · doubles croches',ico:'🥚',snd:'shk',st:[.55,.3,.82,.3]},
+ shk16f:{n:'Shaker · doubles croches fort (refrain)',ico:'🥚',snd:'shk',st:[.72,.45,.95,.45]},
+ shk68:{n:'Shaker · 6/8 (croches ternaires)',ico:'🥚',snd:'shk',st:[.85,.4,.55],tern:1},
  tamb24:{n:'Tambourin · frappé 2 et 4',ico:'🪘',snd:'tamb',st:'b24'},
- tamb16:{n:'Tambourin · secoué doubles + 2 et 4',ico:'🪘',snd:'tamb',st:[.45,.28,.4,.28],hit24:1},
- tamb8:{n:'Tambourin · croches',ico:'🪘',snd:'tamb',st:[.5,.75],hit24:1}};
-const PALIAS={egg8:'shk8',egg16:'shk16',shk3:'shk6',rim24:'tamb24'};const PK=k=>PALIAS[k]||k;
+ tamb8:{n:'Tambourin · croches + 2 et 4 (gros refrain)',ico:'🪘',snd:'tamb',st:[.42,.6],hit24:1},
+ combo:{n:'Shaker doubles + tambourin 2 et 4',ico:'🥚🪘',snd:'shk',st:[.5,.28,.78,.28],tamb24:1}};
+const PALIAS={egg8:'shk8',egg16:'shk16',shk3:'shk68',shk6:'shk68',shk32:'shk16f',mar16:'shk16',cab16:'shk16',tamb16:'tamb8',rim24:'tamb24'};const PK=k=>PALIAS[k]||k;
 // vrais échantillons libres de droits (VSCO 2 CE, CC0), intégrés à la page, calés sur leur pic
-const SMP={shk:[],mar:[],tamb:[],tshk:[],cab:[]};let smpReady=false,smpBusy=false;
+const SMP={shk:[],mar:[],tamb:[],tshk:[],cab:[],shkc:[]};let smpReady=false,smpBusy=false;
 async function buildSamples(){if(smpReady||smpBusy||!window.PSAMP)return;ensureAC();if(!ac)return;smpBusy=true;try{
  for(const k of Object.keys(SMP))for(const x of (PSAMP[k]||[])){const bin=atob(x.d),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
   const buf=await new Promise((res,rej)=>ac.decodeAudioData(u.buffer,res,rej));SMP[k].push({buf,pre:x.pre||0})}
- smpReady=true}catch(e){console.warn(e)}smpBusy=false}
+ SMP.shkc=[0,3,4].map(i=>SMP.shk[i]).filter(Boolean);if(!SMP.shkc.length)SMP.shkc=SMP.shk;smpReady=true}catch(e){console.warn(e)}smpBusy=false}
 let lastPick={};
 function pickS(k){const a=SMP[k];if(!a||!a.length)return null;let i=Math.floor(Math.random()*a.length);if(a.length>1&&i===lastPick[k])i=(i+1)%a.length;lastPick[k]=i;return a[i]}
-function playS(t,s,v){if(!s)return;const n=ac.createBufferSource(),g=ac.createGain();n.buffer=s.buf;g.gain.value=v*(.9+Math.random()*.2);n.connect(g);g.connect(bus('perc'));
+function playS(t,s,v){if(!s)return;const n=ac.createBufferSource(),g=ac.createGain();n.buffer=s.buf;g.gain.value=v*(.96+Math.random()*.08);n.connect(g);g.connect(bus('perc'));
  const st=t-s.pre,now=ac.currentTime;if(st>=now)n.start(st);else if(now-st<s.pre+.05)n.start(now,now-st)}
-function percHit(t,P,v,strong){if(!smpReady)return;try{
+function percHit(t,P,v,strong){if(!smpReady)return;try{if(P.snd==='shk'&&!strong){playS(t,pickS('shkc'),v);return}
  if(P.snd==='tamb')playS(t,pickS(strong?'tamb':'tshk'),strong?v:v*1.1);else playS(t,pickS(P.snd),v)}catch(e){}}
 function percBeat(t,q,beat,per,bpb){const k=q&&PK(q.perc);if(!PERC.on||!k||k==='none'||!sound)return;const P=PATS[k];if(!P||!P.st)return;if(!smpReady){buildSamples();return}
  if(P.st==='b24'){if(beat%2===1)percHit(t,P,1,true);return}
+ if(P.tamb24&&beat%2===1)percHit(t,PATS.tamb24,.9,true);
  const st=P.st,n=st.length;for(let j=0;j<n;j++){const tt=t+j*per/n;if(P.hit24&&j===0&&beat%2===1){percHit(tt,P,1,true);continue}percHit(tt,P,st[j],false)}}
 // aperçu d'une percu quand on la choisit (2 mesures au tempo du chant, avec le clic)
 async function previewPerc(k,songIdx){if(live.on)return;const P=PATS[PK(k)];if(!P||!P.st)return;ensureAC();if(!ac)return;if(ac.state!=='running'){try{await ac.resume()}catch(e){}}
@@ -777,6 +789,14 @@ async function previewPerc(k,songIdx){if(live.on)return;const P=PATS[PK(k)];if(!
  for(let b=0;b<bpb*2;b++){const t=t0+b*per;clickAt(t,b%bpb===0);percBeat(t,{perc:k},b%bpb,per,bpb)}
  sound=was;PERC.on=on;setTimeout(()=>{bus('clk');bus('perc')},(bpb*2*per+.3)*1000)}
 document.addEventListener('change',e=>{const t=e.target;if(!t.dataset||!/\.perc$/.test(t.dataset.f||''))return;const m=t.dataset.f.match(/^songs\.(\d+)/);previewPerc(t.value,m?+m[1]:0)});
+
+const isDrop=q=>!!q&&(q.mark==='drop'||/\bDROP\b/i.test(q.call||''));const isStop=q=>!!q&&(q.mark==='stop'||/\bSTOP\b/i.test(q.call||''));
+function paintNash(q,s){const el=$('#hNash');if(!el)return;const n=q&&q.nash?q.nash:'';el.hidden=!n;if(!n)return;const big=show(n,s.key),small=chords?n:toChords(n,s.key);
+ el.innerHTML=`<b>${esc(big)}</b>${small!==big?`<span>${esc(small)}</span>`:''}`;el.style.color=`var(${KC[q.kind]||'--intro'})`}
+function paintDrop(q,nx,left,V,L){const el=$('#hDrop');if(!el)return;let txt='',cls='';
+ if(V.count>0){}else if(V.bar===0&&isDrop(q)){txt='⬇ DROP';cls='now'}else if(V.bar===0&&isStop(q)){txt='■ STOP';cls='now stop'}
+ else if(!L&&nx&&left<=2&&isDrop(nx)){txt=`⬇ DROP dans ${left} mes. · ${nx.name}`;cls='soon'}else if(!L&&nx&&left<=2&&isStop(nx)){txt=`■ STOP dans ${left} mes. · ${nx.name}`;cls='soon stop'}
+ el.hidden=!txt;el.className='hdrop '+cls;el.textContent=txt}
 
 function percUI(){return `<span class="clk"><button data-perc="on" class="${PERC.on?'on':''}" title="Percus des sections : clic dans l'oreille gauche, percus dans la droite. Sans percus, le clic est en stéréo.">${PERC.on?'🥁 Percus activées · clic à gauche, percus à droite':'🥁 Percus désactivées · clic seul'}</button>${PERC.on?`<input data-perc="vol" type="range" min="0" max="1" step="0.05" value="${PERC.vol}" title="Volume des percus">`:''}</span>`}
 function paintPerc(){document.querySelectorAll('.percbox').forEach(b=>b.innerHTML=percUI())}
@@ -876,9 +896,9 @@ function liveDraw(force){if(!live.on)return;if(live.sb||(live.follow&&fol.sb)){s
  $('#hSong').textContent=live.follow?'👁 En direct avec le MD':`${s.n}. ${s.title} · ${s.key}`;$('#hSec').textContent=q.name;$('#hSec').style.color=`var(${KC[q.kind]||'--intro'})`;
  $('#hBar').textContent=V.count>0?`Décompte${(live.countN||0)>live.bpb?` · mes. ${(V.cbar||0)+1}/${Math.round(live.countN/live.bpb)}`:''} · ${V.beat+1}`:`mes. ${V.bar+1} / ${bars}`;
  $('#hBeats').innerHTML=Array.from({length:bpb},(_,k)=>`<i class="${V.count>0?(k===V.beat?'on c':''):(k===V.beat?'on':'')}${k===0?' one':''}"></i>`).join('');
- $('#hCall').textContent=[q.call,show(q.nash,s.key),viewer&&q.nash?(chords?q.nash:toChords(q.nash,s.key)):''].filter(Boolean).join(' · ');
+ $('#hCall').textContent=q.call||'';paintNash(q,s);
  $('#hNext').innerHTML=L==='inf'?(live.follow?'<b class="loopi">∞ en boucle</b> · on sort sur signe du MD':'<b class="loopi">∞ en boucle</b> · Maj+Espace pour sortir'):typeof L==='number'?`<b class="loopi">↻ encore ${L}×</b> ${live.follow?'':'(Espace = annuler)'} puis → ${esc(nx?nx.name:'fin')}`:nx?`→ <b>${esc(nx.name)}</b> dans ${left} mes.${nx.call?` · ${esc(nx.call)}`:''}`:`→ <b>fin</b> dans ${left} mes.`;
- $('#hNext').classList.toggle('soon',!L&&left<=2&&V.count===0);
+ $('#hNext').classList.toggle('soon',!L&&left<=2&&V.count===0);paintDrop(q,nx,left,V,L);
  $('#hProg').style.width=(done/tot*100).toFixed(1)+'%';$('#hBpm').textContent=Math.round(60/live.per);
  const sec=done*bpb*live.per,tsec=tot*bpb*live.per;$('#hTime').textContent=`${mmss(sec)} / ${mmss(tsec)}`;
  $('#hL1').classList.toggle('on',typeof L==='number');$('#hLi').classList.toggle('on',L==='inf');
@@ -970,7 +990,7 @@ function standby(mode){if(!live.on||live.follow)return;
  live.sb={mode,target:curSec()};live.sbPending=null;live.count=0;live.down=null;live.prevDown=null;if(mode==='panic')schedStop();
  document.body.classList.add('standby');document.body.classList.toggle('panic',mode==='panic');impOpen(true);paintSb();liveDraw(true);leadEmitSb();flash()}
 function sbExit(){const tg=live.sb.target;
- if(live.sb.mode==='panic'){live.sb=null;live.sbPending=null;live.sec=tg;live.bar=0;live.beat=0;live.ended=false;live.countN=CIN()*live.bpb;live.count=live.countN;sbClear();schedStart(liveBeat);flash();return}
+ if(live.sb.mode==='panic'){live.sb=null;live.sbPending=null;live.sec=tg;live.bar=0;live.beat=0;live.ended=false;live.countN=0;live.count=0;sbClear();schedStart(liveBeat);flash();return}
  const now=ac.currentTime-outLat(),g=.25*live.per,ok=d=>d!=null&&now>=d&&now-d<g;
  if(ok(live.down)||ok(live.prevDown)){live.sb=null;live.sbPending=null;live.sec=tg;live.bar=0;live.beat=0;live.count=0;live.ended=false;sbClear();schedRestart(ac.currentTime+.005);flash();return}
  live.sbPending=tg;paintSb();liveDraw(true);leadEmitSb();flash()}
@@ -985,7 +1005,7 @@ function sbDraw(){const s=state.songs[live.si];if(!s)return;const S=s.sections,s
  $('#hSec').textContent=panic?'⛔ PANIC':sb.end?'■ FIN DU CHANT':'⏸ STANDBY';$('#hSec').style.color=panic?'var(--red)':'#e6a100';
  $('#hBar').textContent=panic?'clic coupé':pend?'reprise au prochain 1':'le clic continue';
  const V=live.view;$('#hBeats').innerHTML=panic||live.follow?'':Array.from({length:live.bpb},(_,k)=>`<i class="${V&&V.sb&&k===V.beat?'on':''}${k===0?' one':''}"></i>`).join('');
- $('#hCall').textContent=`Reprise : ${tq.name}${tq.call?' · '+tq.call:''}${tq.nash?' · '+show(tq.nash,s.key):''}`;
+ $('#hCall').textContent=`Reprise : ${tq.name}${tq.call?' · '+tq.call:''}`;paintNash(tq,s);
  $('#hNext').innerHTML=live.follow?(pend?'<b>On repart au prochain 1</b>':'Le MD a mis en pause · attends son signe'):panic?'Clique la section de reprise (ou ← →) · <b>X</b> = repartir sur ton appui (ou F = remettre le clic)':pend?`<b>${esc(tq.name)}</b> démarre au prochain 1`:'Clique la section de reprise (ou ← →) · <b>F</b> = repartir au prochain 1';
  if(sb.end&&!pend){const nx=state.songs[state.songs.indexOf(s)+1];$('#hNext').innerHTML=live.follow?'Fin du chant · le clic continue · attends le signe du MD':`${nx?`Chant suivant : <b>${esc(nx.title)}</b> → <b>N</b> ou ▶ Chant suivant · `:''}<b>F</b> = reprendre ce chant au début`}
  $('#hNext').classList.toggle('soon',!!pend);const nb=$('#hNextSong');if(nb)nb.hidden=!(sb.end&&!live.follow&&state.songs[state.songs.indexOf(s)+1]);paintImpro();
@@ -1074,7 +1094,7 @@ function idleDraw(){const hud=$('#hud');if(!hud)return;document.querySelectorAll
  const b=document.querySelector(`#${S.id} .blk[data-i="${selSec}"]`);b&&b.classList.add('pick');
  $('#hSong').textContent=`${S.n}. ${S.title} · ${S.key}`;$('#hSec').textContent=q.name;$('#hSec').style.color=`var(${KC[q.kind]||'--intro'})`;
  $('#hBar').textContent=selSec?`départ à la section ${selSec+1}`:'départ au début';$('#hBeats').innerHTML='';$('#hImpro').hidden=true;
- $('#hCall').textContent=[q.call,show(q.nash,S.key)].filter(Boolean).join(' · ');
+ $('#hCall').textContent=q.call||'';paintNash(q,S);
  const n=CIN();$('#hNext').innerHTML=`<b>▶ Play</b> (ou L)${n?` · ${n} mes. de décompte`:''} · clique une case pour choisir où partir`;$('#hNext').classList.remove('soon');
  $('#hProg').style.width='0%';$('#hBpm').textContent=(live.bpmOver&&live.bpmOver[S.id])||bpmOf(S);$('#hTime').textContent='';}
 $('#hPlay').onclick=playSel;
