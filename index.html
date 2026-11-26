@@ -815,10 +815,10 @@ function paintDrop(q,nx,left,V,L){const el=$('#hDrop');if(!el)return;let txt='',
  else if(isStop(q)&&V.bar===0){txt='■ STOP';cls='now stop'}
  el.hidden=!txt;el.className='hdrop '+cls;el.textContent=txt;if(cls.startsWith('now')&&el.dataset.f!==txt+V.sec){el.dataset.f=txt+V.sec;flash()}}
 
-// fondu des percus en live (bouton ou touche P) : fade out sur ~2 mesures, puis fade in
+// fondu des percus en live (bouton ou touche P) : fade out sur 1 mesure, puis fade in
 let pLvl=1;
 function setPercGain(dur){if(!ac||!BUS.perc)return;const g=BUS.perc.g.gain,now=ac.currentTime;g.cancelScheduledValues(now);g.setValueAtTime(g.value,now);g.linearRampToValueAtTime(PERC.vol*pLvl,now+Math.max(.03,dur||0))}
-function percFade(){ensureAC();bus('perc');pLvl=pLvl>0?0:1;const per=live.per||.75,dur=clamp(2*(live.bpb||4)*per,2,6);setPercGain(dur);paintFade();flash();toast(pLvl?'Percus : fade in':'Percus : fade out')}
+function percFade(){ensureAC();bus('perc');pLvl=pLvl>0?0:1;const per=live.per||.75,dur=clamp((live.bpb||4)*per,1,4);setPercGain(dur);paintFade();flash();toast(pLvl?'Percus : fade in':'Percus : fade out')}
 function paintFade(){const b=$('#hFade');if(!b)return;b.textContent=pLvl?'🥁 Fade out':'🥁 Fade in';b.classList.toggle('on',!pLvl);b.hidden=!PERC.on}
 
 function percUI(){return `<span class="clk"><button data-perc="on" class="${PERC.on?'on':''}" title="Percus des sections : clic dans l'oreille gauche, percus dans la droite. Sans percus, le clic est en stéréo.">${PERC.on?'🥁 Percus activées · clic à gauche, percus à droite':'🥁 Percus désactivées · clic seul'}</button>${PERC.on?`<input data-perc="vol" type="range" min="0" max="1" step="0.05" value="${PERC.vol}" title="Volume des percus">`:''}</span>`}
