@@ -822,13 +822,17 @@ async function publishTeam(){if(!art||readOnly||!(state.rev>(ORIG.rev||0)))retur
  try{await art.publish(cleanSrc());status('ok',`Feuille publiée pour l'équipe · ${hhmm()}`)}catch(e){const c=e&&e.code;if(c==='not_granted'||c==='not_writer')return;status('warn',c==='conflict'?'Publication : une autre version est passée, réessaie':`Publication pour l'équipe impossible (${c||'erreur'}) : tes modifs restent enregistrées`)}}
 
 // ---------- relais public MQTT (version hébergée, sans compte) ----------
-async function mqttBus(){if(!window.mqtt||!CFG.mqtt)return null;const T=CFG.topic,H={};let cli=null;
- for(const url of CFG.mqtt){try{cli=await new Promise((res,rej)=>{const c=mqtt.connect(url,{clientId:'md_'+Math.random().toString(16).slice(2,10),clean:true,connectTimeout:6000,reconnectPeriod:2000,keepalive:30});
-   const to=setTimeout(()=>{try{c.end(true)}catch(e){}rej()},7000);c.once('connect',()=>{clearTimeout(to);res(c)});c.on('error',()=>{})});break}catch(e){cli=null}}
- if(!cli)return null;const sub=()=>cli.subscribe(T+'/#',{qos:0});sub();
- cli.on('connect',()=>{sub();status('ok','Relais reconnecté')});cli.on('offline',()=>status('warn','Relais coupé : reconnexion…'));
- cli.on('message',(topic,buf)=>{const k=topic.slice(T.length+1);let d;try{d=JSON.parse(buf.toString())}catch(e){return}(H[k]||[]).forEach(f=>{try{f(d)}catch(e){}})});
- return{emit:(k,d,retain)=>cli.publish(T+'/'+k,JSON.stringify(d),{qos:0,retain:!!retain}),on:(k,f)=>{(H[k]=H[k]||[]).push(f)}}}
+async function mqttBus(){if(!window.mqtt||!CFG.mqtt)return null;const T=CFG.topic,H={},seen=[],clis=[];
+ // on se connecte à TOUS les relais en même temps : on envoie partout, on reçoit de partout (sans doublon)
+ const deliver=(topic,buf)=>{const k=topic.slice(T.length+1);let d;try{d=JSON.parse(buf.toString())}catch(e){return}
+  if(d&&d.mid){if(seen.includes(d.mid))return;seen.push(d.mid);if(seen.length>200)seen.shift()}(H[k]||[]).forEach(f=>{try{f(d)}catch(e){console.warn(e)}})};
+ const one=url=>new Promise(res=>{let ok=false;const c=mqtt.connect(url,{clientId:'md_'+Math.random().toString(16).slice(2,10),clean:true,connectTimeout:8000,reconnectPeriod:3000,keepalive:30});
+  const to=setTimeout(()=>{if(!ok)res(null)},9000);c.on('error',()=>{});c.on('message',deliver);
+  c.on('connect',()=>{c.subscribe(T+'/#',{qos:0});if(!ok){ok=true;clearTimeout(to);clis.push(c);res(c)}});c.on('offline',()=>{})});
+ const all=CFG.mqtt.map(one);const first=await Promise.race([Promise.any?Promise.any(all.map(p=>p.then(c=>c||Promise.reject()))).catch(()=>null):all[0],new Promise(r=>setTimeout(()=>r(null),9500))]);
+ if(!first)return null;
+ const live=()=>clis.filter(c=>c.connected);
+ return{emit:(k,d,retain)=>{const m=Object.assign({mid:Math.random().toString(36).slice(2,10)},d);live().forEach(c=>c.publish(T+'/'+k,JSON.stringify(m),{qos:0,retain:!!retain}))},on:(k,f)=>{(H[k]=H[k]||[]).push(f)},n:()=>live().length}}
 
 paintClk();
 renderAll();
