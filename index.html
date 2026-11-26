@@ -770,6 +770,14 @@ function percHit(t,P,v,strong){if(!smpReady)return;try{
 function percBeat(t,q,beat,per,bpb){const k=q&&PK(q.perc);if(!PERC.on||!k||k==='none'||!sound)return;const P=PATS[k];if(!P||!P.st)return;if(!smpReady){buildSamples();return}
  if(P.st==='b24'){if(beat%2===1)percHit(t,P,1,true);return}
  const st=P.st,n=st.length;for(let j=0;j<n;j++){const tt=t+j*per/n;if(P.hit24&&j===0&&beat%2===1){percHit(tt,P,1,true);continue}percHit(tt,P,st[j],false)}}
+// aperçu d'une percu quand on la choisit (2 mesures au tempo du chant, avec le clic)
+async function previewPerc(k,songIdx){if(live.on)return;const P=PATS[PK(k)];if(!P||!P.st)return;ensureAC();if(!ac)return;if(ac.state!=='running'){try{await ac.resume()}catch(e){}}
+ if(!smpReady)await buildSamples();if(!smpReady)return;const S=state.songs[songIdx];const per=60/((live.bpmOver&&S&&live.bpmOver[S.id])||(S?bpmOf(S):80));const bpb=S?(parseInt(S.meter)||4):4;
+ const t0=ac.currentTime+.08,was=sound,on=PERC.on;sound=true;PERC.on=true;bus('clk');bus('perc');
+ for(let b=0;b<bpb*2;b++){const t=t0+b*per;clickAt(t,b%bpb===0);percBeat(t,{perc:k},b%bpb,per,bpb)}
+ sound=was;PERC.on=on;setTimeout(()=>{bus('clk');bus('perc')},(bpb*2*per+.3)*1000)}
+document.addEventListener('change',e=>{const t=e.target;if(!t.dataset||!/\.perc$/.test(t.dataset.f||''))return;const m=t.dataset.f.match(/^songs\.(\d+)/);previewPerc(t.value,m?+m[1]:0)});
+
 function percUI(){return `<span class="clk"><button data-perc="on" class="${PERC.on?'on':''}" title="Percus des sections : clic dans l'oreille gauche, percus dans la droite. Sans percus, le clic est en stéréo.">${PERC.on?'🥁 Percus activées · clic à gauche, percus à droite':'🥁 Percus désactivées · clic seul'}</button>${PERC.on?`<input data-perc="vol" type="range" min="0" max="1" step="0.05" value="${PERC.vol}" title="Volume des percus">`:''}</span>`}
 function paintPerc(){document.querySelectorAll('.percbox').forEach(b=>b.innerHTML=percUI())}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-perc="on"]');if(!b)return;PERC.on=!PERC.on;LS.set('perc2',PERC);if(ac){bus('clk');bus('perc')}if(PERC.on)buildSamples();paintPerc()});
