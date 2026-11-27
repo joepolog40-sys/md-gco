@@ -605,6 +605,17 @@ body.viewer .blk .call{font-size:22px}
 .secdel{display:block;width:100%;margin-top:6px;font:inherit;font-size:13px;font-weight:700;background:transparent;color:var(--mute);border:1px dashed var(--line);border-radius:10px;padding:6px;cursor:pointer}
 .secdel:hover{color:#ff6b6b;border-color:#ff6b6b}
 .secdel.arm{background:#e60000;color:#fff;border-color:#e60000}
+
+.lpset{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin:4px 0}
+.lpset label{font-size:12px;font-weight:800;color:var(--mute);margin-right:2px}
+.lpset button{font:inherit;font-size:13px;font-weight:800;padding:4px 9px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);color:inherit;cursor:pointer}
+.lpset button.on{background:#e6a100;color:#111;border-color:#e6a100}
+.lbadge{align-self:flex-start;margin-top:5px;font-size:12.5px;font-weight:900;border-radius:999px;padding:2px 9px;background:#e6a100;color:#111}
+.lbadge.inf{background:var(--red,#e5484d);color:#fff}
+body.viewer .lbadge{font-size:15px}
+.secdel{background:rgba(229,72,77,.12)!important;color:#ff7b7b!important;border:1px solid rgba(229,72,77,.45)!important}
+.secdel:hover{background:rgba(229,72,77,.25)!important}
+.secdel.arm{background:#e60000!important;color:#fff!important;border-color:#e60000!important}
 </style>
 </head>
 <body>
@@ -818,7 +829,7 @@ function vDupNote(q){const n=norm(q.note),c=norm(q.call);return !!n&&(c.includes
 function blockRO(s,q,i){const si=state.songs.indexOf(s);return `<div class="blk" tabindex="0" data-i="${i}" title="Intensité ${lvlTxt(q)} / 10 · ${WORD(Math.max(q.i0,q.i1))}" style="--g:${Math.max(+q.bars||1,4)};--c:var(${KC[q.kind]||'--intro'})">${wm(q,si,i)}
  <div class="nm"><small class="ty">${esc(SN(q))}</small><span>${esc(q.bars)} mes.</span></div><button class="ico secedit" data-edsec="${si}:${i}" title="Modifier cette section">✏️</button>${q.call?`${noteTxt(q)?`<div class="call ${HOT.test(q.call)||q.mark==='drop'||q.mark==='stop'?'hot':''}">${esc(noteTxt(q))}</div>`:''}`:''}
  ${q.nash?`<div class="nash">${NL(show(q.nash,s.key))}</div>${viewer&&toChords(q.nash,s.key)!==q.nash?`<div class="chd">${NL(chords?q.nash:toChords(q.nash,s.key))}</div>`:''}`:''}${q.cue&&!(viewer&&norm(q.call).includes(norm(q.cue)))?`<div class="cue">« ${esc(q.cue)} »</div>`:''}${q.note&&!viewer&&!vDupNote(q)?`<div class="note" title="Note perso (visible seulement par toi)">📝 ${esc(q.note)}</div>`:''}
- ${q.perc&&PK(q.perc)!=='none'&&PATS[PK(q.perc)]?`<span class="pbadge" title="Percus : ${esc(PATS[PK(q.perc)].n)}">🥁</span>`:''}${q.sub?`<span class="sbadge" title="Subdrop">💥</span>`:''}${q.toNext?`<span class="nbadge">⤳ puis ${esc(state.songs[si+1]?state.songs[si+1].title+' · '+SN(state.songs[si+1].sections[+q.toNextSec||0]||state.songs[si+1].sections[0]):'chant suivant')}</span>`:''}${isDrop(q)?`<span class="dbadge">⬇ DROP · ${esc(dShort(q,parseInt(s.meter)||4))}</span>`:''}${wword(q)}${q.t!=null?`<span class="tm">${mmss(q.t)}</span>`:''}
+ ${q.perc&&PK(q.perc)!=='none'&&PATS[PK(q.perc)]?`<span class="pbadge" title="Percus : ${esc(PATS[PK(q.perc)].n)}">🥁</span>`:''}${q.sub?`<span class="sbadge" title="Subdrop">💥</span>`:''}${q.loop?`<span class="lbadge ${q.loop==='inf'?'inf':''}" title="Boucle réglée dans la feuille">${q.loop==='inf'?'∞ en boucle':'↻ ×'+q.loop}</span>`:''}${q.toNext?`<span class="nbadge">⤳ puis ${esc(state.songs[si+1]?state.songs[si+1].title+' · '+SN(state.songs[si+1].sections[+q.toNextSec||0]||state.songs[si+1].sections[0]):'chant suivant')}</span>`:''}${isDrop(q)?`<span class="dbadge">⬇ DROP · ${esc(dShort(q,parseInt(s.meter)||4))}</span>`:''}${wword(q)}${q.t!=null?`<span class="tm">${mmss(q.t)}</span>`:''}
  <div class="lp">${(()=>{const L=live.loops[s.id+':'+i];return `<button data-loop="${s.id}:${i}:1" class="${typeof L==='number'?'on':''}" title="Refaire cette section 1× de plus (re-clic = annuler)">↻1</button><button data-loop="${s.id}:${i}:inf" class="${L==='inf'?'on':''}" title="Boucler cette section (re-clic = arrêter)">∞</button>`})()}<span class="pc"></span></div>
  <div class="prog"><i></i></div></div>`}
 let sel=null,clip=LS.get('clip',null);
@@ -832,7 +843,7 @@ function blockED(s,si,q,i){const p=`songs.${si}.sections.${i}`,a=100-q.i0*10,b=1
  
  <input class="i-note" data-f="${p}.note" value="${esc(q.note)}" placeholder="Note perso (visible seulement par toi)…">
  ${q.mark==='drop'?dropPicker(s,si,i,q):''}
- <button class="tonext subd ${q.sub?'on':''}" data-act="sub" data-s="${si}" data-i="${i}" title="Gros subdrop « baouum » : sur le drop de cette section si elle en a un, sinon sur son 1">💥 Subdrop ${q.sub?'✓':''}</button><button class="tonext ${q.toNext?'on':''}" data-act="tonext" data-s="${si}" data-i="${i}" title="À la fin de cette section, on passe directement au chant suivant (le clic glisse vers son tempo)">⤳ Ensuite : chant suivant ${q.toNext?'✓':''}</button>${q.toNext&&state.songs[si+1]?`<div class="percsel"><label>Départ</label><select data-tns="${si}:${i}">${state.songs[si+1].sections.map((x,k)=>`<option value="${k}" ${(+q.toNextSec||0)===k?'selected':''}>${esc(state.songs[si+1].title)} · ${esc(SN(x))}</option>`).join('')}</select></div>`:''}<div class="percsel"><label>Percu</label><select data-f="${p}.perc" data-re="1">${Object.entries(PATS).map(([k,v])=>`<option value="${k}" ${PK(q.perc||'none')===k?'selected':''}>${v.n}</option>`).join('')}</select></div>
+ <div class="lpset"><label>↻ Boucle</label>${[['','non'],['2','×2'],['3','×3'],['4','×4'],['inf','∞']].map(([v,l])=>`<button data-act="qloop" data-s="${si}" data-i="${i}" data-v="${v}" class="${String(q.loop||'')===v?'on':''}">${l}</button>`).join('')}</div><button class="tonext subd ${q.sub?'on':''}" data-act="sub" data-s="${si}" data-i="${i}" title="Gros subdrop « baouum » : sur le drop de cette section si elle en a un, sinon sur son 1">💥 Subdrop ${q.sub?'✓':''}</button><button class="tonext ${q.toNext?'on':''}" data-act="tonext" data-s="${si}" data-i="${i}" title="À la fin de cette section, on passe directement au chant suivant (le clic glisse vers son tempo)">⤳ Ensuite : chant suivant ${q.toNext?'✓':''}</button>${q.toNext&&state.songs[si+1]?`<div class="percsel"><label>Départ</label><select data-tns="${si}:${i}">${state.songs[si+1].sections.map((x,k)=>`<option value="${k}" ${(+q.toNextSec||0)===k?'selected':''}>${esc(state.songs[si+1].title)} · ${esc(SN(x))}</option>`).join('')}</select></div>`:''}<div class="percsel"><label>Percu</label><select data-f="${p}.perc" data-re="1">${Object.entries(PATS).map(([k,v])=>`<option value="${k}" ${PK(q.perc||'none')===k?'selected':''}>${v.n}</option>`).join('')}</select></div>
  <div class="marks">${[['drop','DROP'],['stop','STOP']].map(([m,l])=>`<button data-act="mark" data-s="${si}" data-i="${i}" data-m="${m}" class="${q.mark===m?'on':''}" title="${MARKS[m]}">${l}</button>`).join('')}</div>
  <div class="ebar"><span class="bars"><button data-act="bars" data-s="${si}" data-i="${i}" data-d="-1">−</button><b>${esc(q.bars)}</b><small>mes.</small><button data-act="bars" data-s="${si}" data-i="${i}" data-d="1">+</button></span><button data-act="sec-dup" data-s="${si}" data-i="${i}" title="Dupliquer (Ctrl+D)">⧉</button>${(q.pts||[]).length<3?`<button data-act="pts" data-d="1" data-s="${si}" data-i="${i}" title="Ajouter un point d'intensité au milieu de la section (3 max)">＋ point</button>`:''}${(q.pts||[]).length?`<button data-act="pts" data-d="-1" data-s="${si}" data-i="${i}" title="Enlever un point d'intensité">− point</button>`:''}${EDIT.sec===si+':'+i&&EDIT.song!==s.id?`<button class="edone" data-edclose="1">✓ OK</button><button class="secdel" data-act="sec-del" data-s="${si}" data-i="${i}" title="Supprimer cette section (2 clics)">🗑 Supprimer la section</button>`:''}</div>
  <div class="whz" data-gd="${wGuides(state.songs[si],i).map(g=>g.v).join(',')}">${wm(q,si,i)}${wGuides(state.songs[si],i).map(g=>`<span class="wgd" data-v="${g.v}" style="top:${100-g.v*10}%"><small>${esc(g.l)} · ${g.v}</small></span>`).join('')}<span class="wh" data-wh="${si}:${i}:0" style="left:0;top:${a}%" title="Intensité au début"></span>${Array.isArray(q.pts)&&q.pts.length?q.pts.map((v,k)=>`<span class="wh pt" data-wh="${si}:${i}:${k+3}" style="left:${((k+1)/(q.pts.length+1)*100).toFixed(1)}%;top:${100-v*10}%" title="Point ${k+1}"></span>`).join(''):`<span class="wh mid" data-wh="${si}:${i}:2" style="left:50%;top:${(a+b)/2}%" title="Monter / descendre toute la section"></span>`}<span class="wh" data-wh="${si}:${i}:1" style="left:100%;top:${b}%" title="Intensité à la fin"></span><span class="wtip"></span></div>
@@ -895,6 +906,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-live],[dat
  if(a==='pts'){const q=S.sections[i];const n=Math.max(0,Math.min(3,(q.pts||[]).length+num(t.dataset.d)));const ev=f=>{const P=IX(q);for(let k=1;k<P.length;k++){if(f<=P[k][0]){const[a0,v0]=P[k-1],[a1,v1]=P[k];return v0+(v1-v0)*(f-a0)/((a1-a0)||1)}}return q.i1};
   if(n)q.pts=Array.from({length:n},(_,k)=>Math.round(ev((k+1)/(n+1))*2)/2);else delete q.pts;commit();renderSong(si);renderOverview();return}
  if(a==='vc'){const Q=S.sections[i];if(Q.vc)delete Q.vc;else Q.vc=true;commit();renderSong(si);return}
+ if(a==='qloop'){const Q=S.sections[i],v=t.dataset.v;if(!v)delete Q.loop;else Q.loop=v==='inf'?'inf':+v;commit();renderSong(si);return}
  if(a==='sub'){const Q=S.sections[i];if(Q.sub)delete Q.sub;else{Q.sub=true;ensureAC();buildFx().then(()=>{if(!live.on)playSub(ac.currentTime+.05)})}commit();renderSong(si);return}
  if(a==='tonext'){const Q=S.sections[i];if(Q.toNext)delete Q.toNext;else Q.toNext=true;commit();renderSong(si);return}
  if(a==='dropat'){S.sections[i].dropAt=num(t.dataset.v);commit();renderSong(si);return}
@@ -1167,6 +1179,8 @@ var live={on:false,id:null,sec:0,bar:0,beat:0,count:0,bpm:80,bpb:4,t0:0,n:0,tm:n
 const bpmOf=s=>num(String(s.bpm).split(' ')[0])||80;
 // tempo au demi-BPM près
 const r5=x=>Math.round(x*2)/2,fBpm=b=>{b=r5(+b);return b%1?String(b).replace('.',','):String(b)};
+// boucles réglées à l'avance dans la feuille (q.loop : 'inf' ou nombre de passages)
+function applyPresetLoops(s){if(!s)return;Object.keys(live.loops).forEach(k=>{if(k.startsWith(s.id+':'))delete live.loops[k]});s.sections.forEach((q,i)=>{if(q.loop==='inf')live.loops[s.id+':'+i]='inf';else if(+q.loop>1)live.loops[s.id+':'+i]=+q.loop-1});LS.set('loops',live.loops)}
 function setLoop(id,i,m){const k=id+':'+i,L=live.loops[k];
  if(m==='inf')live.loops[k]=L==='inf'?undefined:'inf';else live.loops[k]=typeof L==='number'?undefined:1;
  if(live.loops[k]===undefined)delete live.loops[k];LS.set('loops',live.loops);paintLoops();liveDraw(true);if(room&&!viewer&&!live.follow&&live.on){const lp={};Object.keys(live.loops).forEach(x=>{if(x.startsWith(live.id+':'))lp[x]=live.loops[x]});try{room.emit('loops',{id:live.id,loops:lp})}catch(e){}}}
@@ -1174,7 +1188,7 @@ function flash(){const h=$('#hud');h.classList.remove('flash');void h.offsetWidt
 function paintLoops(){document.querySelectorAll('[data-loop]').forEach(b=>{const[id,i,m]=b.dataset.loop.split(':');const L=live.loops[id+':'+i];b.classList.toggle('on',m==='inf'?L==='inf':typeof L==='number')})}
 async function liveStart(id,from){if(editing)setEdit(null);if(live.follow)followStop();if(mid)toggleMetro(mid);liveStop(true);const si=state.songs.findIndex(s=>s.id===id);const s=state.songs[si];if(!s)return;
  if(!viewer&&ownView!==id){ownView=id;LS.set('view',id);applySel();window.scrollTo({top:0})}live.on=true;live.id=id;live.si=si;live.sec=clamp(+from||0,0,s.sections.length-1);document.body.classList.remove('idle');live.bar=0;live.beat=0;live.ended=false;live.view=null;
- live.subFor=null;live.ramp=null;live.rampDone=false;live.jumpTo=null;live.glideEnd=false;live.glide=null;live.glideReq=false;live.per=60/(live.bpmOver&&live.bpmOver[id]||bpmOf(s));live.base=live.per;live.bpb=parseInt(s.meter)||4;live.countN=cinOf(s,from)*live.bpb;live.count=live.countN;
+ applyPresetLoops(s);live.subFor=null;live.ramp=null;live.rampDone=false;live.jumpTo=null;live.glideEnd=false;live.glide=null;live.glideReq=false;live.per=60/(live.bpmOver&&live.bpmOver[id]||bpmOf(s));live.base=live.per;live.bpb=parseInt(s.meter)||4;live.countN=cinOf(s,from)*live.bpb;live.count=live.countN;
  ensureAC();if(ac&&ac.state!=='running'){try{await ac.resume()}catch(e){}}live.impro='';pLvl=1;if(BUS.perc)setPercGain(.02);paintFade();schedStart(liveBeat);if(PAD.on&&!live.follow)padSwitch(s.key,PAD.when==='first'?SCH.beats[0]+live.countN*live.per:ac.currentTime+.05);window.__mdLat={start:+(SCH.beats[0]-ac.currentTime).toFixed(4),out:+outLat().toFixed(4)};
  try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>live.wl=w).catch(()=>{})}catch(e){}
  cur=id;document.body.classList.add('living');try{window.focus();$('#hud').focus({preventScroll:true})}catch(e){}renderSong(si);markNav();$('#hud').hidden=false;const ar=document.querySelector(`section.song[data-si="${si}"] .road`);ar&&ar.scrollIntoView({block:'start',behavior:'smooth'});
@@ -1297,7 +1311,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=72;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=73;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
@@ -1402,7 +1416,7 @@ function doGlide(t){const i=live.si,n=state.songs[i+1];live.glideReq=false;if(!n
  const from=live.per,to=60/((live.bpmOver&&live.bpmOver[n.id])||bpmOf(n)),bpb=parseInt(n.meter)||4,st=clamp(+live.glideSec||0,0,n.sections.length-1),pre=!!live.rampDone;live.glideSec=0;live.rampDone=false;
  const prev=i;live.sb=null;live.sbPending=null;live.jumpTo=null;live.glideEnd=false;live.id=n.id;live.si=i+1;live.sec=st;live.bar=0;live.beat=0;live.ended=false;live.bpb=bpb;live.countN=live.count=0;live.glide=null;live.down=null;live.prevDown=null;live.glFlag=true;
  if(!pre&&Math.abs(60/to-60/from)>.5){const K=Math.abs(60/to-60/from)<=2?1:2;live.ramp={from,to,n:K*bpb,i:0}}else{live.ramp=null;live.per=live.base=to}
- const fl=`${n.title} · ${SN(n.sections[st])}`;if(PAD.on)padSwitch(n.key,t);
+ const fl=`${n.title} · ${SN(n.sections[st])}`;applyPresetLoops(n);if(PAD.on)padSwitch(n.key,t);
  SCH.q.push({t,run:()=>{impOpen(false);if(live.impro)impSet([]);document.body.classList.remove('standby','panic');document.querySelectorAll('.blk.target').forEach(b=>b.classList.remove('target'));paintSb();lastSec=-1;cur=n.id;if(!viewer&&ownView!==n.id){ownView=n.id;LS.set('view',n.id)}if(viewer)selId=n.id;applySel();renderSong(prev);renderSong(live.si);markNav();leadSel(n.id);paintGlide();jumpFlash(fl);const ar=document.querySelector(`section.song[data-si="${live.si}"] .road`);ar&&ar.scrollIntoView({block:'start',behavior:'smooth'})}})}
 function paintGlide(){const b=$('#hGlide');if(!b)return;const i=state.songs.findIndex(x=>x.id===live.id);b.hidden=!(live.on&&!live.follow&&state.songs[i+1]);const e=$('#hGlideEnd');if(e){e.hidden=b.hidden||!!live.sb;e.classList.toggle('on',!!live.glideEnd);e.textContent=live.glideEnd?'⤳ Fin de section… (annuler)':'⤳ Suivant en fin de section'}b.classList.toggle('on',!!live.glideReq);b.textContent=live.glideReq?'⤳ Au prochain 1…':'⤳ Enchaîner'}
 // ---------- Saut programmé : clic sur une autre case en live = on y va à la fin de la section en cours ----------
