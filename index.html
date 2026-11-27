@@ -545,6 +545,8 @@ body.viewer .nbadge{font-size:15px}
 body:not(.viewer) #hPrev,body:not(.viewer) #hNextB,body:not(.viewer) #hL1,body:not(.viewer) #hLi,body:not(.viewer) #hStart,body:not(.viewer) #hSync,body:not(.viewer) #hTap{display:none!important}
 .hkeys{order:99;flex-basis:100%;font-size:11.5px;color:var(--mute);font-weight:700;line-height:1.2}
 body.viewer .hkeys,body.idle .hkeys{display:none!important}
+.cinb select{font:inherit;font-size:14px;font-weight:800;background:var(--panel2);color:inherit;border:1px solid var(--line);border-radius:8px;padding:3px 4px;margin-top:2px}
+body.viewer .cinb{display:none!important}
 </style>
 </head>
 <body>
@@ -616,6 +618,9 @@ const md=v=>esc(v).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
 const LS={get(k,d){try{const v=localStorage.getItem('md29:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('md29:'+k,JSON.stringify(v))}catch(e){}}};
 let ownView=(()=>{const v=(()=>{try{return JSON.parse(localStorage.getItem('md29:view'))}catch(e){return null}})();return v||'home'})();
 const CIN=()=>{const v=LS.get('countin2',2);return [0,1,2].includes(v)?v:2};
+// décompte : réglage de la section de départ > réglage du chant > réglage général
+const cinOf=(s,from)=>{const q=s&&s.sections[from||0],v=q&&q.cin!=null&&q.cin!==''?+q.cin:(s&&s.cin!=null&&s.cin!==''?+s.cin:CIN());return [0,1,2].includes(v)?v:CIN()};
+const CINO=(v,def)=>`<option value="" ${v==null||v===''?'selected':''}>${def}</option>`+[[2,'2 mes.'],[1,'1 mes.'],[0,'aucun']].map(([k,l])=>`<option value="${k}" ${v!=null&&v!==''&&+v===k?'selected':''}>${l}</option>`).join('');
 const EDIT={song:null,sec:null,side:false};
 let state=(()=>{const c=LS.get('state',null);return c&&c.rev>=(ORIG.rev||0)?c:JSON.parse(JSON.stringify(ORIG))})();
 let chords=LS.get('chords',false),theme=LS.get('theme','dark'),sound=LS.get('sound',true),editing=false,readOnly=false;
@@ -763,7 +768,7 @@ function blockED(s,si,q,i){const p=`songs.${si}.sections.${i}`,a=100-q.i0*10,b=1
  <input class="i-cue" data-f="${p}.cue" value="${esc(q.cue)}" placeholder="Repère paroles…">
  <input class="i-note" data-f="${p}.note" value="${esc(q.note)}" placeholder="Note…">
  ${q.mark==='drop'?dropPicker(s,si,i,q):''}
- <button class="tonext ${q.toNext?'on':''}" data-act="tonext" data-s="${si}" data-i="${i}" title="À la fin de cette section, on passe directement au chant suivant (le clic glisse vers son tempo)">⤳ Ensuite : chant suivant ${q.toNext?'✓':''}</button><button class="tonext ${q.vc?'on':''}" data-act="vc" data-s="${si}" data-i="${i}" title="Le guide fait « 1, 2, 3, 4 » dans la mesure juste avant cette section (le nom est annoncé une mesure plus tôt)">🗣 Décompte vocal avant cette section ${q.vc?'✓':''}</button>${q.toNext&&state.songs[si+1]?`<div class="percsel"><label>Départ</label><select data-tns="${si}:${i}">${state.songs[si+1].sections.map((x,k)=>`<option value="${k}" ${(+q.toNextSec||0)===k?'selected':''}>${esc(state.songs[si+1].title)} · ${esc(x.name)}</option>`).join('')}</select></div>`:''}<div class="percsel"><label>Percu</label><select data-f="${p}.perc" data-re="1">${Object.entries(PATS).map(([k,v])=>`<option value="${k}" ${PK(q.perc||'none')===k?'selected':''}>${v.n}</option>`).join('')}</select></div>
+ <button class="tonext ${q.toNext?'on':''}" data-act="tonext" data-s="${si}" data-i="${i}" title="À la fin de cette section, on passe directement au chant suivant (le clic glisse vers son tempo)">⤳ Ensuite : chant suivant ${q.toNext?'✓':''}</button><div class="percsel"><label>Décompte</label><select data-qcin="${si}:${i}" title="Décompte quand on démarre le live depuis cette section">${CINO(q.cin,'si on démarre ici : comme le chant')}</select></div><button class="tonext ${q.vc?'on':''}" data-act="vc" data-s="${si}" data-i="${i}" title="Le guide fait « 1, 2, 3, 4 » dans la mesure juste avant cette section (le nom est annoncé une mesure plus tôt)">🗣 Décompte vocal avant cette section ${q.vc?'✓':''}</button>${q.toNext&&state.songs[si+1]?`<div class="percsel"><label>Départ</label><select data-tns="${si}:${i}">${state.songs[si+1].sections.map((x,k)=>`<option value="${k}" ${(+q.toNextSec||0)===k?'selected':''}>${esc(state.songs[si+1].title)} · ${esc(x.name)}</option>`).join('')}</select></div>`:''}<div class="percsel"><label>Percu</label><select data-f="${p}.perc" data-re="1">${Object.entries(PATS).map(([k,v])=>`<option value="${k}" ${PK(q.perc||'none')===k?'selected':''}>${v.n}</option>`).join('')}</select></div>
  <div class="marks">${[['drop','DROP'],['stop','STOP'],['fill','fill'],['cresc','↗'],['descente','↘']].map(([m,l])=>`<button data-act="mark" data-s="${si}" data-i="${i}" data-m="${m}" class="${q.mark===m?'on':''}" title="${MARKS[m]}">${l}</button>`).join('')}</div>
  <div class="ebar"><span class="bars"><button data-act="bars" data-s="${si}" data-i="${i}" data-d="-1">−</button><b>${esc(q.bars)}</b><small>mes.</small><button data-act="bars" data-s="${si}" data-i="${i}" data-d="1">+</button></span><button data-act="sec-dup" data-s="${si}" data-i="${i}" title="Dupliquer (Ctrl+D)">⧉</button>${(q.pts||[]).length<3?`<button data-act="pts" data-d="1" data-s="${si}" data-i="${i}" title="Ajouter un point d'intensité au milieu de la section (3 max)">＋ point</button>`:''}${(q.pts||[]).length?`<button data-act="pts" data-d="-1" data-s="${si}" data-i="${i}" title="Enlever un point d'intensité">− point</button>`:''}<button data-act="copy" data-s="${si}" data-i="${i}" title="Copier (Ctrl+C), puis Coller dans un autre chant">📋</button>${EDIT.sec===si+':'+i&&EDIT.song!==s.id?`<button class="edone" data-edclose="1">✓ OK</button>`:''}</div>
  <div class="whz" data-gd="${wGuides(state.songs[si],i).map(g=>g.v).join(',')}">${wm(q,si,i)}${wGuides(state.songs[si],i).map(g=>`<span class="wgd" data-v="${g.v}" style="top:${100-g.v*10}%"><small>${esc(g.l)} · ${g.v}</small></span>`).join('')}<span class="wh" data-wh="${si}:${i}:0" style="left:0;top:${a}%" title="Intensité au début"></span>${Array.isArray(q.pts)&&q.pts.length?q.pts.map((v,k)=>`<span class="wh pt" data-wh="${si}:${i}:${k+3}" style="left:${((k+1)/(q.pts.length+1)*100).toFixed(1)}%;top:${100-v*10}%" title="Point ${k+1}"></span>`).join(''):`<span class="wh mid" data-wh="${si}:${i}:2" style="left:50%;top:${(a+b)/2}%" title="Monter / descendre toute la section"></span>`}<span class="wh" data-wh="${si}:${i}:1" style="left:100%;top:${b}%" title="Intensité à la fin"></span><span class="wtip"></span></div>
@@ -776,7 +781,7 @@ function songHTML(s,si){const P=`songs.${si}`,editing=EDIT.song===s.id;
  return `<section class="song" id="${s.id}" data-si="${si}">
  <div class="sh"><div class="n">${s.n}</div><div><h2>${esc(s.title)} ${editing?`<button class="edone" data-edclose="1">✓ Terminer</button>`:`<button class="ico songedit" data-edsong="${s.id}" title="Modifier le chant (titre, tona, BPM, grille, batterie, tips, sections)">✏️</button>`}</h2><div class="o">${s.orig?esc(s.orig)+' · ':''}${esc(s.ref)}</div></div>
   <div class="badges"><div class="badge"><small>Tona</small><span class="big">${esc(s.key)}</span></div>${editing?`<div class="badge bpmed"><small>BPM</small><div class="bstep"><button data-act="bpm" data-s="${si}" data-d="-1">−</button><span class="big">${esc(String(s.bpm).match(/\d+/)?.[0]||'')}</span><button data-act="bpm" data-s="${si}" data-d="1">+</button></div></div>`:`<div class="badge"><small>BPM</small><span class="big">${esc(String(s.bpm).split(' ')[0])}</span></div>`}
-   <div class="badge bdur"><small>Durée</small><span class="big" style="font-size:22px">${esc(String(s.dur).replace('≈ ',''))}</span></div><div class="badge"><small>Lead</small><span class="big" style="font-size:22px">${esc(s.lead)}</span></div>
+   <div class="badge cinb"><small>Décompte au début</small><select data-cin="${si}">${CINO(s.cin,'général ('+(CIN()?CIN()+' mes.':'aucun')+')')}</select></div><div class="badge bdur"><small>Durée</small><span class="big" style="font-size:22px">${esc(String(s.dur).replace('≈ ',''))}</span></div><div class="badge"><small>Lead</small><span class="big" style="font-size:22px">${esc(s.lead)}</span></div>
    </div></div>
  <div class="o" style="margin-top:6px">${esc(s.slot)} · ${esc(s.bpm)} BPM · ${esc(s.meter)}</div>${relTable(s)}${head}
  ${s.suggest?'<div class="sugg">Pas d\'analyse du live : structure du plan, intensités proposées par le MD.</div>':''}
@@ -803,6 +808,8 @@ document.addEventListener('input',e=>{const t=e.target;if(!t.closest('main,heade
   else setP(t.dataset.lines,L);commit()}
  else if(t.dataset.introchords!=null){pushUndo();state.songs[+t.dataset.introchords].intro.chords=t.value.trim().split(/\s+/).filter(Boolean);commit()}});
 document.addEventListener('change',e=>{const t=e.target;
+ if(t.dataset.cin!=null){pushUndo();const S=state.songs[+t.dataset.cin];if(t.value==='')delete S.cin;else S.cin=+t.value;commit();renderSong(+t.dataset.cin);return}
+ if(t.dataset.qcin){pushUndo();const[a,b]=t.dataset.qcin.split(':').map(Number),Q=state.songs[a].sections[b];if(t.value==='')delete Q.cin;else Q.cin=+t.value;commit();renderSong(a);return}
  if(t.dataset.tns){pushUndo();const[a,b]=t.dataset.tns.split(':').map(Number);state.songs[a].sections[b].toNextSec=+t.value||0;commit();renderSong(a);return}
  if(t.dataset.chk!=null){pushUndo();state.meta.decide[+t.dataset.chk].ok=t.checked;commit();if(!editing)renderSide();return}
  if(t.dataset.re){const m=(t.dataset.f||'').match(/^songs\.(\d+)/);if(m){renderSong(+m[1]);renderOverview();renderHead()}}
@@ -1024,7 +1031,7 @@ function flash(){const h=$('#hud');h.classList.remove('flash');void h.offsetWidt
 function paintLoops(){document.querySelectorAll('[data-loop]').forEach(b=>{const[id,i,m]=b.dataset.loop.split(':');const L=live.loops[id+':'+i];b.classList.toggle('on',m==='inf'?L==='inf':typeof L==='number')})}
 async function liveStart(id,from){if(editing)setEdit(null);if(live.follow)followStop();if(mid)toggleMetro(mid);liveStop(true);const si=state.songs.findIndex(s=>s.id===id);const s=state.songs[si];if(!s)return;
  if(!viewer&&ownView!==id){ownView=id;LS.set('view',id);applySel();window.scrollTo({top:0})}live.on=true;live.id=id;live.si=si;live.sec=clamp(+from||0,0,s.sections.length-1);document.body.classList.remove('idle');live.bar=0;live.beat=0;live.ended=false;live.view=null;
- live.ramp=null;live.rampDone=false;live.jumpTo=null;live.glideEnd=false;live.glide=null;live.glideReq=false;live.per=60/(live.bpmOver&&live.bpmOver[id]||bpmOf(s));live.base=live.per;live.bpb=parseInt(s.meter)||4;live.countN=CIN()*live.bpb;live.count=live.countN;
+ live.ramp=null;live.rampDone=false;live.jumpTo=null;live.glideEnd=false;live.glide=null;live.glideReq=false;live.per=60/(live.bpmOver&&live.bpmOver[id]||bpmOf(s));live.base=live.per;live.bpb=parseInt(s.meter)||4;live.countN=cinOf(s,from)*live.bpb;live.count=live.countN;
  ensureAC();if(ac&&ac.state!=='running'){try{await ac.resume()}catch(e){}}live.impro='';pLvl=1;if(BUS.perc)setPercGain(.02);paintFade();schedStart(liveBeat);window.__mdLat={start:+(SCH.beats[0]-ac.currentTime).toFixed(4),out:+outLat().toFixed(4)};
  try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>live.wl=w).catch(()=>{})}catch(e){}
  cur=id;document.body.classList.add('living');try{window.focus();$('#hud').focus({preventScroll:true})}catch(e){}renderSong(si);markNav();$('#hud').hidden=false;const ar=document.querySelector(`section.song[data-si="${si}"] .road`);ar&&ar.scrollIntoView({block:'start',behavior:'smooth'});
@@ -1145,7 +1152,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=54;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=55;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
@@ -1317,7 +1324,7 @@ function idleDraw(){const hud=$('#hud');if(!hud)return;document.querySelectorAll
  $('#hSong').textContent=`${S.n}. ${S.title} · ${S.key}`;$('#hSec').textContent=q.name;$('#hSec').style.color=`var(${KC[q.kind]||'--intro'})`;
  $('#hBar').textContent=selSec?`départ à la section ${selSec+1}`:'départ au début';$('#hBeats').innerHTML='';$('#hImpro').hidden=true;
  $('#hCall').textContent=q.call||'';paintNash(q,S);
- const n=CIN();$('#hNext').innerHTML=`<b>▶ Play</b> (ou L)${n?` · ${n} mes. de décompte`:''} · clique une case pour choisir où partir`;$('#hNext').classList.remove('soon');
+ const n=cinOf(S,selSec);$('#hNext').innerHTML=`<b>▶ Play</b> (ou L)${n?` · ${n} mes. de décompte`:''} · clique une case pour choisir où partir`;$('#hNext').classList.remove('soon');
  $('#hProg').style.width='0%';$('#hBpm').textContent=(live.bpmOver&&live.bpmOver[S.id])||bpmOf(S);$('#hTime').textContent='';}
 $('#hPlay').onclick=playSel;$('#hFade').onclick=percFade;paintFade();
 
