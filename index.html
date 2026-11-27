@@ -650,7 +650,7 @@ body.viewer .blk .call{font-size:22px}
   </div></div>
  <div id="imp" class="imp" hidden></div>
 </div>
-<div id="setm" class="setm" hidden><div class="setp"><div class="sethd"><b>⚙️ Réglages</b><button id="setX" title="Fermer">✕</button></div><div class="setsec"><h4>⏱ Décompte au début des chants (général)</h4><span class="clk"><button id="bCount">Décompte : off</button></span><p class="seth2">Chaque chant peut avoir son propre réglage (menu « Décompte au début » sous le titre).</p></div><div id="setBody"></div></div></div><div id="toast" class="toast"></div><div id="shout" class="shout"></div><div id="jflash" class="jflash"></div>
+<div id="setm" class="setm" hidden><div class="setp"><div class="sethd"><b>⚙️ Réglages</b><button id="setX" title="Fermer">✕</button></div><div class="setsec"><h4>💾 Sauvegarde</h4><span class="clk"><button data-backup="1">💾 Télécharger une sauvegarde complète</button></span><p class="seth2">Un seul fichier .html avec <b>toutes tes modifications</b>, les sons et les voix. Il suffit de l'ouvrir pour tout retrouver.</p></div><div class="setsec"><h4>⏱ Décompte au début des chants (général)</h4><span class="clk"><button id="bCount">Décompte : off</button></span><p class="seth2">Chaque chant peut avoir son propre réglage (menu « Décompte au début » sous le titre).</p></div><div id="setBody"></div></div></div><div id="toast" class="toast"></div><div id="shout" class="shout"></div><div id="jflash" class="jflash"></div>
 <button id="edDone" class="eddone" data-edclose="1" title="Terminer la modification (Échap)">✓ Terminer</button>
 </div>
 <script data-md src="mqtt.min.js"></script>
@@ -1125,7 +1125,9 @@ function clkUI(){return `<span class="clk"><button data-clk="snd" class="${sound
 function quickUI(){return `<span class="clk quick"><button data-clk="snd" class="${sound?'on':''}" title="Clic on/off">${sound?'🔊':'🔇'} Clic</button><button data-gd="on" class="${GUIDE.on?'on':''}" title="Guide vocal on/off">🗣 Guide</button><button data-gd="notes" class="${GUIDE.notes&&GUIDE.on?'on':''}" title="Le guide lit aussi les indications MD">💬 Indic. MD</button><button data-perc="on" class="${PERC.on?'on':''}" title="Percus on/off (clic à gauche, percus à droite)">🥁 Percus</button><button data-pad="on" class="${PAD.on?'on':''}" title="Pad ambiant on/off">🌫 Pad</button><button data-setopen="1" title="Tous les réglages">⚙️</button></span>`}
 function paintClk(){document.querySelectorAll('.clkbox').forEach(b=>b.innerHTML=quickUI());const sb=$('#setBody');if(sb)sb.innerHTML=
  `<div class="setsec"><h4>🔊 Clic</h4>${clkUI()}</div><div class="setsec"><h4>🗣 Guide vocal</h4>${guideUI()}<p class="seth2">Annonce la section suivante sur le 1 de la dernière mesure (+ indication MD), puis le décompte continue. Une indication nouvelle ou modifiée est mise en voix tout de suite (même voix). <b class="genst">${genState}</b></p></div><div class="setsec"><h4>🥁 Percus</h4>${percUI()}</div><div class="setsec"><h4>🌫 Pad ambiant</h4>${padUI()}<p class="seth2">Pad enregistré (orgue, violoncelles et violons, libres de droits) transposé dans la tonalité du chant, fondu de 4 s ; elle continue en standby, change de tonalité avec l'enchaînement, et s'éteint en fondu à l'arrêt. Côté percus (droite) quand les percus sont activées.</p></div>`}
-document.addEventListener('click',e=>{if(e.target.closest('[data-setopen]')){$('#setm').hidden=false;paintClk();return}if(e.target.id==='setX'||e.target.id==='setm')$('#setm').hidden=true});
+function saveBackup(){try{const html=cleanSrc(),d=new Date(),p=n=>String(n).padStart(2,'0'),name=`MD 29 novembre - sauvegarde ${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}h${p(d.getMinutes())}.html`;
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);toast('💾 Sauvegarde téléchargée : '+name)}catch(e){toast('⚠ Sauvegarde impossible ici')}}
+document.addEventListener('click',e=>{if(e.target.closest('[data-backup]')){saveBackup();return}if(e.target.closest('[data-setopen]')){$('#setm').hidden=false;paintClk();return}if(e.target.id==='setX'||e.target.id==='setm')$('#setm').hidden=true});
 function previewClk(){if(live.on||SCH.fn)return;ensureAC();if(!ac)return;const t=ac.currentTime+.03,p=.32;const was=sound;sound=true;for(let k=0;k<4;k++)clickAt(t+k*p,k===0);sound=was}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-clk]');if(!b||b.tagName==='SELECT'||b.tagName==='INPUT')return;
  if(b.dataset.clk==='snd'){sound=!sound;LS.set('sound',sound);if(sound)ensureAC()}else if(b.dataset.clk==='acc'){CLK.accent=!CLK.accent;LS.set('clk',CLK);previewClk()}paintClk()});
@@ -1280,7 +1282,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=67;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=68;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
