@@ -1136,8 +1136,10 @@ function guideBeat(t,s,si,sec,bar,beat){if(!GUIDE.on||!gReady)return;const q=s.s
  if(live.gSaid!==key&&bpb-beat>1){live.gSaid=key;gAnnounce(t,N);return}// changement en cours de mesure : on annonce tout de suite la nouvelle destination
  if(GUIDE.vcAll&&N.q&&beat<6&&t>=(live.gEnd||0)-.03)say('n'+(beat+1),t)}
 function guideCount(t,e){if(!GUIDE.on||!gReady)return;const bpb=live.bpb,cb=Math.floor(e/bpb),b=e%bpb,cN=Math.round(live.countN/bpb),s=state.songs[live.si],q0=s&&s.sections[live.sec];
- if(cb===cN-1){if(b===0){live.gEnd=sayNote(q0,sayList(gKeys(q0),t,GRATE));return}if(GUIDE.cnt&&b<6&&t>=(live.gEnd||0)-.03)say('n'+(b+1),t)}
- else if(GUIDE.cnt&&b<6)say('n'+(b+1),t)}
+ // décompte de 2 mesures : 1re mesure = annonce de la section (+ indication MD), 2e mesure = « 1, 2, 3, 4 » ; 1 mesure : annonce puis la fin du décompte
+ const ann=()=>{live.gEnd=sayNote(q0,sayList([...gKeys(q0),...(q0&&isDrop(q0)?['drop']:[])],t,GRATE))};
+ if(cN>=2){if(cb===cN-2&&b===0)ann();else if(cb===cN-1&&GUIDE.cnt&&b<6)say('n'+(b+1),t)}
+ else{if(b===0){ann();return}if(GUIDE.cnt&&b<6&&t>=(live.gEnd||0)-.03)say('n'+(b+1),t)}}
 function guideUI(){return `<span class="clk gd"><button data-gd="on" class="${GUIDE.on?'on':''}" title="Voix qui annonce la section suivante 1 mesure avant (comme MultiTracks)">${GUIDE.on?'🗣 Guide : oui':'🗣 Guide : non'}</button>${GUIDE.on?`<select data-gd="voice" title="Voix"><option value="tom" ${GUIDE.voice==='tom'?'selected':''}>Voix homme</option><option value="siwis" ${GUIDE.voice==='siwis'?'selected':''}>Voix femme</option></select><button data-gd="cnt" class="${GUIDE.cnt?'on':''}" title="Décompte vocal 1-2-3-4 au début des chants">${GUIDE.cnt?'1-2-3-4 début : oui':'1-2-3-4 début : non'}</button><button data-gd="vcAll" class="${GUIDE.vcAll?'on':''}" title="1-2-3-4 dans la dernière mesure avant chaque section (le nom est annoncé une mesure plus tôt)">${GUIDE.vcAll?'1-2-3-4 sections : oui':'1-2-3-4 sections : non'}</button><button data-gd="notes" class="${GUIDE.notes?'on':''}" title="Lire aussi les notes MD de la section qui arrive">${GUIDE.notes?'💬 Indications MD : oui':'💬 Indications MD : non'}</button><input data-gd="vol" type="range" min="0.1" max="1.5" step="0.05" value="${GUIDE.vol}" title="Volume de la voix">`:''}</span>`}
 function previewGuide(k){if(live.on||SCH.fn)return;ensureAC();const go=()=>{if(!gReady)return setTimeout(go,80);sayList(k||['refrain','n2'],ac.currentTime+.05)};go()}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-gd]');if(!b||b.tagName==='SELECT'||b.tagName==='INPUT')return;if(b.dataset.gd==='on'){GUIDE.on=!GUIDE.on;if(GUIDE.on)previewGuide()}else if(b.dataset.gd==='cnt'){GUIDE.cnt=!GUIDE.cnt;if(GUIDE.cnt)previewGuide(['n1'])}else if(b.dataset.gd==='vcAll'){GUIDE.vcAll=!GUIDE.vcAll}else if(b.dataset.gd==='notes'){GUIDE.notes=!GUIDE.notes}LS.set('guide',GUIDE);paintClk()});
@@ -1311,7 +1313,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=73;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=74;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
