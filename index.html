@@ -616,6 +616,13 @@ body.viewer .lbadge{font-size:15px}
 .secdel{background:rgba(229,72,77,.12)!important;color:#ff7b7b!important;border:1px solid rgba(229,72,77,.45)!important}
 .secdel:hover{background:rgba(229,72,77,.25)!important}
 .secdel.arm{background:#e60000!important;color:#fff!important;border-color:#e60000!important}
+
+/* verrouillage */
+button.lockb.on{background:#2a2f3a;color:var(--gold);border-color:var(--gold)}
+button.lockb.arm{background:#5a1e1e;color:#fff;border-color:#e60000}
+body.viewer #bLock{display:none!important}
+body.locked [data-edsec],body.locked [data-edsong],body.locked [data-edside],body.locked #bUndo{display:none!important}
+body.locked [data-chk]{pointer-events:none;opacity:.6}
 </style>
 </head>
 <body>
@@ -626,6 +633,7 @@ body.viewer .lbadge{font-size:15px}
   <div class="tools">
    <button class="edit" id="bEdit" title="Modifier la feuille (répétition)">✏️ Mode édition</button>
    <button class="ed-only" id="bUndo" title="Annuler la dernière modification">↶ Annuler</button>
+   <button id="bLock" class="lockb" title="Verrouiller la feuille : plus aucune modification possible">🔓 Verrouiller</button>
    <button id="bTheme" title="Mode scène sombre / clair">Mode scène</button>
    <span class="clkbox"></span>
    <button id="bPrint">Imprimer</button>
@@ -1318,7 +1326,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=75;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=76;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
@@ -1471,6 +1479,15 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-edsec],[da
  if(b.dataset.edclose)setEdit(null);else if(b.dataset.edsec)setEdit('sec',b.dataset.edsec);else if(b.dataset.edsong)setEdit('song',b.dataset.edsong);else setEdit(EDIT.side?null:'side',true)},true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&editing&&!live.on&&!typing()){setEdit(null)}});
 
+// ---------- 🔒 Verrouillage : la feuille ne peut plus être modifiée sur cet appareil ----------
+let locked=LS.get('lock',false),unlockArm=0;
+function paintLock(){document.body.classList.toggle('locked',locked);const b=$('#bLock');if(!b)return;b.classList.toggle('on',locked);b.classList.remove('arm');b.textContent=locked?'🔒 Verrouillé':'🔓 Verrouiller';b.title=locked?'Feuille verrouillée · cliquer 2× pour déverrouiller':'Verrouiller la feuille : plus aucune modification possible'}
+function setLock(v){locked=v;LS.set('lock',v);if(v&&(editing||EDIT.song||EDIT.sec||EDIT.side)){try{setEdit(null)}catch(e){editing=false;renderAll()}}paintLock();toast(v?'🔒 Feuille verrouillée : rien ne peut être modifié':'🔓 Feuille déverrouillée')}
+$('#bLock').onclick=()=>{if(!locked){setLock(true);return}if(Date.now()-unlockArm<3000){unlockArm=0;setLock(false);return}unlockArm=Date.now();const b=$('#bLock');b.classList.add('arm');b.textContent='🔓 Encore 1× pour déverrouiller';setTimeout(()=>{if(locked&&Date.now()-unlockArm>=2900)paintLock()},3000)};
+const LOCKSEL='[data-edsec],[data-edsong],[data-edside],#bEdit,#bUndo,[data-chk],[data-h],.blk.ed *';
+['click','pointerdown','mousedown','change','input','dblclick'].forEach(ev=>window.addEventListener(ev,e=>{if(!locked||!e.target.closest)return;const t=e.target.closest(LOCKSEL);if(!t)return;e.stopImmediatePropagation();e.preventDefault();if(ev==='click'||ev==='change')toast('🔒 Feuille verrouillée · déverrouille en haut pour modifier')},true));
+window.addEventListener('keydown',e=>{if(!locked)return;const k=e.key.toLowerCase();if((e.ctrlKey||e.metaKey)&&(k==='z'||k==='d'||k==='v'||k==='x')&&!live.on){e.stopImmediatePropagation();e.preventDefault()}},true);
+paintLock();
 function paintLoopBadge(s,sec,L){const h=$('#hLoop');if(h){h.hidden=!L;if(L){h.className='hloop '+(L==='inf'?'inf':'one');h.textContent=L==='inf'?'∞ EN BOUCLE · on reste ici':`↻ ON REFAIT ${typeof L==='number'&&L>1?L+'×':'1×'} cette section`}}
  const root=document.getElementById(s.id);if(root)root.querySelectorAll('.blk').forEach(b=>{const me=+b.dataset.i===sec;b.classList.toggle('lpinf',me&&L==='inf');b.classList.toggle('lpone',me&&typeof L==='number')})}
 (async()=>{for(let k=0;k<40&&!room;k++)await new Promise(r=>setTimeout(r,500));if(!room)return;room.on('loops',a=>{const d=unwrap(a);if(!d||!live.follow||d.id!==live.id||typeof d.loops!=='object')return;live.loops=d.loops;liveDraw(true)})})();
