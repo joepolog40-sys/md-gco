@@ -590,6 +590,10 @@ body.viewer .blk .chd{font-size:19px}
 .blk .sbadge{position:absolute!important;top:26px;right:28px;font-size:16px;z-index:2;display:inline!important;width:auto!important}
 .tonext.subd.on{background:#e60000;color:#fff;border-color:#e60000}
 .fxv{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:700}
+
+/* cases épurées : type, remarque MD, degrés, note perso (MD) */
+.blk .cue,.blk .ww,.blk .tm,.blk .lp{display:none!important}
+.blk .note{font-size:13px;color:var(--mute);font-style:italic}
 </style>
 </head>
 <body>
@@ -795,8 +799,8 @@ const norm=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''
 function vCall(q){const c=String(q.call||''),p=c.split('·').map(x=>x.trim()),first=norm(p[0]).split(' ')[0],nm=norm(q.name);if(p.length>1&&first&&(nm.startsWith(first)||nm.includes(first)||(first==='pre'&&q.kind==='prerefrain')))return p.slice(1).join(' · ');return c}
 function vDupNote(q){const n=norm(q.note),c=norm(q.call);return !!n&&(c.includes(n)||n===c)}
 function blockRO(s,q,i){const si=state.songs.indexOf(s);return `<div class="blk" tabindex="0" data-i="${i}" title="Intensité ${lvlTxt(q)} / 10 · ${WORD(Math.max(q.i0,q.i1))}" style="--g:${Math.max(+q.bars||1,4)};--c:var(${KC[q.kind]||'--intro'})">${wm(q,si,i)}
- <div class="nm">${esc(q.name)}<span>${esc(q.bars)} mes.</span></div><button class="ico secedit" data-edsec="${si}:${i}" title="Modifier cette section">✏️</button>${q.call?`<div class="call ${HOT.test(q.call)||q.mark==='drop'||q.mark==='stop'?'hot':''}">${esc(viewer?vCall(q):q.call)}</div>`:''}
- ${q.nash?`<div class="nash">${NL(show(q.nash,s.key))}</div>${viewer&&toChords(q.nash,s.key)!==q.nash?`<div class="chd">${NL(chords?q.nash:toChords(q.nash,s.key))}</div>`:''}`:''}${q.cue&&!(viewer&&norm(q.call).includes(norm(q.cue)))?`<div class="cue">« ${esc(q.cue)} »</div>`:''}${q.note&&!(viewer&&vDupNote(q))?`<div class="note">${esc(q.note)}</div>`:''}
+ <div class="nm">${esc(q.name)}<span>${esc(q.bars)} mes.</span></div><button class="ico secedit" data-edsec="${si}:${i}" title="Modifier cette section">✏️</button>${q.call?`<div class="call ${HOT.test(q.call)||q.mark==='drop'||q.mark==='stop'?'hot':''}">${esc(vCall(q))}</div>`:''}
+ ${q.nash?`<div class="nash">${NL(show(q.nash,s.key))}</div>${viewer&&toChords(q.nash,s.key)!==q.nash?`<div class="chd">${NL(chords?q.nash:toChords(q.nash,s.key))}</div>`:''}`:''}${q.cue&&!(viewer&&norm(q.call).includes(norm(q.cue)))?`<div class="cue">« ${esc(q.cue)} »</div>`:''}${q.note&&!viewer&&!vDupNote(q)?`<div class="note" title="Note perso (visible seulement par toi)">📝 ${esc(q.note)}</div>`:''}
  ${q.perc&&PK(q.perc)!=='none'&&PATS[PK(q.perc)]?`<span class="pbadge" title="Percus : ${esc(PATS[PK(q.perc)].n)}">🥁</span>`:''}${q.sub?`<span class="sbadge" title="Subdrop">💥</span>`:''}${q.toNext?`<span class="nbadge">⤳ puis ${esc(state.songs[si+1]?state.songs[si+1].title+' · '+(state.songs[si+1].sections[+q.toNextSec||0]||state.songs[si+1].sections[0]).name:'chant suivant')}</span>`:''}${isDrop(q)?`<span class="dbadge">⬇ DROP · ${esc(dShort(q,parseInt(s.meter)||4))}</span>`:''}${wword(q)}${q.t!=null?`<span class="tm">${mmss(q.t)}</span>`:''}
  <div class="lp">${(()=>{const L=live.loops[s.id+':'+i];return `<button data-loop="${s.id}:${i}:1" class="${typeof L==='number'?'on':''}" title="Refaire cette section 1× de plus (re-clic = annuler)">↻1</button><button data-loop="${s.id}:${i}:inf" class="${L==='inf'?'on':''}" title="Boucler cette section (re-clic = arrêter)">∞</button>`})()}<span class="pc"></span></div>
  <div class="prog"><i></i></div></div>`}
@@ -807,10 +811,10 @@ function blockED(s,si,q,i){const p=`songs.${si}.sections.${i}`,a=100-q.i0*10,b=1
   <select class="kchip" data-f="${p}.kind" data-re="1" title="Type de section">${Object.keys(KL).map(k=>`<option value="${k}" ${k===q.kind?'selected':''}>${KL[k]}</option>`).join('')}</select>
   <button class="xdel" data-act="sec-del" data-s="${si}" data-i="${i}" title="Supprimer (Suppr)">✕</button></div>
  <input class="i-name" data-f="${p}.name" value="${esc(q.name)}" placeholder="Nom de la section">
- <input class="i-call" data-f="${p}.call" value="${esc(q.call)}" placeholder="Appel MD…">
+ <input class="i-call" data-f="${p}.call" value="${esc(q.call)}" placeholder="Remarque MD (lue par le guide, vue par tous)…">
  <input class="i-nash nashin" data-f="${p}.nash" value="${esc(q.nash)}" placeholder="Degrés…">
  
- <input class="i-note" data-f="${p}.note" value="${esc(q.note)}" placeholder="Note…">
+ <input class="i-note" data-f="${p}.note" value="${esc(q.note)}" placeholder="Note perso (visible seulement par toi)…">
  ${q.mark==='drop'?dropPicker(s,si,i,q):''}
  <button class="tonext subd ${q.sub?'on':''}" data-act="sub" data-s="${si}" data-i="${i}" title="Gros subdrop « baouum » : sur le drop de cette section si elle en a un, sinon sur son 1">💥 Subdrop ${q.sub?'✓':''}</button><button class="tonext ${q.toNext?'on':''}" data-act="tonext" data-s="${si}" data-i="${i}" title="À la fin de cette section, on passe directement au chant suivant (le clic glisse vers son tempo)">⤳ Ensuite : chant suivant ${q.toNext?'✓':''}</button>${q.toNext&&state.songs[si+1]?`<div class="percsel"><label>Départ</label><select data-tns="${si}:${i}">${state.songs[si+1].sections.map((x,k)=>`<option value="${k}" ${(+q.toNextSec||0)===k?'selected':''}>${esc(state.songs[si+1].title)} · ${esc(x.name)}</option>`).join('')}</select></div>`:''}<div class="percsel"><label>Percu</label><select data-f="${p}.perc" data-re="1">${Object.entries(PATS).map(([k,v])=>`<option value="${k}" ${PK(q.perc||'none')===k?'selected':''}>${v.n}</option>`).join('')}</select></div>
  <div class="marks">${[['drop','DROP'],['stop','STOP']].map(([m,l])=>`<button data-act="mark" data-s="${si}" data-i="${i}" data-m="${m}" class="${q.mark===m?'on':''}" title="${MARKS[m]}">${l}</button>`).join('')}</div>
@@ -1247,7 +1251,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=59;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=60;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
