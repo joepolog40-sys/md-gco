@@ -1088,8 +1088,10 @@ function padReverb(){if(padIR)return padIR;const len=Math.floor(ac.sampleRate*5)
 // pad enregistré (orgue + violoncelles + violons VSCO 2 CE, libres de droits) transposé dans la tonalité ; sinon la nappe synthétisée
 var PADB=null,padP=null;function buildPad(){if(!window.PADSAMP||!ac)return Promise.resolve();if(padP)return padP;PADB={};padP=(async()=>{try{const bin=atob(PADSAMP.C),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);PADB.C=await ac.decodeAudioData(u.buffer)}catch(e){}})();return padP}
 function padMakeS(root,t){let st=((root%12)+12)%12;if(st>6)st-=12;const src=ac.createBufferSource();src.buffer=PADB.C;src.loop=true;src.playbackRate.value=Math.pow(2,st/12);
- const lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1500+PAD.bright*7000;lp.Q.value=.5;const o=ac.createGain();o.gain.value=0;src.connect(lp);lp.connect(o);o.connect(bus('pad'));
- src.start(t,Math.random()*20);o.gain.setValueAtTime(0,t);o.gain.linearRampToValueAtTime(1.4,t+4);return {o,osc:[src],root}}
+ const lp=ac.createBiquadFilter();lp.type='lowpass';lp.Q.value=.7;const hs=ac.createBiquadFilter();hs.type='highshelf';hs.frequency.value=2500;const o=ac.createGain();o.gain.value=0;src.connect(lp);lp.connect(hs);hs.connect(o);o.connect(bus('pad'));
+ const P={o,osc:[src],root,lp,hs};padBright(P);src.start(t,Math.random()*20);o.gain.setValueAtTime(0,t);o.gain.linearRampToValueAtTime(1.4,t+4);return P}
+// brillance : 0 = très sombre (filtre à ~350 Hz), 1 = très ouvert (+8 dB d'aigus), réglable en direct
+function padBright(P){if(!P||!P.lp||!ac)return;const b=PAD.bright,t=ac.currentTime;P.lp.frequency.setTargetAtTime(350*Math.pow(18000/350,b),t,.05);P.hs.gain.setTargetAtTime(-8+16*b,t,.05);if(window.__gdLog)__gdLog.push(['BRIGHT',Math.round(350*Math.pow(18000/350,b))])}
 function padMake(root,t){if(PADB&&PADB.C)return padMakeS(root,t);const o=ac.createGain();o.gain.value=0;const lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=500+PAD.bright*1400;lp.Q.value=.6;
  const lfo=ac.createOscillator(),lg=ac.createGain();lfo.frequency.value=.07;lg.gain.value=250+PAD.bright*350;lfo.connect(lg);lg.connect(lp.frequency);
  const cv=ac.createConvolver();cv.buffer=padReverb();const wet=ac.createGain();wet.gain.value=.85;const dry=ac.createGain();dry.gain.value=.35;
@@ -1104,7 +1106,7 @@ function padUI(){return `<span class="clk"><button data-pad="on" class="${PAD.on
 function padToggle(){PAD.on=!PAD.on;LS.set('pad',PAD);if(PAD.on){ensureAC();const s=live.on&&!live.follow?state.songs[live.si]:state.songs.find(x=>x.id===(viewer?selId:ownView));if(s)padSwitch(s.key,ac.currentTime+.05);if(!live.on)setTimeout(()=>{if(!live.on)padStop(3)},6000)}else padStop(2.5);paintClk()}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-pad="on"]');if(b)padToggle()});
 document.addEventListener('change',e=>{const b=e.target.closest('[data-pad="when"]');if(!b)return;PAD.when=b.value;LS.set('pad',PAD)});
-document.addEventListener('input',e=>{const b=e.target.closest('[data-pad="vol"],[data-pad="bright"]');if(!b)return;PAD[b.dataset.pad]=+b.value;LS.set('pad',PAD);if(ac&&BUS.pad)BUS.pad.g.gain.value=PAD.vol});
+document.addEventListener('input',e=>{const b=e.target.closest('[data-pad="vol"],[data-pad="bright"]');if(!b)return;PAD[b.dataset.pad]=+b.value;LS.set('pad',PAD);if(ac&&BUS.pad)BUS.pad.g.gain.value=PAD.vol;if(b.dataset.pad==='bright')padBright(padCur)});
 function guideBeat(t,s,si,sec,bar,beat){if(!GUIDE.on||!gReady)return;const q=s.sections[sec],bars=+q.bars||1,bpb=live.bpb;if(bar!==bars-1)return;
  const N=gNext(s,si,sec),key=[si,sec,N.rep?'r':N.q?N.q.name:'fin',N.song?1:0].join('|');
  if(beat===0){live.gSaid=key;gAnnounce(t,N);return}
@@ -1278,7 +1280,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=65;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=66;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
