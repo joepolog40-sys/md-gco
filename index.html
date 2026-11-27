@@ -934,7 +934,7 @@ function clickAt(t,acc){if(!sound||!ac)return;t=Math.max(t,ac.currentTime+.012);
 // ---------- ESSAI : percussions par section (œuf, tambourin…), synchro sur le clic, clic à gauche / percus à droite ----------
 let OUT=null;const BUS={};
 const PERC=Object.assign({on:true,vol:.7},LS.get('perc2',{}));
-function bus(k){if(!ac)return null;if(!BUS[k]){const p=ac.createStereoPanner?ac.createStereoPanner():null,g=ac.createGain();if(p){g.connect(p);p.connect(ac.destination)}else g.connect(ac.destination);BUS[k]={g,p};g.gain.value=k==='perc'?PERC.vol*pLvl:k==='gd'?GUIDE.vol:k==='fx'?(PERC.fx??.9):1}
+function bus(k){if(!ac)return null;if(!BUS[k]){const p=ac.createStereoPanner?ac.createStereoPanner():null,g=ac.createGain();if(p){g.connect(p);p.connect(ac.destination)}else g.connect(ac.destination);BUS[k]={g,p};g.gain.value=k==='perc'?PERC.vol*pLvl:k==='gd'?GUIDE.vol:k==='fx'?(PERC.fx??.9):k==='pad'?PAD.vol:1}
  const B=BUS[k];if(B.p)B.p.pan.value=PERC.on?(k==='clk'||k==='gd'?-1:1):0;return B.g}
 // sélection CCM / worship : jeu droit, accent sur le « et » (pas de 4e double croche appuyée = pas de feeling samba)
 const PATS={
@@ -1054,6 +1054,26 @@ function fxBeat(t,per,s,si,sec,bar,beat){const q=s.sections[sec],bpb=live.bpb,ba
  if(q.sub){if(isDrop(q)&&dAt(q)<=0){const g=-dAt(q);if(into===Math.floor(g))playSub(t+(g-Math.floor(g))*per)}else if(into===0&&!(isDrop(q)&&live.subFor===sec))playSub(t)}// drop avant la section mais on démarre dessus : baouum sur son 1
  if(into===0&&live.subFor!==sec)live.subFor=null;
  const N=gNext(s,si,sec);if(N&&N.q&&!N.rep&&N.q.sub&&isDrop(N.q)&&dAt(N.q)>0){const d=dAt(N.q),c=Math.ceil(d);if(remain===c){playSub(t+(c-d)*per);live.subFor=s.sections.indexOf(N.q)}}}
+// ---------- Pad ambiant (façon pads worship) : nappe tonique + quinte + octave dans la tonalité du chant, synthétisée ----------
+var PAD=Object.assign({on:false,vol:.45,when:'count',bright:.5},LS.get('pad')||{}),padCur=null,padIR=null;
+const KEYI={C:0,'C#':1,Db:1,D:2,'D#':3,Eb:3,E:4,F:5,'F#':6,Gb:6,G:7,'G#':8,Ab:8,A:9,'A#':10,Bb:10,B:11};
+function keyMidi(k){const m=String(k||'').trim().match(/^([A-G])([#b♯♭]?)/);if(!m)return null;const n=KEYI[m[1]+(m[2]==='♯'?'#':m[2]==='♭'?'b':m[2])];if(n==null)return null;let r=48+n;if(r>51)r-=12;return r}// racine entre Mi2 et Ré#3
+function padReverb(){if(padIR)return padIR;const len=Math.floor(ac.sampleRate*5),b=ac.createBuffer(2,len,ac.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6)}padIR=b;return b}
+function padMake(root,t){const o=ac.createGain();o.gain.value=0;const lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=500+PAD.bright*1400;lp.Q.value=.6;
+ const lfo=ac.createOscillator(),lg=ac.createGain();lfo.frequency.value=.07;lg.gain.value=250+PAD.bright*350;lfo.connect(lg);lg.connect(lp.frequency);
+ const cv=ac.createConvolver();cv.buffer=padReverb();const wet=ac.createGain();wet.gain.value=.85;const dry=ac.createGain();dry.gain.value=.35;
+ lp.connect(dry);lp.connect(cv);cv.connect(wet);dry.connect(o);wet.connect(o);o.connect(bus('pad'));
+ const osc=[];const voice=(m,g,types)=>{for(const[ty,det]of types){const x=ac.createOscillator();x.type=ty;x.frequency.value=440*Math.pow(2,(m-69)/12);x.detune.value=det;const vg=ac.createGain();vg.gain.value=g;x.connect(vg);vg.connect(lp);x.start(t);osc.push(x)}};
+ voice(root,.16,[['sawtooth',-7],['sawtooth',7],['triangle',0]]);voice(root+7,.11,[['sawtooth',-5],['sawtooth',6]]);voice(root+12,.10,[['sawtooth',-8],['sawtooth',8]]);voice(root+19,.05,[['triangle',-4],['triangle',4]]);voice(root+24,.035,[['sine',0]]);
+ lfo.start(t);osc.push(lfo);o.gain.setValueAtTime(0,t);o.gain.linearRampToValueAtTime(1,t+4);return {o,osc,root}}
+function padSwitch(key,t){if(!PAD.on)return;ensureAC();if(!ac)return;const r=keyMidi(key);if(r==null)return;t=Math.max(t||0,ac.currentTime+.02);if(padCur&&padCur.root===r)return;padStop(3,t);padCur=padMake(r,t);paintPadBtn()}
+function padStop(f,t){if(!padCur||!ac)return;const P=padCur;padCur=null;t=Math.max(t||0,ac.currentTime);try{P.o.gain.cancelScheduledValues(t);P.o.gain.setValueAtTime(P.o.gain.value,t);P.o.gain.linearRampToValueAtTime(0,t+(f||3));P.osc.forEach(x=>x.stop(t+(f||3)+.1))}catch(e){}}
+function paintPadBtn(){if(window.__gdLog&&padCur)__gdLog.push(['PAD',padCur.root])}
+function padUI(){return `<span class="clk"><button data-pad="on" class="${PAD.on?'on':''}" title="Nappe ambiante dans la tonalité du chant (tonique + quinte), lancée au début du chant">${PAD.on?'🌫 Pad : oui':'🌫 Pad : non'}</button><select data-pad="when" title="Quand le pad démarre"><option value="count" ${PAD.when==='count'?'selected':''}>dès le décompte</option><option value="first" ${PAD.when==='first'?'selected':''}>sur le 1 du chant</option></select><label class="fxv">Volume <input data-pad="vol" type="range" min="0" max="1" step="0.05" value="${PAD.vol}"></label><label class="fxv">Brillance <input data-pad="bright" type="range" min="0" max="1" step="0.05" value="${PAD.bright}"></label></span>`}
+function padToggle(){PAD.on=!PAD.on;LS.set('pad',PAD);if(PAD.on){ensureAC();const s=live.on&&!live.follow?state.songs[live.si]:state.songs.find(x=>x.id===(viewer?selId:ownView));if(s)padSwitch(s.key,ac.currentTime+.05);if(!live.on)setTimeout(()=>{if(!live.on)padStop(3)},6000)}else padStop(2.5);paintClk()}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-pad="on"]');if(b)padToggle()});
+document.addEventListener('change',e=>{const b=e.target.closest('[data-pad="when"]');if(!b)return;PAD.when=b.value;LS.set('pad',PAD)});
+document.addEventListener('input',e=>{const b=e.target.closest('[data-pad="vol"],[data-pad="bright"]');if(!b)return;PAD[b.dataset.pad]=+b.value;LS.set('pad',PAD);if(ac&&BUS.pad)BUS.pad.g.gain.value=PAD.vol});
 function guideBeat(t,s,si,sec,bar,beat){if(!GUIDE.on||!gReady)return;const q=s.sections[sec],bars=+q.bars||1,bpb=live.bpb;if(bar!==bars-1)return;
  const N=gNext(s,si,sec),key=[si,sec,N.rep?'r':N.q?N.q.name:'fin',N.song?1:0].join('|');
  if(beat===0){live.gSaid=key;gAnnounce(t,N);return}
@@ -1069,9 +1089,9 @@ document.addEventListener('change',e=>{const b=e.target.closest('[data-gd="voice
 document.addEventListener('input',e=>{const b=e.target.closest('[data-gd="vol"]');if(!b)return;GUIDE.vol=+b.value;LS.set('guide',GUIDE);if(ac&&BUS.gd)BUS.gd.g.gain.value=GUIDE.vol});
 function clkUI(){return `<span class="clk"><button data-clk="snd" class="${sound?'on':''}">${sound?'🔊':'🔇'} Clic</button><select data-clk="type" title="Son du clic">${Object.entries(CLKS).map(([k,l])=>`<option value="${k}" ${k===CLK.type?'selected':''}>${l}</option>`).join('')}</select><button data-clk="acc" class="${CLK.accent?'on':''}" title="Accent sur le 1">${CLK.accent?'Accent 1 : oui':'Accent 1 : non'}</button><input data-clk="vol" type="range" min="0.1" max="1" step="0.05" value="${CLK.vol}" title="Volume du clic"></span>`}
 // accès rapide (barre live + en-tête) : ce qu'on touche pendant le live ; le reste dans ⚙️ Réglages
-function quickUI(){return `<span class="clk quick"><button data-clk="snd" class="${sound?'on':''}" title="Clic on/off">${sound?'🔊':'🔇'} Clic</button><button data-gd="on" class="${GUIDE.on?'on':''}" title="Guide vocal on/off">🗣 Guide</button><button data-gd="notes" class="${GUIDE.notes&&GUIDE.on?'on':''}" title="Le guide lit aussi les indications MD">💬 Indic. MD</button><button data-perc="on" class="${PERC.on?'on':''}" title="Percus on/off (clic à gauche, percus à droite)">🥁 Percus</button><button data-setopen="1" title="Tous les réglages">⚙️</button></span>`}
+function quickUI(){return `<span class="clk quick"><button data-clk="snd" class="${sound?'on':''}" title="Clic on/off">${sound?'🔊':'🔇'} Clic</button><button data-gd="on" class="${GUIDE.on?'on':''}" title="Guide vocal on/off">🗣 Guide</button><button data-gd="notes" class="${GUIDE.notes&&GUIDE.on?'on':''}" title="Le guide lit aussi les indications MD">💬 Indic. MD</button><button data-perc="on" class="${PERC.on?'on':''}" title="Percus on/off (clic à gauche, percus à droite)">🥁 Percus</button><button data-pad="on" class="${PAD.on?'on':''}" title="Pad ambiant on/off">🌫 Pad</button><button data-setopen="1" title="Tous les réglages">⚙️</button></span>`}
 function paintClk(){document.querySelectorAll('.clkbox').forEach(b=>b.innerHTML=quickUI());const sb=$('#setBody');if(sb)sb.innerHTML=
- `<div class="setsec"><h4>🔊 Clic</h4>${clkUI()}</div><div class="setsec"><h4>🗣 Guide vocal</h4>${guideUI()}<p class="seth2">Annonce la section suivante sur le 1 de la dernière mesure (+ indication MD), puis le décompte continue.</p></div><div class="setsec"><h4>🥁 Percus</h4>${percUI()}</div>`}
+ `<div class="setsec"><h4>🔊 Clic</h4>${clkUI()}</div><div class="setsec"><h4>🗣 Guide vocal</h4>${guideUI()}<p class="seth2">Annonce la section suivante sur le 1 de la dernière mesure (+ indication MD), puis le décompte continue.</p></div><div class="setsec"><h4>🥁 Percus</h4>${percUI()}</div><div class="setsec"><h4>🌫 Pad ambiant</h4>${padUI()}<p class="seth2">Nappe tonique + quinte dans la tonalité du chant, fondu de 4 s ; elle continue en standby, change de tonalité avec l'enchaînement, et s'éteint en fondu à l'arrêt. Côté percus (droite) quand les percus sont activées.</p></div>`}
 document.addEventListener('click',e=>{if(e.target.closest('[data-setopen]')){$('#setm').hidden=false;paintClk();return}if(e.target.id==='setX'||e.target.id==='setm')$('#setm').hidden=true});
 function previewClk(){if(live.on||SCH.fn)return;ensureAC();if(!ac)return;const t=ac.currentTime+.03,p=.32;const was=sound;sound=true;for(let k=0;k<4;k++)clickAt(t+k*p,k===0);sound=was}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-clk]');if(!b||b.tagName==='SELECT'||b.tagName==='INPUT')return;
@@ -1107,11 +1127,11 @@ function paintLoops(){document.querySelectorAll('[data-loop]').forEach(b=>{const
 async function liveStart(id,from){if(editing)setEdit(null);if(live.follow)followStop();if(mid)toggleMetro(mid);liveStop(true);const si=state.songs.findIndex(s=>s.id===id);const s=state.songs[si];if(!s)return;
  if(!viewer&&ownView!==id){ownView=id;LS.set('view',id);applySel();window.scrollTo({top:0})}live.on=true;live.id=id;live.si=si;live.sec=clamp(+from||0,0,s.sections.length-1);document.body.classList.remove('idle');live.bar=0;live.beat=0;live.ended=false;live.view=null;
  live.subFor=null;live.ramp=null;live.rampDone=false;live.jumpTo=null;live.glideEnd=false;live.glide=null;live.glideReq=false;live.per=60/(live.bpmOver&&live.bpmOver[id]||bpmOf(s));live.base=live.per;live.bpb=parseInt(s.meter)||4;live.countN=cinOf(s,from)*live.bpb;live.count=live.countN;
- ensureAC();if(ac&&ac.state!=='running'){try{await ac.resume()}catch(e){}}live.impro='';pLvl=1;if(BUS.perc)setPercGain(.02);paintFade();schedStart(liveBeat);window.__mdLat={start:+(SCH.beats[0]-ac.currentTime).toFixed(4),out:+outLat().toFixed(4)};
+ ensureAC();if(ac&&ac.state!=='running'){try{await ac.resume()}catch(e){}}live.impro='';pLvl=1;if(BUS.perc)setPercGain(.02);paintFade();schedStart(liveBeat);if(PAD.on&&!live.follow)padSwitch(s.key,PAD.when==='first'?SCH.beats[0]+live.countN*live.per:ac.currentTime+.05);window.__mdLat={start:+(SCH.beats[0]-ac.currentTime).toFixed(4),out:+outLat().toFixed(4)};
  try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>live.wl=w).catch(()=>{})}catch(e){}
  cur=id;document.body.classList.add('living');try{window.focus();$('#hud').focus({preventScroll:true})}catch(e){}renderSong(si);markNav();$('#hud').hidden=false;const ar=document.querySelector(`section.song[data-si="${si}"] .road`);ar&&ar.scrollIntoView({block:'start',behavior:'smooth'});
  impPaintPad();leadSel(id)}
-function liveStop(silent){if(live.follow){followStop();return}live.jumpTo=null;live.glideEnd=false;live.glide=null;live.glideReq=false;impOpen(false);if(live.impro)impSet([]);live.sb=null;live.sbPending=null;document.body.classList.remove('standby','panic');document.querySelectorAll('.blk.target').forEach(b=>b.classList.remove('target'));schedStop();const was=live.on;if(was&&room&&!viewer)try{room.emit('stop',{})}catch(e){}live.on=false;live.view=null;document.body.classList.remove('living');$('#hud').hidden=true;
+function liveStop(silent){if(live.follow){followStop();return}if(!silent)padStop(3);live.jumpTo=null;live.glideEnd=false;live.glide=null;live.glideReq=false;impOpen(false);if(live.impro)impSet([]);live.sb=null;live.sbPending=null;document.body.classList.remove('standby','panic');document.querySelectorAll('.blk.target').forEach(b=>b.classList.remove('target'));schedStop();const was=live.on;if(was&&room&&!viewer)try{room.emit('stop',{})}catch(e){}live.on=false;live.view=null;document.body.classList.remove('living');$('#hud').hidden=true;
  try{live.wl&&live.wl.release()}catch(e){}live.wl=null;
  document.querySelectorAll('.blk.live').forEach(b=>b.classList.remove('live'));document.querySelectorAll('.arc .ph').forEach(p=>p.style.display='none');
  if(was&&!silent&&live.si!=null)renderSong(live.si);if(!silent)idleDraw()}
@@ -1227,7 +1247,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=58;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=59;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
@@ -1332,7 +1352,7 @@ function doGlide(t){const i=live.si,n=state.songs[i+1];live.glideReq=false;if(!n
  const from=live.per,to=60/((live.bpmOver&&live.bpmOver[n.id])||bpmOf(n)),bpb=parseInt(n.meter)||4,st=clamp(+live.glideSec||0,0,n.sections.length-1),pre=!!live.rampDone;live.glideSec=0;live.rampDone=false;
  const prev=i;live.sb=null;live.sbPending=null;live.jumpTo=null;live.glideEnd=false;live.id=n.id;live.si=i+1;live.sec=st;live.bar=0;live.beat=0;live.ended=false;live.bpb=bpb;live.countN=live.count=0;live.glide=null;live.down=null;live.prevDown=null;live.glFlag=true;
  if(!pre&&Math.abs(60/to-60/from)>.5){const K=Math.abs(60/to-60/from)<=2?1:2;live.ramp={from,to,n:K*bpb,i:0}}else{live.ramp=null;live.per=live.base=to}
- const fl=`${n.title} · ${n.sections[st].name}`;
+ const fl=`${n.title} · ${n.sections[st].name}`;if(PAD.on)padSwitch(n.key,t);
  SCH.q.push({t,run:()=>{impOpen(false);if(live.impro)impSet([]);document.body.classList.remove('standby','panic');document.querySelectorAll('.blk.target').forEach(b=>b.classList.remove('target'));paintSb();lastSec=-1;cur=n.id;if(!viewer&&ownView!==n.id){ownView=n.id;LS.set('view',n.id)}if(viewer)selId=n.id;applySel();renderSong(prev);renderSong(live.si);markNav();leadSel(n.id);paintGlide();jumpFlash(fl);const ar=document.querySelector(`section.song[data-si="${live.si}"] .road`);ar&&ar.scrollIntoView({block:'start',behavior:'smooth'})}})}
 function paintGlide(){const b=$('#hGlide');if(!b)return;const i=state.songs.findIndex(x=>x.id===live.id);b.hidden=!(live.on&&!live.follow&&state.songs[i+1]);const e=$('#hGlideEnd');if(e){e.hidden=b.hidden||!!live.sb;e.classList.toggle('on',!!live.glideEnd);e.textContent=live.glideEnd?'⤳ Fin de section… (annuler)':'⤳ Suivant en fin de section'}b.classList.toggle('on',!!live.glideReq);b.textContent=live.glideReq?'⤳ Au prochain 1…':'⤳ Enchaîner'}
 // ---------- Saut programmé : clic sur une autre case en live = on y va à la fin de la section en cours ----------
@@ -1405,7 +1425,7 @@ $('#hPlay').onclick=playSel;$('#hFade').onclick=percFade;paintFade();
 // ---------- Mode Répétition (musiciens) : jouer soi-même pour s'entraîner, sans suivre le MD ----------
 function setRep(on){rep=!!on&&viewer;document.body.classList.toggle('rep',rep);const b=$('#bRep');if(b){b.classList.toggle('on',rep);b.textContent=rep?'🎧 Répétition · ON':'🎧 Répétition'}
  if(rep){fol.optOut=true;if(live.follow)followStop();ensureAC();try{buildSamples()}catch(e){}cur=selId||(state.songs[0]&&state.songs[0].id);if(!selId&&cur)showSong(cur);markNav();selSec=0;idleDraw();toast('🎧 Répétition : choisis un chant en haut, clique une case, puis ▶ Play. Tu ne suis plus le MD.')}
- else{if(live.on&&!live.follow)liveStop(true);fol.optOut=false;idleDraw();if(mdSel)showSong(mdSel);toast('👁 Retour au suivi du MD')}}
+ else{if(live.on&&!live.follow)liveStop(true);padStop(2);fol.optOut=false;idleDraw();if(mdSel)showSong(mdSel);toast('👁 Retour au suivi du MD')}}
 (()=>{const b=$('#bRep');if(b)b.onclick=()=>setRep(!rep)})();
 
 // migration locale (sans envoi) : pré-refrain d'All Hail = une seule ligne sur la fiche
