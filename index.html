@@ -1158,7 +1158,7 @@ function guideBeat(t,s,si,sec,bar,beat){if(!GUIDE.on||!gReady)return;const q=s.s
  if(beat===0){live.gSaid=key;gAnnounce(t,N);return}
  if(live.gSaid!==key&&bpb-beat>1){live.gSaid=key;gAnnounce(t,N);return}// changement en cours de mesure : on annonce tout de suite la nouvelle destination
  if(GUIDE.vcAll&&N.q&&beat<6&&t>=(live.gEnd||0)-.03)say('n'+(beat+1),t)}
-function guideCount(t,e){if(!GUIDE.on||!gReady)return;const bpb=live.bpb,cb=Math.floor(e/bpb),b=e%bpb,cN=Math.round(live.countN/bpb),s=state.songs[live.si],q0=s&&s.sections[live.sec];
+function guideCount(t,e){if(!GUIDE.on||!gReady)return;const bpb=live.bpb,cb=Math.floor(e/bpb),b=e%bpb,cN=Math.round((live.countN-(live.slideN||0))/bpb),s=state.songs[live.si],q0=s&&s.sections[live.sec];
  // décompte de 2 mesures : 1re mesure = annonce de la section (+ indication MD), 2e mesure = « 1, 2, 3, 4 » ; 1 mesure : annonce puis la fin du décompte
  const ann=()=>{live.gEnd=sayNote(q0,sayList([...gKeys(q0),...(q0&&isDrop(q0)?['drop']:[])],t,GRATE))};
  if(cN>=2){if(cb===cN-2&&b===0)ann();else if(cb===cN-1&&GUIDE.cnt&&b<6)say('n'+(b+1),t)}
@@ -1213,7 +1213,7 @@ function flash(){const h=$('#hud');h.classList.remove('flash');void h.offsetWidt
 function paintLoops(){document.querySelectorAll('[data-loop]').forEach(b=>{const[id,i,m]=b.dataset.loop.split(':');const L=live.loops[id+':'+i];b.classList.toggle('on',m==='inf'?L==='inf':typeof L==='number')})}
 async function liveStart(id,from){if(editing)setEdit(null);if(live.follow)followStop();if(mid)toggleMetro(mid);liveStop(true);const si=state.songs.findIndex(s=>s.id===id);const s=state.songs[si];if(!s)return;
  if(!viewer&&ownView!==id){ownView=id;LS.set('view',id);applySel();window.scrollTo({top:0})}live.on=true;live.id=id;live.si=si;live.sec=clamp(+from||0,0,s.sections.length-1);document.body.classList.remove('idle');live.bar=0;live.beat=0;live.ended=false;live.view=null;
- applyPresetLoops(s);live.subFor=null;live.ramp=null;live.rampDone=false;live.jumpTo=null;live.glideEnd=false;live.glide=null;live.glideReq=false;live.per=60/(live.bpmOver&&live.bpmOver[id]||bpmOf(s));live.base=live.per;live.bpb=parseInt(s.meter)||4;live.countN=cinOf(s,from)*live.bpb;live.count=live.countN;
+ applyPresetLoops(s);live.subFor=null;live.ramp=null;live.rampDone=false;live.jumpTo=null;live.glideEnd=false;live.glide=null;live.glideReq=false;live.per=60/(live.bpmOver&&live.bpmOver[id]||bpmOf(s));live.base=live.per;live.bpb=parseInt(s.meter)||4;live.slideN=0;live.countN=cinOf(s,from)*live.bpb;live.count=live.countN;
  ensureAC();if(ac&&ac.state!=='running'){try{await ac.resume()}catch(e){}}live.impro='';pLvl=1;if(BUS.perc)setPercGain(.02);paintFade();schedStart(liveBeat);if(PAD.on&&!live.follow)padSwitch(s.key,PAD.when==='first'?SCH.beats[0]+live.countN*live.per:ac.currentTime+.05);window.__mdLat={start:+(SCH.beats[0]-ac.currentTime).toFixed(4),out:+outLat().toFixed(4)};
  try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>live.wl=w).catch(()=>{})}catch(e){}
  cur=id;document.body.classList.add('living');try{window.focus();$('#hud').focus({preventScroll:true})}catch(e){}renderSong(si);markNav();$('#hud').hidden=false;const ar=document.querySelector(`section.song[data-si="${si}"] .road`);ar&&ar.scrollIntoView({block:'start',behavior:'smooth'});
@@ -1228,7 +1228,7 @@ function liveBeat(t){if(live.glideReq&&live.beat===0&&live.count<=0&&!(live.sb&&
  if(live.ramp&&!live.sb&&live.count<=0){const G=live.ramp;G.i++;per=G.from+(G.to-G.from)*Math.min(1,G.i/G.n);live.per=per;if(G.i>=G.n){live.per=live.base=G.to;live.ramp=null;if(G.pre)live.rampDone=true}}
  if(live.sb){if(live.sbPending!=null&&live.beat===0){live.sec=live.sbPending;live.bar=0;live.count=0;live.ended=false;live.sbPending=null;live.sb=null;SCH.q.push({t,run:sbClear})}
   else{const b=live.beat,sn={sec:live.sec,bar:live.bar,beat:b,count:0,sb:true};clickAt(t,b===0);if(b===0){live.prevDown=live.down;live.down=t;leadEmitSb()}live.beat=(b+1)%live.bpb;SCH.q.push({t,run:()=>{live.view=sn;liveDraw()}});return per}}
- if(live.count>0){const e=live.countN-live.count;const gl=!!live.glide;if(live.glide){const G=live.glide;G.i++;per=G.from+(G.to-G.from)*Math.min(1,G.i/G.n);live.per=per;if(G.i>=G.n){live.per=live.base=G.to;live.glide=null}}snap={sec:live.sec,bar:0,beat:e%live.bpb,count:live.count,cbar:Math.floor(e/live.bpb),glide:gl?1:0};if(e%live.bpb===0||snap.glide)leadEmit({sec:live.sec,bar:0},t-ac.currentTime,{cin:(live.countN-e)/live.bpb,cinN:live.countN/live.bpb,gl:gl?1:0});clickAt(t,e%live.bpb===0);guideCount(t,e);live.count--}
+ if(live.count>0){const e=live.countN-live.count;const gl=!!live.glide;if(live.glide){const G=live.glide;G.i++;per=G.from+(G.to-G.from)*Math.min(1,G.i/G.n);live.per=per;if(G.i>=G.n){live.per=live.base=G.to;live.glide=null}}const SL=live.slideN||0,ec=e-SL;snap={sec:live.sec,bar:0,beat:(ec>=0?ec:e)%live.bpb,count:live.count,cbar:ec>=0?Math.floor(ec/live.bpb):0,glide:gl||ec<0?1:0};if(e%live.bpb===0||snap.glide)leadEmit({sec:live.sec,bar:0},t-ac.currentTime,{cin:(live.countN-e)/live.bpb,cinN:(live.countN-SL)/live.bpb,gl:snap.glide});clickAt(t,e%live.bpb===0);if(ec>=0)guideCount(t,ec);live.count--}
  else{snap={sec:live.sec,bar:live.bar,beat:live.beat,count:0};clickAt(t,live.beat===0);guideBeat(t,s,live.si,live.sec,live.bar,live.beat);fxBeat(t,per,s,live.si,live.sec,live.bar,live.beat);percBeat(t,s.sections[live.sec],live.beat,per,live.bpb);live.beat++;
   if(live.beat>=live.bpb){live.beat=0;live.bar++;const q=s.sections[live.sec];
    if(live.bar>=(+q.bars||1)){live.bar=0;if(live.glideEnd){live.glideEnd=false;live.glideReq=true;live.glideSec=0;live.beat=0}else if(live.jumpTo!=null){live.sec=clamp(live.jumpTo,0,s.sections.length-1);live.jumpTo=null;const jn=SN(s.sections[live.sec]);SCH.q.push({t,run:()=>{paintJump();liveDraw(true);jumpFlash(jn)}})}else{const k=live.id+':'+live.sec,L=live.loops[k];
@@ -1275,7 +1275,7 @@ function liveDraw(force){if(!live.on)return;if(live.sb||(live.follow&&fol.sb)){s
  // section suivante réelle : saut, ou début du chant suivant (enchaînement), sinon la suivante du chant
  const NSG=live.follow?fol.ns:live.glideEnd,NSS=state.songs[live.si+1],nsOn=!!NSS&&JT==null&&(NSG||(q.toNext&&!L)),nx=JT!=null&&S[JT]?S[JT]:nsOn?NSS.sections[clamp(NSG?0:(+q.toNextSec||0),0,NSS.sections.length-1)]:S[V.sec+1];paintLoopBadge(s,V.sec,L);
  $('#hSong').textContent=live.follow?'👁 En direct avec le MD':`${s.n}. ${s.title} · ${s.key}`;$('#hKey').textContent=s.key||'';$('#hSec').textContent=SN(q);$('#hSec').style.color=`var(${KC[q.kind]||'--intro'})`;
- $('#hBar').textContent=V.count>0?`${V.glide?'⤳ Enchaînement · '+fBpm(60/live.per)+' BPM':'Décompte'}${(live.countN||0)>live.bpb?` · mes. ${(V.cbar||0)+1}/${Math.round(live.countN/live.bpb)}`:''} · ${V.beat+1}`:`mes. ${V.bar+1} / ${bars}`;
+ $('#hBar').textContent=V.count>0?`${V.glide?'⤳ Enchaînement · '+fBpm(60/live.per)+' BPM':'Décompte'}${((live.countN||0)-(live.slideN||0))>live.bpb&&!V.glide?` · mes. ${(V.cbar||0)+1}/${Math.round((live.countN-(live.slideN||0))/live.bpb)}`:''} · ${V.beat+1}`:`mes. ${V.bar+1} / ${bars}`;
  $('#hBeats').innerHTML=Array.from({length:bpb},(_,k)=>`<i class="${V.count>0?(k===V.beat?'on c':''):(k===V.beat?'on':'')}${k===0?' one':''}"></i>`).join('');
  $('#hCall').textContent=q.call||'';paintNash(q,s,V.count===0&&left<=1&&!L&&nx?nx:null,nsOn&&JT==null?NSS.key:null);
  $('#hNext').innerHTML=JT!=null&&S[JT]&&V.count===0?`<b class="jumpi">⤳ SAUT → ${esc(SN(S[JT]))}</b> à la fin de la section · dans ${left} mes.`:L==='inf'?(live.follow?'<b class="loopi">∞ en boucle</b> · on sort sur signe du MD':'<b class="loopi">∞ en boucle</b> · Maj+Espace pour sortir'):typeof L==='number'?`<b class="loopi">↻ encore ${L}×</b> ${live.follow?'':'(Espace = annuler)'} puis → ${esc(nx?SN(nx):'fin')}`:nx?`→ <b>${esc(SN(nx))}</b> dans ${left} mes.${nx.call?` · ${esc(nx.call)}`:''}`:`→ <b>fin</b> dans ${left} mes.`;
@@ -1336,7 +1336,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=82;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=83;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
@@ -1430,17 +1430,18 @@ function nextSong(){if(viewer)return;const i=state.songs.findIndex(x=>x.id===liv
 // ---------- Enchaîner : passer direct au chant suivant, le clic glisse du tempo actuel vers le nouveau (1 mesure si tempo quasi identique, sinon 2) ----------
 function glideEnd(){if(!live.on||live.follow)return;const i=state.songs.findIndex(x=>x.id===live.id),n=state.songs[i+1];if(!n){toast('Pas de chant suivant');return}
  if(live.sb){glideNext();return}
- live.glideEnd=!live.glideEnd;if(live.glideEnd){live.glideReq=false;live.jumpTo=null;paintJump()}else if(live.ramp&&live.ramp.pre){live.per=live.base=live.ramp.from;live.ramp=null}paintGlide();liveDraw(true);
+ live.glideEnd=!live.glideEnd;if(live.glideEnd){live.glideReq=false;live.glideManual=false;live.jumpTo=null;paintJump()}else if(live.ramp&&live.ramp.pre){live.per=live.base=live.ramp.from;live.ramp=null}paintGlide();liveDraw(true);
  toast(live.glideEnd?`⤳ « ${n.title} » à la fin de la section · reclique pour annuler`:'Enchaînement annulé');
  if(room&&!viewer)try{room.emit('jump',{id:live.id,jt:-1,ns:live.glideEnd?1:0})}catch(e){}flash()}
 function glideNext(){if(!live.on||live.follow)return;const i=state.songs.findIndex(x=>x.id===live.id),n=state.songs[i+1];if(!n){toast('Pas de chant suivant');return}
  if(live.sb&&live.sb.mode==='panic'){toast('En Panic : relance d’abord le clic (F)');return}
- live.glideReq=!live.glideReq;if(live.glideReq){live.glideEnd=false;if(GUIDE.on&&gReady&&ac){let x=sayList(['next'],ac.currentTime+.05,GRATE);sayText(n.title,x)}}paintGlide();const b0=fBpm(60/live.per),b1=fBpm((live.bpmOver&&live.bpmOver[n.id])||bpmOf(n));
- toast(live.glideReq?`⤳ Enchaînement vers « ${n.title} » au prochain 1 · ${b0} → ${b1} BPM`:'Enchaînement annulé');flash()}
+ live.glideReq=!live.glideReq;live.glideManual=live.glideReq;if(live.glideReq){live.glideEnd=false;if(GUIDE.on&&gReady&&ac){let x=sayList(['next'],ac.currentTime+.05,GRATE);sayText(n.title,x)}}paintGlide();const b0=fBpm(60/live.per),b1=fBpm((live.bpmOver&&live.bpmOver[n.id])||bpmOf(n));
+ toast(live.glideReq?`⤳ « ${n.title} » au prochain 1 : tempo ${b0} → ${b1} BPM, puis décompte`:'Enchaînement annulé');flash()}
 function doGlide(t){const i=live.si,n=state.songs[i+1];live.glideReq=false;if(!n)return;
  const from=live.per,to=60/((live.bpmOver&&live.bpmOver[n.id])||bpmOf(n)),bpb=parseInt(n.meter)||4,st=clamp(+live.glideSec||0,0,n.sections.length-1),pre=!!live.rampDone;live.glideSec=0;live.rampDone=false;
- const prev=i;live.sb=null;live.sbPending=null;live.jumpTo=null;live.glideEnd=false;live.id=n.id;live.si=i+1;live.sec=st;live.bar=0;live.beat=0;live.ended=false;live.bpb=bpb;live.countN=live.count=0;live.glide=null;live.down=null;live.prevDown=null;live.glFlag=true;
- if(!pre&&Math.abs(60/to-60/from)>.5){const K=Math.abs(60/to-60/from)<=2?1:2;live.ramp={from,to,n:K*bpb,i:0}}else{live.ramp=null;live.per=live.base=to}
+ const prev=i;live.sb=null;live.sbPending=null;live.jumpTo=null;live.glideEnd=false;live.id=n.id;live.si=i+1;live.sec=st;live.bar=0;live.beat=0;live.ended=false;live.bpb=bpb;live.countN=live.count=0;live.slideN=0;live.glide=null;live.down=null;live.prevDown=null;live.glFlag=true;const man=!!live.glideManual;live.glideManual=false;
+ if(man){const dB=Math.abs(60/to-60/from),sl=dB>.5?(dB<=2?1:2)*bpb:0;live.ramp=null;live.slideN=sl;live.countN=live.count=sl+Math.max(1,cinOf(n,st))*bpb;if(sl){live.glide={from,to,n:sl,i:0};live.per=live.base=from}else live.per=live.base=to}
+ else if(!pre&&Math.abs(60/to-60/from)>.5){const K=Math.abs(60/to-60/from)<=2?1:2;live.ramp={from,to,n:K*bpb,i:0}}else{live.ramp=null;live.per=live.base=to}
  const fl=`${n.title} · ${SN(n.sections[st])}`;applyPresetLoops(n);if(PAD.on)padSwitch(n.key,t);
  SCH.q.push({t,run:()=>{impOpen(false);if(live.impro)impSet([]);document.body.classList.remove('standby','panic');document.querySelectorAll('.blk.target').forEach(b=>b.classList.remove('target'));paintSb();lastSec=-1;cur=n.id;if(!viewer&&ownView!==n.id){ownView=n.id;LS.set('view',n.id)}if(viewer)selId=n.id;applySel();renderSong(prev);renderSong(live.si);markNav();leadSel(n.id);paintGlide();jumpFlash(fl);const ar=document.querySelector(`section.song[data-si="${live.si}"] .road`);ar&&ar.scrollIntoView({block:'start',behavior:'smooth'})}})}
 function paintGlide(){const b=$('#hGlide');if(!b)return;const i=state.songs.findIndex(x=>x.id===live.id);b.hidden=!(live.on&&!live.follow&&state.songs[i+1]);const e=$('#hGlideEnd');if(e){e.hidden=b.hidden||!!live.sb;e.classList.toggle('on',!!live.glideEnd);e.textContent=live.glideEnd?'⤳ Fin de section… (annuler)':'⤳ Suivant en fin de section'}b.classList.toggle('on',!!live.glideReq);b.textContent=live.glideReq?'⤳ Au prochain 1…':'⤳ Enchaîner'}
