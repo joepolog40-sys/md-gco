@@ -1075,7 +1075,9 @@ document.addEventListener('input',e=>{const f=e.target.closest('[data-perc="fx"]
 var GUIDE=Object.assign({on:true,vol:.9,cnt:true,voice:'tom',notes:true,vcAll:false},LS.get('guide')||{}),GBUF={},gReady=false,gBusy=false;
 async function buildGuide(){if(gReady||gBusy||!window.GSAMP||!ac)return;gBusy=true;try{for(const v of Object.keys(GSAMP)){GBUF[v]={};for(const[k,b64]of Object.entries(GSAMP[v])){const bin=atob(b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);const buf=await ac.decodeAudioData(u.buffer);const d=buf.getChannelData(0);let o=0;while(o<d.length&&Math.abs(d[o])<.03)o++;GBUF[v][k]={buf,off:Math.max(0,o/buf.sampleRate-.004)}}}gReady=true;preloadNotes()}catch(e){}gBusy=false}
 const GRATE=1.18;// voix un peu accélérée : l'annonce tient dans le début de la dernière mesure
-function say(k,t,r){r=r||1;const B=GBUF[GUIDE.voice]&&GBUF[GUIDE.voice][k];if(window.__gdLog)__gdLog.push([k,+(t-ac.currentTime).toFixed(2)]);if(!B||!ac)return 0;const src=ac.createBufferSource();src.buffer=B.buf;src.playbackRate.value=r;src.connect(bus('gd'));src.start(Math.max(t,ac.currentTime+.01),B.off);return (B.buf.duration-B.off)/r}
+var GACT=[];function gTrack(src){GACT.push(src);src.onended=()=>{const i=GACT.indexOf(src);if(i>=0)GACT.splice(i,1)}}
+function gHush(){GACT.splice(0).forEach(x=>{try{x.stop()}catch(e){}})}
+function say(k,t,r){r=r||1;const B=GBUF[GUIDE.voice]&&GBUF[GUIDE.voice][k];if(window.__gdLog)__gdLog.push([k,+(t-ac.currentTime).toFixed(2)]);if(!B||!ac)return 0;const src=ac.createBufferSource();src.buffer=B.buf;src.playbackRate.value=r;src.connect(bus('gd'));gTrack(src);src.start(Math.max(t,ac.currentTime+.01),B.off);return (B.buf.duration-B.off)/r}
 function sayList(keys,t,r){let x=t;for(const k of keys){x+=say(k,x,r)*.92}return x+.04}
 // notes MD (même voix que le guide : enregistrée si dispo, sinon voix du navigateur du même genre, sinon rien)
 const NTYPE=/^\s*(pr[ée][- ]?refrain|pr[ée]|refrain|couplet|pont|bridge|intro|instrumental|instru|tag|vamp|turnaround|transition|interlude|outro|fin)(?=[\s·:\-–]|$)\s*(n°\s*)?\d*\s*[·:\-–]?\s*/i;
@@ -1088,7 +1090,7 @@ const FEM=/denise|julie|hortense|am[ée]lie|marie|audrey|aur[ée]lie|virginie|c[
 function ttsVoice(){const vs=(window.speechSynthesis&&speechSynthesis.getVoices()||[]).filter(v=>/^fr/i.test(v.lang));return GUIDE.voice==='siwis'?vs.find(v=>FEM.test(v.name)&&!MAS.test(v.name)):vs.find(v=>MAS.test(v.name)&&!FEM.test(v.name))}
 function speakTxt(t,v){try{const u=new SpeechSynthesisUtterance(t.replace(/[«»]/g,'').replace(/·/g,',').toLowerCase());u.lang='fr-FR';u.rate=1.25;u.volume=Math.min(1,GUIDE.vol);u.voice=v;speechSynthesis.speak(u)}catch(e){}}
 function sayNote(q,x){if(!GUIDE.notes||!q)return x;const t=noteTxt(q);if(!t)return x;const k=nKey(t),v=GUIDE.voice,B=NBUF[v+':'+k];if(window.__gdLog)__gdLog.push(['note:'+t,B?'clip':nSrc(v,k)?'decode':'tts']);
- if(B){const src=ac.createBufferSource();src.buffer=B.buf;src.playbackRate.value=GRATE;src.connect(bus('gd'));const st=Math.max(x,ac.currentTime+.01);src.start(st,B.off);return st+(B.buf.duration-B.off)/GRATE+.04}
+ if(B){const src=ac.createBufferSource();src.buffer=B.buf;src.playbackRate.value=GRATE;src.connect(bus('gd'));gTrack(src);const st=Math.max(x,ac.currentTime+.01);src.start(st,B.off);return st+(B.buf.duration-B.off)/GRATE+.04}
  if(nSrc(v,k)){noteBuf(v,k);return x}
  genMissing();return x}
 function preloadNotes(){if(!ac)return;for(const s of state.songs){const k=nKey(String(s.title||'').trim());for(const v of ['tom','siwis'])if(nSrc(v,k))noteBuf(v,k)}for(const s of state.songs)for(const q of s.sections){const t=noteTxt(q);if(!t)continue;const k=nKey(t);for(const v of ['tom','siwis'])if(nSrc(v,k))noteBuf(v,k)}genMissing()}
@@ -1113,7 +1115,7 @@ function gNext(s,si,sec){const q=s.sections[sec],L=live.loops[s.id+':'+sec],n=st
 function gAnnounce(t,N){const T=N.q;let x=t;if(N.song){x=sayList(['next'],x,GRATE);x=sayText(N.song.title,x)}x=sayList(N.rep?['encore']:[...gKeys(T),...(T&&isDrop(T)?['drop']:T&&T.mark==='stop'?['stop']:[])],x,GRATE);if(!N.rep)x=sayNote(T,x);live.gEnd=x}
 // texte libre (titre du chant…) : voix enregistrée ou générée, même voix que le guide
 function sayText(t,x){t=String(t||'').trim();if(!t)return x;const k=nKey(t),v=GUIDE.voice,B=NBUF[v+':'+k];if(window.__gdLog)__gdLog.push(['text:'+t,B?'clip':nSrc(v,k)?'decode':'gen']);
- if(B){const src=ac.createBufferSource();src.buffer=B.buf;src.playbackRate.value=GRATE;src.connect(bus('gd'));const st=Math.max(x,ac.currentTime+.01);src.start(st,B.off);return st+(B.buf.duration-B.off)/GRATE+.04}
+ if(B){const src=ac.createBufferSource();src.buffer=B.buf;src.playbackRate.value=GRATE;src.connect(bus('gd'));gTrack(src);const st=Math.max(x,ac.currentTime+.01);src.start(st,B.off);return st+(B.buf.duration-B.off)/GRATE+.04}
  if(nSrc(v,k))noteBuf(v,k);else{const id=v+':'+k;if(!genQ.some(j=>j.id===id)){genQ.push({id,v,k,t});genRun()}}return x}
 // ---------- Subdrop (gros « baouum ») : sur le drop de la section si elle a un drop, sinon sur son 1 ----------
 const FXK=[['boom','Boum cinéma'],['ccm','⭐ Classique CCM : montée + sub drop'],['sub808','Sub 808 (low drop bass)'],['lowboom','Boum grave'],['swell','Montée cymbale + boum'],['sw808','Montée cymbale + 808'],['nz808','Riser bruit blanc + 808'],['snroll','Roulement caisse claire + boum'],['tamb','Roulement court tambourin + boum'],['noise','Riser bruit blanc (EDM) + boum'],['pitch','Riser qui monte + sub 808'],['revcym','Grande montée cymbale + gong'],['suck','Aspiration + boum (court)']];
@@ -1207,8 +1209,13 @@ const r5=x=>Math.round(x*2)/2,fBpm=b=>{b=r5(+b);return b%1?String(b).replace('.'
 // boucles réglées à l'avance dans la feuille (q.loop : 'inf' ou nombre de passages)
 function applyPresetLoops(s){if(!s)return;Object.keys(live.loops).forEach(k=>{if(k.startsWith(s.id+':'))delete live.loops[k]});s.sections.forEach((q,i)=>{if(q.loop==='inf')live.loops[s.id+':'+i]='inf';else if(+q.loop>1)live.loops[s.id+':'+i]=+q.loop-1});LS.set('loops',live.loops)}
 function setLoop(id,i,m){const k=id+':'+i,L=live.loops[k];
+ const rw=lateRewind(id,i);if(rw){i=rw-1;const k=id+':'+i;if(m==='inf'){live.loops[k]='inf';LS.set('loops',live.loops)}paintLoops();if(GUIDE.on&&gReady&&ac){gHush();say('encore',ac.currentTime+.02,GRATE)}const sn={sec:live.sec,bar:live.bar,beat:live.beat,count:0};SCH.q.push({t:ac.currentTime+.05,run:()=>{live.view=Object.assign({},live.view||sn,{sec:i});liveDraw(true)}});try{leadEmit({sec:live.sec,bar:live.bar},0)}catch(e){}toast(m==='inf'?'∞ On reste sur cette section':'↻ On refait la section');return}
  if(m==='inf')live.loops[k]=L==='inf'?undefined:'inf';else live.loops[k]=typeof L==='number'?undefined:1;
- if(live.loops[k]===undefined)delete live.loops[k];LS.set('loops',live.loops);paintLoops();liveDraw(true);if(room&&!viewer&&!live.follow&&live.on){const lp={};Object.keys(live.loops).forEach(x=>{if(x.startsWith(live.id+':'))lp[x]=live.loops[x]});try{room.emit('loops',{id:live.id,loops:lp})}catch(e){}}}
+ if(live.loops[k]===undefined)delete live.loops[k];LS.set('loops',live.loops);paintLoops();liveDraw(true);try{lateAnn(id,i)}catch(e){}if(room&&!viewer&&!live.follow&&live.on){const lp={};Object.keys(live.loops).forEach(x=>{if(x.startsWith(live.id+':'))lp[x]=live.loops[x]});try{room.emit('loops',{id:live.id,loops:lp})}catch(e){}}}
+// appui juste après le passage à la section suivante (≤ ½ temps) : on revient quand même en arrière
+function lateRewind(id,i){if(!live.on||live.follow||live.sb||!ac)return false;const E=live.lastEnd;if(!E||E.id!==id||(E.from!==i&&E.to!==i)||live.id!==id||live.sec!==E.to||live.bar!==0||live.count>0)return false;if(ac.currentTime>E.t+Math.min(.5,.5*live.per))return false;live.sec=E.from;live.lastEnd=null;return E.from+1}
+function lateAnn(id,i){if(!live.on||live.follow||live.sb||!GUIDE.on||!gReady||!ac||live.id!==id)return;const s=state.songs[live.si],V=live.view||live;if(!s||V.count>0||V.sec!==i)return;const q=s.sections[i],bars=+q.bars||1;
+ const lastBar=V.bar===bars-1||live.pend||(live.bar>=bars);if(!lastBar)return;const N=gNext(s,live.si,i);gHush();live.gSaid=[live.si,i,N.rep?'r':N.q?N.q.name:'fin',N.song?1:0].join('|');gAnnounce(ac.currentTime+.02,N)}
 function flash(){const h=$('#hud');h.classList.remove('flash');void h.offsetWidth;h.classList.add('flash')}
 function paintLoops(){document.querySelectorAll('[data-loop]').forEach(b=>{const[id,i,m]=b.dataset.loop.split(':');const L=live.loops[id+':'+i];b.classList.toggle('on',m==='inf'?L==='inf':typeof L==='number')})}
 async function liveStart(id,from){if(editing)setEdit(null);if(live.follow)followStop();if(mid)toggleMetro(mid);liveStop(true);const si=state.songs.findIndex(s=>s.id===id);const s=state.songs[si];if(!s)return;
@@ -1222,7 +1229,11 @@ function liveStop(silent){if(live.follow){followStop();return}if(!silent)padStop
  try{live.wl&&live.wl.release()}catch(e){}live.wl=null;
  document.querySelectorAll('.blk.live').forEach(b=>b.classList.remove('live'));document.querySelectorAll('.arc .ph').forEach(p=>p.style.display='none');
  if(was&&!silent&&live.si!=null)renderSong(live.si);if(!silent)idleDraw()}
-function liveBeat(t){if(live.glideReq&&live.beat===0&&live.count<=0&&!(live.sb&&live.sb.mode==='panic'))doGlide(t);const s=state.songs[live.si];if(!s||!live.on)return 0;let per=live.per;if(live.ended&&!live.sb)return per;let snap;
+function endSec(t,per,s){const q=s.sections[live.sec];live.lastEnd=null;if(live.glideEnd){live.glideEnd=false;live.glideReq=true;live.glideSec=0;live.beat=0}else if(live.jumpTo!=null){live.sec=clamp(live.jumpTo,0,s.sections.length-1);live.jumpTo=null;const jn=SN(s.sections[live.sec]);SCH.q.push({t,run:()=>{paintJump();liveDraw(true);jumpFlash(jn)}})}else{const k=live.id+':'+live.sec,L=live.loops[k];
+    if(L==='inf'){}else if(typeof L==='number'){if(L<=1)delete live.loops[k];else live.loops[k]=L-1;LS.set('loops',live.loops);SCH.q.push({t,run:paintLoops})}
+    else if(q.toNext&&state.songs[live.si+1]){live.glideReq=true;live.glideSec=+q.toNextSec||0;live.beat=0}
+    else{live.lastEnd={id:live.id,from:live.sec,to:live.sec+1,t};live.sec++;if(live.sec>=s.sections.length){live.sec=s.sections.length-1;live.bar=0;live.beat=0;live.sb={mode:'click',target:0,end:true};live.sbPending=null;live.down=null;live.prevDown=null;SCH.q.push({t,run:()=>{document.body.classList.add('standby');paintSb();liveDraw(true);leadEmitSb()}})}}}}
+function liveBeat(t){{const s0=state.songs[live.si];if(live.pend){live.pend=false;const q=s0&&s0.sections[live.sec];if(q&&!live.sb&&live.count<=0&&live.bar>=(+q.bars||1)){live.bar=0;endSec(t,live.per,s0)}}}if(live.glideReq&&live.beat===0&&live.count<=0&&!(live.sb&&live.sb.mode==='panic'))doGlide(t);const s=state.songs[live.si];if(!s||!live.on)return 0;let per=live.per;if(live.ended&&!live.sb)return per;let snap;
  if(!live.sb&&live.count<=0&&live.beat===0&&!live.ramp){const q0=s.sections[live.sec],b0=+q0.bars||1,L0=live.loops[live.id+':'+live.sec],n0=state.songs[live.si+1];
   if(n0&&(live.glideEnd||(q0.toNext&&!L0&&live.jumpTo==null))){const to=60/((live.bpmOver&&live.bpmOver[n0.id])||bpmOf(n0)),d=Math.abs(60/to-60/live.per);if(d>.5){const K=Math.min(b0,d<=2?1:2);if(live.bar===b0-K)live.ramp={from:live.per,to,n:K*live.bpb,i:0,pre:1}}}}
  if(live.ramp&&!live.sb&&live.count<=0){const G=live.ramp;G.i++;per=G.from+(G.to-G.from)*Math.min(1,G.i/G.n);live.per=per;if(G.i>=G.n){live.per=live.base=G.to;live.ramp=null;if(G.pre)live.rampDone=true}}
@@ -1231,10 +1242,7 @@ function liveBeat(t){if(live.glideReq&&live.beat===0&&live.count<=0&&!(live.sb&&
  if(live.count>0){const e=live.countN-live.count;const gl=!!live.glide;if(live.glide){const G=live.glide;G.i++;per=G.from+(G.to-G.from)*Math.min(1,G.i/G.n);live.per=per;if(G.i>=G.n){live.per=live.base=G.to;live.glide=null}}const SL=live.slideN||0,ec=e-SL;snap={sec:live.sec,bar:0,beat:(ec>=0?ec:e)%live.bpb,count:live.count,cbar:ec>=0?Math.floor(ec/live.bpb):0,glide:gl||ec<0?1:0};if(e%live.bpb===0||snap.glide)leadEmit({sec:live.sec,bar:0},t-ac.currentTime,{cin:(live.countN-e)/live.bpb,cinN:(live.countN-SL)/live.bpb,gl:snap.glide});clickAt(t,e%live.bpb===0);if(ec>=0)guideCount(t,ec);live.count--}
  else{snap={sec:live.sec,bar:live.bar,beat:live.beat,count:0};clickAt(t,live.beat===0);guideBeat(t,s,live.si,live.sec,live.bar,live.beat);fxBeat(t,per,s,live.si,live.sec,live.bar,live.beat);percBeat(t,s.sections[live.sec],live.beat,per,live.bpb);live.beat++;
   if(live.beat>=live.bpb){live.beat=0;live.bar++;const q=s.sections[live.sec];
-   if(live.bar>=(+q.bars||1)){live.bar=0;if(live.glideEnd){live.glideEnd=false;live.glideReq=true;live.glideSec=0;live.beat=0}else if(live.jumpTo!=null){live.sec=clamp(live.jumpTo,0,s.sections.length-1);live.jumpTo=null;const jn=SN(s.sections[live.sec]);SCH.q.push({t,run:()=>{paintJump();liveDraw(true);jumpFlash(jn)}})}else{const k=live.id+':'+live.sec,L=live.loops[k];
-    if(L==='inf'){}else if(typeof L==='number'){if(L<=1)delete live.loops[k];else live.loops[k]=L-1;LS.set('loops',live.loops);SCH.q.push({t:t+per,run:paintLoops})}
-    else if(q.toNext&&state.songs[live.si+1]){live.glideReq=true;live.glideSec=+q.toNextSec||0;live.beat=0}
-    else{live.sec++;if(live.sec>=s.sections.length){live.sec=s.sections.length-1;live.bar=0;live.beat=0;live.sb={mode:'click',target:0,end:true};live.sbPending=null;live.down=null;live.prevDown=null;SCH.q.push({t:t+per,run:()=>{document.body.classList.add('standby');paintSb();liveDraw(true);leadEmitSb()}})}}}}}}
+   if(live.bar>=(+q.bars||1))live.pend=true}}
  if(!snap.count&&!snap.beat)leadEmit(snap,t-ac.currentTime);SCH.q.push({t,run:()=>{live.view=snap;liveDraw()}});return per}
 const curSec=()=>(live.view||live).sec;
 function liveJump(i){live.jumpTo=null;const s=state.songs[live.si];if(!s)return;live.sec=clamp(i,0,s.sections.length-1);live.bar=0;live.beat=0;live.count=0;live.ended=false;live.view={sec:live.sec,bar:0,beat:0,count:0};schedRestart()}
@@ -1336,7 +1344,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=84;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=85;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
