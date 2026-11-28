@@ -957,7 +957,9 @@ $('#bFile').onclick=async()=>{const html=cleanSrc();
 let mid=null,ac=null,beatN=0;
 // ---------- horloge audio précise (planification à l'avance, sans dérive) ----------
 const SCH={ahead:.12,iv:null,q:[],raf:null,fn:null,next:0,beats:[]};
-function ensureAC(){try{if(!ac)ac=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});if(ac.state!=='running')ac.resume()}catch(e){}if(ac&&!gReady)setTimeout(buildGuide,0);if(ac&&!fxP)setTimeout(buildFx,0);if(ac&&!padP)setTimeout(buildPad,0);return ac}
+// iPhone : sans ça, le son Web Audio est coupé quand le bouton silencieux est activé
+function iosUnmute(){if(window.__unm)return;window.__unm=1;try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}try{const a=document.createElement('audio');a.src='data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';a.loop=true;a.setAttribute('playsinline','');a.setAttribute('x-webkit-airplay','deny');const p=a.play();if(p&&p.catch)p.catch(()=>{window.__unm=0});window.__unmA=a}catch(e){window.__unm=0}}
+function ensureAC(){iosUnmute();try{if(!ac)ac=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});if(ac.state!=='running')ac.resume()}catch(e){}if(ac&&!gReady)setTimeout(buildGuide,0);if(ac&&!fxP)setTimeout(buildFx,0);if(ac&&!padP)setTimeout(buildPad,0);return ac}
 const CLK=Object.assign({type:'bois',accent:true,vol:.8},LS.get('clk',{}));let NOISE=null;
 const CLKS={bip:'Bip',bois:'Bois',clave:'Clave',rim:'Baguettes',hat:'Charley',cloche:'Cloche'};
 function env(g,t,peak,dec){g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+.0015);g.gain.exponentialRampToValueAtTime(.0001,t+dec)}
@@ -1326,7 +1328,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=78;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=79;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
