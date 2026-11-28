@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+<title>MD · Setlists</title>
+<link rel="stylesheet" href="home.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo">MD</span><span class="bname">Setlists &amp; live</span></div>
+  <nav class="tabs">
+    <button data-tab="sets" class="on">🗂 Setlists</button>
+    <button data-tab="lib">📚 Bibliothèque</button>
+  </nav>
+  <div class="tools">
+    <button id="bImport" title="Importer une setlist (.mdset), une feuille MD (.html) ou une bibliothèque (.json)">⬆︎ Importer</button>
+    <button id="bFolder" title="Ouvrir le dossier où tout est enregistré">📁 Dossier</button>
+  </div>
+</header>
+
+<main>
+  <!-- ======== SETLISTS ======== -->
+  <section id="tab-sets" class="tab on">
+    <aside class="col list">
+      <button id="bNewSet" class="primary wide">＋ Nouvelle setlist</button>
+      <div id="setList"></div>
+    </aside>
+    <div class="col detail" id="setDetail"></div>
+  </section>
+
+  <!-- ======== BIBLIOTHÈQUE ======== -->
+  <section id="tab-lib" class="tab">
+    <aside class="col list">
+      <div class="searchrow"><input id="libQ" type="search" placeholder="Chercher un chant, une tonalité…"><button id="bNewSong" title="Nouveau chant">＋</button></div>
+      <div class="libcount" id="libCount"></div>
+      <div id="libList"></div>
+    </aside>
+    <div class="col detail" id="songDetail"></div>
+  </section>
+</main>
+
+<!-- choix de chants à ajouter -->
+<div id="pick" class="modal" hidden>
+  <div class="mpanel">
+    <div class="mhead"><b>Ajouter des chants</b><input id="pickQ" type="search" placeholder="Chercher…"><button id="pickX" class="ghost">Terminé</button></div>
+    <div id="pickList" class="picklist"></div>
+  </div>
+</div>
+<div id="toast" class="toast" hidden></div>
+<script src="home.js"></script>
+</body>
+</html>

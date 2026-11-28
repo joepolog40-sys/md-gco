@@ -1,0 +1,57 @@
+name: Installeurs app MD
+on:
+  push:
+    paths: ['app/**', '.github/workflows/app.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci || npm install
+      - name: Windows
+        if: runner.os == 'Windows'
+        run: npx electron-builder --win --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+      - name: Mac
+        if: runner.os == 'macOS'
+        run: npx electron-builder --mac --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MD-${{ runner.os }}
+          path: |
+            app/dist/*.exe
+            app/dist/*.zip
+            app/dist/*.dmg
+          if-no-files-found: error
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+      - name: Publier la version
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: app-v${{ github.run_number }}
+          name: App MD (version ${{ github.run_number }})
+          body: |
+            Installeurs de l'app MD.
+            - Windows : MD Setup ….exe (ou la version .zip sans installation)
+            - Mac : MD-….dmg (au premier lancement : clic droit sur l'app > Ouvrir)
+          files: out/**/*

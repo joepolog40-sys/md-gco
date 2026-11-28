@@ -1,0 +1,1682 @@
+{
+"id": "dim-29-nov",
+"name": "Dimanche 29 novembre",
+"date": "2026-11-29",
+"theme": "Série de Noël · L'espérance",
+"created": 0,
+"state": {
+"meta": {
+"date": "Dimanche 29 novembre 2026",
+"theme": "L'espérance",
+"series": "Série de Noël",
+"services": [
+"9:15",
+"11:15"
+],
+"schedule": [
+[
+"Jeu. 26",
+"20:00",
+"Répétition louange"
+],
+[
+"Dim.",
+"7:30",
+"Répétition louange"
+],
+[
+"Dim.",
+"8:50",
+"Prière"
+],
+[
+"Dim.",
+"8:55",
+"Briefing technique"
+],
+[
+"Dim.",
+"9:15",
+"Culte 1"
+],
+[
+"Dim.",
+"11:15",
+"Culte 2"
+]
+],
+"team": [
+[
+"Tim",
+"Lead"
+],
+[
+"Mélanie",
+"Chant"
+],
+[
+"Audrey",
+"Chant (pas encore confirmée)"
+],
+[
+"Ketsia",
+"Piano"
+],
+[
+"Sylvain",
+"Guitare électrique"
+],
+[
+"Micaël",
+"Batterie"
+],
+[
+"Jo",
+"Basse · MD"
+]
+],
+"run": [
+{
+"h": "9:09",
+"w": "Countdown",
+"d": "6 min",
+"x": ""
+},
+{
+"h": "9:15",
+"w": "Chant d'introduction",
+"d": "≈ 5 min",
+"x": "J'élève un alléluia · C · intro spécifique"
+},
+{
+"h": "9:20",
+"w": "Bienvenue & introduction",
+"d": "3 min",
+"x": ""
+},
+{
+"h": "9:23",
+"w": "Table créative",
+"d": "",
+"x": ""
+},
+{
+"h": "9:25",
+"w": "Louange",
+"d": "20 min",
+"x": "Béni Dieu → Gloire au Roi Jésus → Holy and Anointed One → Prosterné · tout en G"
+},
+{
+"h": "9:45",
+"w": "Temps de ministère",
+"d": "15 min",
+"x": "nappe en G"
+},
+{
+"h": "10:00",
+"w": "Annonces",
+"d": "6 min",
+"x": ""
+},
+{
+"h": "10:06",
+"w": "Message",
+"d": "30 min",
+"x": "Colossiens 1.4-5 · 2.13-15 · 1.27"
+},
+{
+"h": "10:36",
+"w": "Clôture",
+"d": "6 min",
+"x": ""
+},
+{
+"h": "10:42",
+"w": "Chant de clôture",
+"d": "≈ 3 min",
+"x": "Jésus tu es si beau · G · 64"
+},
+{
+"h": "10:45",
+"w": "Boucle outro",
+"d": "",
+"x": ""
+}
+],
+"decide": [
+{
+"t": "Tempo de J'élève un alléluia : 82 (plan) ou 85 (live) ?",
+"ok": true
+},
+{
+"t": "Valider les pêches de l'intro (C C F F Am Am F F)",
+"ok": true
+},
+{
+"t": "Accords du vamp de Béni Dieu et du turnaround « Oh Savior »",
+"ok": false
+},
+{
+"t": "Durée de la louange : ≈ 24 min pour 20 prévues → où couper ?",
+"ok": true
+},
+{
+"t": "Spontané de Prosterné : le garder pour enchaîner sur le ministère ?",
+"ok": false
+},
+{
+"t": "Intensités de Holy and Anointed One et de Jésus tu es si beau",
+"ok": false
+},
+{
+"t": "Signes de main : les caler avec l'équipe",
+"ok": true
+}
+],
+"signals": [
+[
+"☝️ 1, 2, 3 doigts",
+"Couplet 1, 2, 3"
+],
+[
+"✊ Poing fermé",
+"Refrain"
+],
+[
+"🤟 Main en « P » / pont",
+"Pont"
+],
+[
+"↻ Index qui tourne",
+"On répète la section"
+],
+[
+"🖐️ Paume vers le bas",
+"On redescend / plus doux"
+],
+[
+"🖐️ Paume vers le haut",
+"On monte"
+],
+[
+"✋ Main à plat, coupée",
+"STOP / drop"
+],
+[
+"👆 Index levé",
+"Dernière fois"
+],
+[
+"🤚 Main sur la tête",
+"On reprend au début"
+]
+]
+},
+"songs": [
+{
+"id": "rah",
+"n": 1,
+"title": "J'élève un alléluia",
+"orig": "Raise A Hallelujah",
+"ref": "Live Lakewood (YouTube) · arr. Bethel Music",
+"key": "C",
+"bpm": "85 (plan) · 85 (live)",
+"meter": "4/4",
+"lead": "Tim",
+"slot": "Chant d'introduction",
+"dur": "≈ 5:15",
+"sections": [
+{
+"name": "Intro",
+"bars": 8,
+"kind": "intro",
+"nash": "1 1 4 4 6 6 4 4",
+"i0": 7,
+"i1": 7,
+"call": "PÊCHES ",
+"cue": "",
+"note": "",
+"mark": "fill",
+"t": 3.2
+},
+{
+"name": "Couplet  1",
+"bars": 8,
+"kind": "couplet",
+"nash": "1 1 1 1",
+"i0": 2,
+"i1": 2,
+"call": "Couplet 1",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": 26
+},
+{
+"name": "Couplet 2",
+"bars": 8,
+"kind": "couplet",
+"nash": "1 1 1 1",
+"i0": 2,
+"i1": 2,
+"call": "",
+"cue": "",
+"note": "",
+"mark": "cresc",
+"t": 48.6
+},
+{
+"name": "Refrain 1",
+"bars": 8,
+"kind": "refrain",
+"nash": "4 1 6 5 (2×)",
+"i0": 4.5,
+"i1": 4.5,
+"call": "REFRAIN",
+"cue": "",
+"note": "BASS IN",
+"mark": "none",
+"t": 71.2,
+"perc": "combo"
+},
+{
+"name": "MESURE ADD",
+"bars": 1,
+"kind": "tag",
+"nash": "5",
+"i0": 8,
+"i1": 8,
+"call": "",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": 206.7,
+"dropAt": 0,
+"perc": "combo"
+},
+{
+"name": "Transition",
+"bars": 2,
+"kind": "intro",
+"nash": "1 1",
+"i0": 4.5,
+"i1": 5,
+"call": "",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": 93.7,
+"perc": "combo"
+},
+{
+"name": "Couplet 3",
+"bars": 8,
+"kind": "couplet",
+"nash": "1 4 6 5",
+"i0": 5,
+"i1": 5,
+"call": "GROOVE SOLIDE",
+"cue": "With everything inside of me",
+"note": "",
+"mark": "none",
+"t": 99.4,
+"perc": "tamb24"
+},
+{
+"name": "Couplet 4",
+"bars": 8,
+"kind": "couplet",
+"nash": "1 4 6 5",
+"i0": 5,
+"i1": 5.5,
+"call": "GROOVE SOLIDE",
+"cue": "",
+"note": "",
+"mark": "fill",
+"t": 122,
+"perc": "combo"
+},
+{
+"name": "Refrain 2",
+"bars": 8,
+"kind": "refrain",
+"nash": "4 1 6 5 (2×)",
+"i0": 6.5,
+"i1": 6.5,
+"call": "REFRAIN",
+"cue": "",
+"note": "",
+"mark": "fill",
+"t": 144.6,
+"perc": "combo"
+},
+{
+"name": "MESURE ADD",
+"bars": 1,
+"kind": "tag",
+"nash": "5",
+"i0": 8,
+"i1": 8,
+"call": "",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": 206.7,
+"dropAt": 0,
+"perc": "combo"
+},
+{
+"name": "Musical",
+"bars": 4,
+"kind": "intro",
+"nash": "1 1 1 1",
+"i0": 6,
+"i1": 3.5,
+"call": "INSTRU · on redescent",
+"cue": "",
+"note": "",
+"mark": "cresc",
+"t": 172.8,
+"perc": "combo"
+},
+{
+"name": "Bridge 1",
+"bars": 8,
+"kind": "pont",
+"nash": "1 5 6 4",
+"i0": 1,
+"i1": 5,
+"call": "PONT · tout le monde descend",
+"cue": "Sing a little louder",
+"note": "sans batterie, puis montée",
+"mark": "cresc",
+"t": 184.1
+},
+{
+"name": "Bridge 2",
+"bars": 8,
+"kind": "pont",
+"nash": "1 5 6 4",
+"i0": 5.5,
+"i1": 8,
+"call": "PONT 2 · ON MONTE",
+"cue": "",
+"note": "",
+"mark": "fill",
+"t": 206.7,
+"perc": "combo"
+},
+{
+"name": "MESURE ADD",
+"bars": 1,
+"kind": "tag",
+"nash": "4",
+"i0": 8,
+"i1": 8,
+"call": "",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": 206.7,
+"dropAt": 0,
+"perc": "combo"
+},
+{
+"name": "Refrain 3 (plein)",
+"bars": 8,
+"kind": "refrain",
+"nash": "4 1 6 5 (2×)",
+"i0": 8.5,
+"i1": 8.5,
+"call": "TOUT LE MONDE",
+"cue": "",
+"note": "",
+"mark": "drop",
+"t": 240.5,
+"perc": "combo",
+"dropAt": 0,
+"sub": true,
+"subk": "ccm"
+},
+{
+"name": "Refrain 3 (plein)",
+"bars": 8,
+"kind": "refrain",
+"nash": "4 1 6 5 (2×)",
+"i0": 8.5,
+"i1": 8.5,
+"call": "TOUT LE MONDE",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": 240.5,
+"perc": "combo"
+},
+{
+"name": "MESURE ADD",
+"bars": 1,
+"kind": "tag",
+"nash": "5",
+"i0": 8,
+"i1": 8,
+"call": "",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": 206.7,
+"dropAt": 0,
+"perc": "combo"
+},
+{
+"name": "Tag / fin",
+"bars": 8,
+"kind": "tag",
+"nash": "1 4 6 5",
+"i0": 9,
+"i1": 7.5,
+"call": "TAG chant",
+"cue": "I raise a hallelujah",
+"note": "",
+"mark": "descente",
+"t": 280.1,
+"perc": "combo"
+},
+{
+"name": "Tag / fin",
+"bars": 8,
+"kind": "tag",
+"nash": "4",
+"i0": 9,
+"i1": 7.5,
+"call": "Finir gros wash cymbale et mettre un 4",
+"cue": "I raise a hallelujah",
+"note": "",
+"mark": "drop",
+"t": 280.1,
+"perc": "none",
+"dropAt": 0,
+"sub": true,
+"subk": "ccm"
+}
+],
+"intro": {
+"title": "Intro spécifique — pêches (ta version)",
+"chords": [
+"1",
+"1",
+"4",
+"4",
+"6m",
+"6m",
+"4",
+"4"
+],
+"pickup": 4,
+"hits": [
+[
+1,
+0
+],
+[
+1,
+3
+],
+[
+2,
+0
+],
+[
+2,
+3
+],
+[
+2,
+5
+],
+[
+2,
+12
+],
+[
+3,
+0
+],
+[
+3,
+3
+],
+[
+4,
+0
+],
+[
+4,
+3
+],
+[
+5,
+0
+],
+[
+5,
+3
+],
+[
+6,
+0
+],
+[
+6,
+3
+],
+[
+6,
+8
+],
+[
+7,
+0
+],
+[
+7,
+3
+],
+[
+7,
+8
+],
+[
+7,
+11
+],
+[
+8,
+0
+],
+[
+8,
+3
+],
+[
+8,
+8
+],
+[
+8,
+11
+]
+],
+"note": "Levée : fill de Micaël sur le 4 · pêche sur 1 et 1a à chaque mesure · mes. 8 : 3 – 3a puis stop, le couplet repart sur 2 et 4."
+},
+"bass": [
+[
+"intro",
+"1 1 4 4 6 6 4 4"
+],
+[
+"couplet",
+"1 1 1 1"
+],
+[
+"refrain",
+"4 1 6 5 (2×)"
+],
+[
+"couplet",
+"1 4 6 5"
+],
+[
+"pont",
+"1 5 6 4"
+],
+[
+"fin",
+"4"
+]
+],
+"drums": [],
+"tips": [],
+"next": "",
+"libId": "lib-j-eleve-un-alleluia"
+},
+{
+"id": "r10k",
+"n": 2,
+"title": "Béni Dieu",
+"orig": "10,000 Reasons",
+"ref": "Live Bethel – Jenn Johnson (YouTube) · plan : Matt Redman",
+"key": "G",
+"bpm": "72",
+"meter": "4/4",
+"lead": "Tim",
+"slot": "Louange",
+"dur": "≈ 5:50",
+"sections": [
+{
+"name": "Intro",
+"bars": 8,
+"kind": "refrain",
+"nash": "4 1 5/7 6 4 1 5 · 4 6 4 5 6 4 5 1",
+"i0": 6.5,
+"i1": 6.5,
+"call": "EN MODE MUSICAL !",
+"cue": "",
+"note": "toms seuls, pas de CC",
+"mark": "stop",
+"t": 1.4
+},
+{
+"name": "Couplet 1",
+"bars": 9,
+"kind": "couplet",
+"nash": "4 1 5 6 (3×) · 4 1 5 1",
+"i0": 1,
+"i1": 1,
+"call": "COUPLET · sans batterie",
+"cue": "When the sun comes up",
+"note": "sans batterie",
+"mark": "none",
+"t": 31.4
+},
+{
+"name": "Refrain 1",
+"bars": 8,
+"kind": "refrain",
+"nash": "4 1 5/7 6 4 1 5 · 4 6 4 5 6 4 5 1",
+"i0": 4.5,
+"i1": 4.5,
+"call": "REFRAIN · très léger",
+"cue": "Bless the Lord",
+"note": "très léger",
+"mark": "none",
+"t": 61.4,
+"perc": "shk8"
+},
+{
+"name": "Couplet 2",
+"bars": 9,
+"kind": "couplet",
+"nash": "4 1 5 6 (3×) · 4 1 5 1",
+"i0": 6,
+"i1": 6,
+"call": "GROOVE SOLIDE",
+"cue": "You are rich in love",
+"note": "",
+"mark": "cresc",
+"t": 88,
+"perc": "combo"
+},
+{
+"name": "Refrain 2",
+"bars": 8,
+"kind": "refrain",
+"nash": "4 1 5/7 6 4 1 5 · 4 6 4 5 6 4 5 1",
+"i0": 8,
+"i1": 8,
+"call": "GROOVE INTENSE RIDE",
+"cue": "",
+"note": "Avec ride",
+"mark": "fill",
+"t": 118,
+"perc": "combo"
+},
+{
+"name": "Couplet 3",
+"bars": 9,
+"kind": "couplet",
+"nash": "4 1 5 6 (3×) · 4 1 5 1",
+"i0": 1,
+"i1": 9,
+"call": "DROP · couplet 3, ATTENTION MESURE ADD",
+"cue": "",
+"note": "sans batterie, entrée juste ava…",
+"mark": "stop",
+"t": 144.7
+},
+{
+"name": "Refrain 3",
+"bars": 8,
+"kind": "refrain",
+"nash": "4 1 5/7 6 4 1 5 · 4 6 4 5 6 4 5 1",
+"i0": 8.5,
+"i1": 8.5,
+"call": "TOUT LE MONDE",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": 174.7,
+"perc": "combo"
+},
+{
+"name": "Refrain 4",
+"bars": 8,
+"kind": "refrain",
+"nash": "4 1 5/7 6 4 1 5 · 4 6 4 5 6 4 5 1",
+"i0": 8.5,
+"i1": 8.5,
+"call": "",
+"cue": "",
+"note": "",
+"mark": "fill",
+"t": 198,
+"perc": "combo"
+},
+{
+"name": "Tag",
+"bars": 8,
+"kind": "refrain",
+"nash": "4 1 5/7 6 4 1 5 · 4 6 4 5 6 4 5 1",
+"i0": 8.5,
+"i1": 8.5,
+"call": "MUSICAL",
+"cue": "Lift up a shout of praise",
+"note": "",
+"mark": "none",
+"t": 231.4,
+"perc": "combo"
+},
+{
+"name": "Refrain final CALME",
+"bars": 8,
+"kind": "refrain",
+"nash": "4 1 5/7 6 4 1 5 · 4 6 4 5 6 4 5 1",
+"i0": 2.5,
+"i1": 2.5,
+"call": "dernier refrain → fin",
+"cue": "Bless the Lord (one last time)",
+"note": "",
+"mark": "descente",
+"t": 311.4,
+"perc": "none"
+}
+],
+"bass": [
+[
+"refrain",
+"4 1 5/7 6 4 1 5"
+],
+[
+"refrain",
+"4 6 4 5 6 4 5 1"
+],
+[
+"couplet",
+"4 1 5 (5/7) 6 (3×)"
+],
+[
+"couplet",
+"4 1 5 1"
+],
+[
+"tag",
+"4 5 6 4 5 1"
+]
+],
+"drums": [
+"Intro – toms — toms syncopés, aucune CC",
+"Refrain 1 – léger — GC sur le 3, HH sur le 2",
+"Couplet 2 / Refrain 2 — GC 1, 1&, 3 ; CC 2 et 4 ; HH",
+"Grands refrains — GC 1, 1&, 3, 3& ; CC 2 et 4 ; cymbales ouvertes",
+"Vamp – toms — toms en continu, GC sur le 1",
+"Stop — coup sur le 1"
+],
+"tips": [
+"Structure du **live Bethel**, pas celle de Matt Redman du plan : le 1er passage après l'intro est un **couplet** (pas le refrain).",
+"Intro : Micaël seul aux toms, pas de caisse claire. Ketsia peut poser le G en tenue.",
+"Couplet 3 « And on that day » : tout le monde redescend, la batterie revient à la mesure 49.",
+"Spontané + vamp « Lord we thank you » : **accords à caler avec Tim** (refrain ou tag en boucle).",
+"Si on manque de temps : couper spontané + vamp (≈ 1:10)."
+],
+"next": "Enchaîner direct : même tonalité (**G**), 72 → 74. Ketsia garde le G et lance l'intro de Gloire au Roi Jésus (1 6 5 4).",
+"libId": "lib-beni-dieu"
+},
+{
+"id": "ahkj",
+"n": 3,
+"title": "Gloire au Roi Jésus",
+"orig": "All Hail King Jesus",
+"ref": "Live Bethel – Bethany Wohrle (YouTube) · plan : Jeremy Riddle",
+"key": "G",
+"bpm": "74",
+"meter": "4/4",
+"lead": "Tim",
+"slot": "Louange",
+"dur": "≈ 5:35",
+"sections": [
+{
+"name": "Intro",
+"bars": 4,
+"kind": "intro",
+"nash": "1",
+"i0": 0.5,
+"i1": 0.5,
+"call": "juste piano",
+"cue": "",
+"note": "piano seul",
+"mark": "none",
+"t": 0.5
+},
+{
+"name": "Couplet 1",
+"bars": 8,
+"kind": "couplet",
+"nash": "1 6 5 4",
+"i0": 1,
+"i1": 1,
+"call": "Calme",
+"cue": "",
+"note": "sans batterie",
+"mark": "none",
+"t": 19.9
+},
+{
+"name": "Calme",
+"bars": 8,
+"kind": "couplet",
+"nash": "1 6 5 4",
+"i0": 1,
+"i1": 1,
+"call": "calme",
+"cue": "There on a cross",
+"note": "sans batterie",
+"mark": "none",
+"t": 45.9
+},
+{
+"name": "Coup sur les changements d'accord",
+"bars": 7,
+"kind": "prerefrain",
+"nash": "2 6 5  1 3 4",
+"i0": 1,
+"i1": 4,
+"call": "",
+"cue": "",
+"note": "",
+"mark": "cresc",
+"t": 68.6
+},
+{
+"name": "Refrain 1",
+"bars": 8,
+"kind": "refrain",
+"nash": "1 1 1 3 · 6 4 3 5 (1)",
+"i0": 4.5,
+"i1": 4.5,
+"call": "REFRAIN · DRUM GC ET TOM 2 et 4",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": 91.3
+},
+{
+"name": "Turnaround",
+"bars": 4,
+"kind": "intro",
+"nash": "1 1 1 1",
+"i0": 5,
+"i1": 5,
+"call": "",
+"cue": "",
+"note": "",
+"mark": "cresc",
+"t": 120.5
+},
+{
+"name": "Couplet 3",
+"bars": 8,
+"kind": "couplet",
+"nash": "1 6 5 4",
+"i0": 5,
+"i1": 5,
+"call": "COUPLET 3 · GROOVE SOLIDE HH16",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": 133.4
+},
+{
+"name": "Pré-refrain 2",
+"bars": 7,
+"kind": "prerefrain",
+"nash": "2 6 5  1 3 4",
+"i0": 5,
+"i1": 6.5,
+"call": "PRÉ · on monte",
+"cue": "",
+"note": "",
+"mark": "cresc",
+"t": 159.4
+},
+{
+"name": "Refrain 2",
+"bars": 8,
+"kind": "refrain",
+"nash": "1 1 1 3 · 6 4 3 5 (1)",
+"i0": 6.5,
+"i1": 6.5,
+"call": "REFRAIN",
+"cue": "",
+"note": "AVEC CYMBALE",
+"mark": "none",
+"t": 182.1
+},
+{
+"name": "Refrain 3",
+"bars": 8,
+"kind": "refrain",
+"nash": "6 4 3 5",
+"i0": 6.5,
+"i1": 7.5,
+"call": "AVEC ROULEMENT ET DOUBLER GC",
+"cue": "",
+"note": "",
+"mark": "fill",
+"t": 208
+},
+{
+"name": "Turnaround garder intense et GC 8th",
+"bars": 4,
+"kind": "intro",
+"nash": "5 6 4 1 3",
+"i0": 7.5,
+"i1": 9,
+"call": "",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": 234,
+"perc": "shk16"
+},
+{
+"name": "Bridge",
+"bars": 6,
+"kind": "pont",
+"nash": "5 6 4 1 3",
+"i0": 9,
+"i1": 9,
+"call": "intense !",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": 246.9,
+"dropAt": 1,
+"perc": "shk16f"
+},
+{
+"name": "Bridge",
+"bars": 6,
+"kind": "pont",
+"nash": "5 6 4 1 3",
+"i0": 9,
+"i1": 9,
+"call": "MONTEE 16TH ",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": 246.9,
+"dropAt": 1,
+"perc": "shk16f"
+},
+{
+"name": "Holy",
+"bars": 8,
+"kind": "pont",
+"nash": "5 6 4 1 3",
+"i0": 0,
+"i1": 8.5,
+"call": "DROP - on part sur saint",
+"cue": "",
+"note": "DEMANDER OU VEUT ALLER LE MD !!",
+"mark": "drop",
+"t": 259.9,
+"pts": [
+8.5,
+8.5
+],
+"perc": "combo",
+"sub": true,
+"subk": "ccm",
+"loop": 2
+},
+{
+"name": "Refrain final",
+"bars": 11,
+"kind": "refrain",
+"nash": "1 1 1 3 \n6 4 3 5 (1)",
+"i0": 1,
+"i1": 1,
+"call": "DROP · voix seules",
+"cue": "",
+"note": "voix seules, sans batterie",
+"mark": "stop",
+"t": 289.1,
+"dropAt": 0
+}
+],
+"bass": [
+[
+"couplet",
+"1 6 5 4"
+],
+[
+"prerefrain",
+"2 6 5 · 1 3 4"
+],
+[
+"refrain",
+"1 1 1 3"
+],
+[
+"refrain",
+"6 4 3 5 (1)"
+],
+[
+"pont",
+"5 6 4 1 3"
+]
+],
+"drums": [
+"Pré-refrain – entrée — GC sur 1 et 3, swells cymbales",
+"Refrain – 2 et 4 — frappes sur 2 et 4 (CC douce / rim, à vérifier)",
+"Couplet 3 — GC 1, 1a, 3&, 3e ; CC sur le 4 ; HH",
+"Refrain 3 / Bridge – toms — GC 2 et 3, toms sur 3a et 4a",
+"Holy – plein — GC 1, 1&, 3, 3& ; CC 2 et 4 ; cymbales"
+],
+"tips": [
+"Couplets 1-2 **sans batterie** : basse en tenues, entrée de la batterie au milieu du pré-refrain (mes. 23).",
+"Le gros saut d'énergie est au **refrain 3** (mes. 65), pas au pont.",
+"« Oh Savior » (turnaround) : **accords à caler** jeudi.",
+"Fin : **drop** au refrain final, voix seules. La basse peut tenir le 1 très doux ou se taire."
+],
+"next": "Enchaîner direct : **G** → **G**, 74 → 70. Dès la fin des voix, Ketsia lance le couplet 1 de Holy and Anointed One.",
+"cin": 2,
+"libId": "lib-gloire-au-roi-jesus"
+},
+{
+"id": "holy",
+"n": 4,
+"title": "Holy and Anointed One",
+"orig": "",
+"ref": "Vineyard Worship (plan) · RehearsalMix : Legacy Live",
+"key": "G",
+"bpm": "70",
+"meter": "4/4",
+"lead": "Tim",
+"slot": "Louange",
+"dur": "≈ 4:15",
+"suggest": true,
+"sections": [
+{
+"name": "Intro accords couplet",
+"kind": "intro",
+"bars": 8,
+"nash": "1 3 4 1 5 4 · 1 5 4 2 1 5 1",
+"i0": 2,
+"i1": 2,
+"call": "COUPLET · doux",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": null
+},
+{
+"name": "Couplet 1",
+"kind": "couplet",
+"bars": 8,
+"nash": "1 3 4 1 5 4 · 1 5 4 2 1 5 1",
+"i0": 2,
+"i1": 2,
+"call": "COUPLET · doux",
+"cue": "Jesus, I love your name",
+"note": "",
+"mark": "none",
+"t": null
+},
+{
+"name": "Couplet 2",
+"kind": "couplet",
+"bars": 8,
+"nash": "1 3 4 1 5 4 · 1 5 4 2 1 5 1",
+"i0": 2,
+"i1": 2,
+"call": "on reste doux",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": null
+},
+{
+"name": "Refrain",
+"kind": "refrain",
+"bars": 8,
+"nash": "4 1 4 1  4 6 4 5",
+"i0": 5,
+"i1": 5,
+"call": "REFRAIN · tout le monde",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": null
+},
+{
+"name": "Refrain",
+"kind": "refrain",
+"bars": 8,
+"nash": "4 1 4 1  4 6 4 5",
+"i0": 5,
+"i1": 5,
+"call": "REFRAIN · tout le monde",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": null
+},
+{
+"name": "Instru",
+"kind": "intro",
+"bars": 4,
+"nash": "1 3 4 1 3 4",
+"i0": 4,
+"i1": 4,
+"call": "",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": null
+},
+{
+"name": "Couplet 2",
+"kind": "couplet",
+"bars": 8,
+"nash": "1 3 4 1 5 4 · 1 5 4 2 1 5 1",
+"i0": 3,
+"i1": 3,
+"call": "on reste doux",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": null
+},
+{
+"name": "Refrain",
+"kind": "refrain",
+"bars": 8,
+"nash": "4 1 4 1 4 6 4 5",
+"i0": 5,
+"i1": 5,
+"call": "Tout le monde entre ",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": null
+},
+{
+"name": "Refrain",
+"kind": "refrain",
+"bars": 8,
+"nash": "4 1 4 1 4 6 4 5",
+"i0": 5,
+"i1": 5,
+"call": "Batterie double GC",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": null
+},
+{
+"name": "Instru",
+"kind": "pont",
+"bars": 4,
+"nash": "4 1 5",
+"i0": 5,
+"i1": 5.5,
+"call": "Transition bridge musical intense",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": null,
+"perc": "combo"
+},
+{
+"name": "",
+"kind": "pont",
+"bars": 8,
+"nash": "4 1 5",
+"i0": 5,
+"i1": 6,
+"call": "a fond",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": null,
+"toNextSec": 0,
+"dropAt": 0,
+"perc": "combo"
+},
+{
+"name": "",
+"kind": "pont",
+"bars": 8,
+"nash": "4 1 5",
+"i0": 6,
+"i1": 6.5,
+"call": "on monte",
+"cue": "",
+"note": "",
+"mark": "cresc",
+"t": null,
+"perc": "combo"
+},
+{
+"name": "",
+"kind": "pont",
+"bars": 8,
+"nash": "4 1 5",
+"i0": 6.5,
+"i1": 7.5,
+"call": "on monte",
+"cue": "",
+"note": "",
+"mark": "cresc",
+"t": null,
+"perc": "combo"
+},
+{
+"name": "",
+"kind": "pont",
+"bars": 8,
+"nash": "4 1 5",
+"i0": 7.5,
+"i1": 7.5,
+"call": "Spontané musical EN BOUCLE !!",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": null,
+"toNextSec": 0,
+"dropAt": 0,
+"loop": "inf",
+"perc": "combo"
+},
+{
+"name": "",
+"kind": "pont",
+"bars": 8,
+"nash": "4 1 5 ",
+"i0": 7.5,
+"i1": 7.5,
+"call": "A fond avec les voix EN BOUCLE",
+"cue": "",
+"note": "",
+"mark": "cresc",
+"t": null,
+"toNext": true,
+"loop": "inf",
+"perc": "combo"
+}
+],
+"bass": [
+[
+"couplet",
+"1 3 4 1 5 4"
+],
+[
+"couplet",
+"1 5 4 2 1 5 1"
+],
+[
+"refrain",
+"4 1 4 1 4 6 4 5"
+],
+[
+"fin",
+"1 3 4 2 1 5 4 5 1"
+]
+],
+"drums": [
+"Pas de fiche batterie (pas dans la playlist YouTube) : couplets en douceur, refrain avec groove simple, dernier refrain plein."
+],
+"tips": [
+"Pas dans la playlist YouTube : on suit la **structure du plan** (V1 · V2 · R · V1 · V2 · R ×2 · Fin).",
+"Intensités = **suggestion** de MD à valider jeudi.",
+"Fin : grille de fin 1 3 4 2 1 5 4 5 1, on peut ralentir sur le dernier 5 → 1."
+],
+"next": "Enchaîner : **G** → **G**, 70 → 67. Sur le dernier 1, Ketsia reste et part en ad lib pour l'intro de Prosterné.",
+"libId": "lib-holy-and-anointed-one"
+},
+{
+"id": "wfd",
+"n": 5,
+"title": "Prosterné",
+"orig": "We Fall Down",
+"ref": "Live Bethel – Josh Baldwin (YouTube) · RehearsalMix : Passion",
+"key": "G",
+"bpm": "67 (live) · 70 (plan)",
+"meter": "4/4",
+"lead": "Tim",
+"slot": "Louange → temps de ministère",
+"dur": "≈ 8:15 (à raccourcir ?)",
+"sections": [
+{
+"name": "Refrain 1",
+"bars": 8,
+"kind": "refrain",
+"nash": "4 6 5 · 4 6 5 1",
+"i0": 8,
+"i1": 8,
+"call": "AU TAQUET",
+"cue": "We cry holy",
+"note": "",
+"mark": "none",
+"t": 90.3,
+"perc": "combo",
+"dropAt": 0
+},
+{
+"name": "Refrain 1",
+"bars": 8,
+"kind": "refrain",
+"nash": "4 6 5 · 4 6 5 1",
+"i0": 8,
+"i1": 8,
+"call": "AU TAQUET ",
+"cue": "We cry holy",
+"note": "",
+"mark": "none",
+"t": 90.3,
+"perc": "combo",
+"dropAt": 0
+},
+{
+"name": "Couplet 2",
+"bars": 8,
+"kind": "couplet",
+"nash": "1 5 6 4⁹ 2 · 1 5 6 4⁹ 5",
+"i0": 1,
+"i1": 1,
+"call": "Couplet musical",
+"cue": "",
+"note": "",
+"mark": "drop",
+"t": 61.7,
+"dropAt": 0
+},
+{
+"name": "Couplet 2",
+"bars": 8,
+"kind": "couplet",
+"nash": "1 5 6 4⁹ 2 · 1 5 6 4⁹ 5",
+"i0": 1,
+"i1": 1,
+"call": "Voix",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": 61.7,
+"dropAt": 0,
+"subk": "noise",
+"perc": "combo"
+},
+{
+"name": "Couplet 2",
+"bars": 8,
+"kind": "couplet",
+"nash": "1 5 6 4⁹ 2 · 1 5 6 4⁹ 5",
+"i0": 1,
+"i1": 1,
+"call": "Voix",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": 61.7,
+"dropAt": 0,
+"perc": "combo"
+},
+{
+"name": "Refrain 1",
+"bars": 8,
+"kind": "refrain",
+"nash": "4 6 5 · 4 6 5 1",
+"i0": 3.5,
+"i1": 3.5,
+"call": "",
+"cue": "We cry holy",
+"note": "",
+"mark": "none",
+"t": 90.3,
+"perc": "combo",
+"dropAt": 0,
+"loop": "inf"
+}
+],
+"bass": [
+[
+"couplet",
+"1 5 6 4⁹ 2"
+],
+[
+"couplet",
+"1 5 6 4⁹ 5"
+],
+[
+"refrain",
+"4 6 5"
+],
+[
+"refrain",
+"4 6 5 1"
+]
+],
+"drums": [
+"Entrée — GC + CC sur le 1, CC sur le 4, tom sur 2a",
+"Refrain 3 – toms — toms sur 1a, 2&, 3, 3a, 4… CC sur le 4",
+"Refrains pleins — GC 1, 1&, 3, 3& ; CC 2 et 4 ; cymbales ouvertes",
+"Retour doux — GC + crash sur le 1, crescendo",
+"Refrain final — GC 1, 1&, 2, 3, 3& ; CC 2 et 4 ; crash",
+"Stop / coup final — coupure puis crash + GC"
+],
+"tips": [
+"Pas de batterie pendant ≈ 2:30 (2 couplets + 1 refrain + couplet 3) : la basse entre légère avec Micaël au refrain 2.",
+"Refrain 5 : **drop** sans batterie, puis spontané. Suivre Tim, c'est lui qui relance.",
+"Le live dure 8:15. **À décider avec Tim** : raccourcir le spontané, ou le garder pour faire le pont avec le temps de ministère.",
+"Après la fin : **pad en G** pour le temps de ministère (refrain 4 6 5 1 très doux en boucle)."
+],
+"next": "Temps de ministère (15 min) : nappe en **G**, puis annonces et message.",
+"libId": "lib-prosterne"
+},
+{
+"id": "jesus",
+"n": 6,
+"title": "Jésus tu es si beau",
+"orig": "",
+"ref": "Jon Thurlow (plan) · RehearsalMix : Harvest, original seul",
+"key": "G",
+"bpm": "64",
+"meter": "4/4",
+"lead": "Tim",
+"slot": "Chant de clôture (après le message)",
+"dur": "≈ 3:10",
+"suggest": true,
+"sections": [
+{
+"name": "Intro",
+"kind": "intro",
+"bars": 4,
+"nash": "1",
+"i0": 1,
+"i1": 2,
+"call": "PIANO · nappe",
+"cue": "",
+"note": "",
+"mark": "cresc",
+"t": null
+},
+{
+"name": "Couplet ×2",
+"kind": "couplet",
+"bars": 8,
+"nash": "1 4/6 1 4/6 (2×)",
+"i0": 2,
+"i1": 3,
+"call": "COUPLET · doux",
+"cue": "",
+"note": "",
+"mark": "cresc",
+"t": null
+},
+{
+"name": "Pré-refrain",
+"kind": "prerefrain",
+"bars": 8,
+"nash": "1 4/6\n1 4 2 1\n1 4\n1 4",
+"i0": 4,
+"i1": 5,
+"call": "PRÉ · on monte",
+"cue": "",
+"note": "",
+"mark": "cresc",
+"t": null
+},
+{
+"name": "Refrain 1",
+"kind": "refrain",
+"bars": 8,
+"nash": "1/3 5\n4 2 1",
+"i0": 5,
+"i1": 5,
+"call": "REFRAIN 1",
+"cue": "",
+"note": "car je sais que tes yeux...",
+"mark": "none",
+"t": null
+},
+{
+"name": "Refrain 2",
+"kind": "refrain",
+"bars": 4,
+"nash": "1sus 1 5 2 4 1",
+"i0": 6,
+"i1": 6,
+"call": "REFRAIN 2",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": null
+},
+{
+"name": "Tag",
+"kind": "tag",
+"bars": 8,
+"nash": "1 5\n2 4 1\n1/3 4\n1/3 2",
+"i0": 5,
+"i1": 5,
+"call": "TAG",
+"cue": "",
+"note": "jésus tu es si beau...",
+"mark": "none",
+"t": null
+},
+{
+"name": "Pont",
+"kind": "pont",
+"bars": 8,
+"nash": "1 5\n4 2 1",
+"i0": 5,
+"i1": 8,
+"call": "PONT · ON MONTE",
+"cue": "",
+"note": "",
+"mark": "cresc",
+"t": null
+},
+{
+"name": "Refrain 1 ×2",
+"kind": "refrain",
+"bars": 16,
+"nash": "1/3 5\n4 2 1 (2×)",
+"i0": 8,
+"i1": 8,
+"call": "REFRAIN 1 ×2 · plein",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": null
+},
+{
+"name": "Refrain 2 ×2",
+"kind": "refrain",
+"bars": 8,
+"nash": "1sus 1 5 2 4 1 (2×)",
+"i0": 8,
+"i1": 8,
+"call": "REFRAIN n°2 plein",
+"cue": "",
+"note": "",
+"mark": "none",
+"t": null
+}
+],
+"bass": [
+[
+"intro",
+"1"
+],
+[
+"couplet",
+"1 4/6 1 4/6 (2×)"
+],
+[
+"prerefrain",
+"1 4/6"
+],
+[
+"prerefrain",
+"1 4 2 1"
+],
+[
+"prerefrain",
+"1 4"
+],
+[
+"prerefrain",
+"1 4"
+],
+[
+"refrain",
+"1/3 5 4 2 1"
+],
+[
+"refrain",
+"1sus 1 5 2 4 1"
+],
+[
+"tag",
+"1 5 2 4 1"
+],
+[
+"tag",
+"1/3 4 1/3 2"
+],
+[
+"pont",
+"1 5 4 2 1"
+]
+],
+"drums": [
+"Pas de fiche batterie : couplets très doux, refrains en groove simple, pont qui monte, fin qui redescend."
+],
+"tips": [
+"Après le message : **être prêts pendant le temps de ministère** (Ketsia peut poser le G).",
+"Intensités = **suggestion** de MD à valider jeudi.",
+"Le plus lent du jour (64) : laisser de l'espace, basse en notes longues."
+],
+"next": "Boucle outro, fin du live.",
+"libId": "lib-jesus-tu-es-si-beau"
+}
+],
+"rev": 1795894981726,
+"mig": [
+"nl1"
+]
+}
+}

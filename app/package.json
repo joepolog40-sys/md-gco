@@ -1,0 +1,26 @@
+{
+  "name": "md-setlists",
+  "productName": "MD",
+  "version": "1.0.0",
+  "description": "Feuille MD, setlists et live (clic, guide vocal, synchro musiciens)",
+  "author": "Jo",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac"
+  },
+  "build": {
+    "appId": "ch.gco.md",
+    "productName": "MD",
+    "files": ["main.js", "preload.js", "renderer/**", "default/**", "build/icon.png"],
+    "directories": { "output": "dist" },
+    "win": { "target": [{ "target": "nsis", "arch": ["x64"] }, { "target": "zip", "arch": ["x64"] }], "icon": "build/icon.png" },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true, "shortcutName": "MD" },
+    "mac": { "target": [{ "target": "dmg", "arch": ["universal"] }], "category": "public.app-category.music", "icon": "build/icon.png", "identity": null }
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  }
+}
