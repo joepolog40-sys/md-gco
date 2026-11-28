@@ -333,7 +333,7 @@ body.viewer .imp{display:none!important}
 
 /* barre de lecture au repos */
 body.idle main{padding-bottom:190px}
-body.idle .hbtns>*:not(#hPlay):not(.hbpm){display:none}
+body.idle .hbtns>*:not(#hPlay):not(.hbpm):not(.hkeyb){display:none}
 body:not(.idle) #hPlay{display:none}
 .hbtns .play{background:#1f8a3b!important;color:#fff!important;border-color:#1f8a3b!important;font-size:20px!important;padding:0 22px;min-width:120px}
 .blk.pick{outline:3px solid #1f8a3b!important;outline-offset:1px}
@@ -623,6 +623,10 @@ button.lockb.arm{background:#5a1e1e;color:#fff;border-color:#e60000}
 body.viewer #bLock{display:none!important}
 body.locked [data-edsec],body.locked [data-edsong],body.locked [data-edside],body.locked #bUndo{display:none!important}
 body.locked [data-chk]{pointer-events:none;opacity:.6}
+
+/* tonalité toujours visible dans le live */
+.hkeyb{display:inline-flex;align-items:center;gap:6px;padding:2px 12px;border:2px solid var(--gold);border-radius:10px;color:var(--gold);line-height:1.1}.hkeyb small{font-size:11px;letter-spacing:.08em;opacity:.8}.hkeyb b{font-size:24px;font-weight:800;min-width:24px;text-align:center}
+@media (max-width:700px){.hkeyb b{font-size:18px}.hkeyb{padding:1px 8px}}
 </style>
 </head>
 <body>
@@ -669,7 +673,7 @@ body.locked [data-chk]{pointer-events:none;opacity:.6}
    <button id="hPrev" title="Section précédente (←)">⏮</button><button id="hNextB" title="Section suivante (→)">⏭</button>
    <button id="hL1" title="Refaire la section 1× de plus (Espace)">↻1 <small>espace</small></button><button id="hLi" title="Boucler la section (Maj+Espace ou L)">∞</button>
    <button id="hStart" title="On est au début de la section en cours (↑ ou D)">⤒ Début</button><button id="hSync" class="sync" title="Appuie pile sur un 1 du groupe : le clic se cale dessus (touche C)">⤓ Caler le 1</button><button id="hTap" title="Tape les noires avec le groupe (T) : tempo + calage">Tap</button>
-   <span class="hbpm"><button id="hMinus">−</button><b id="hBpm"></b><small>BPM</small><button id="hPlus">+</button></span>
+   <span class="hkeyb" title="Tonalité du chant en cours"><small>TONA</small><b id="hKey"></b></span><span class="hbpm"><button id="hMinus">−</button><b id="hBpm"></b><small>BPM</small><button id="hPlus">+</button></span>
    <span class="hkeys">Entrée standby · ← → section · Espace ↻1 · Maj+Espace ∞ · D début · C caler le 1 · T tap</span><button id="hStop" class="stop" title="Arrêter (Échap)">■</button>
   </div></div>
  <div id="imp" class="imp" hidden></div>
@@ -1266,7 +1270,7 @@ function liveDraw(force){if(!live.on)return;if(live.sb||(live.follow&&fol.sb)){s
  const JT=live.follow?fol.jt:live.jumpTo,L=live.loops[s.id+':'+V.sec],left=bars-V.bar;
  // section suivante réelle : saut, ou début du chant suivant (enchaînement), sinon la suivante du chant
  const NSG=live.follow?fol.ns:live.glideEnd,NSS=state.songs[live.si+1],nsOn=!!NSS&&JT==null&&(NSG||(q.toNext&&!L)),nx=JT!=null&&S[JT]?S[JT]:nsOn?NSS.sections[clamp(NSG?0:(+q.toNextSec||0),0,NSS.sections.length-1)]:S[V.sec+1];paintLoopBadge(s,V.sec,L);
- $('#hSong').textContent=live.follow?'👁 En direct avec le MD':`${s.n}. ${s.title} · ${s.key}`;$('#hSec').textContent=SN(q);$('#hSec').style.color=`var(${KC[q.kind]||'--intro'})`;
+ $('#hSong').textContent=live.follow?'👁 En direct avec le MD':`${s.n}. ${s.title} · ${s.key}`;$('#hKey').textContent=s.key||'';$('#hSec').textContent=SN(q);$('#hSec').style.color=`var(${KC[q.kind]||'--intro'})`;
  $('#hBar').textContent=V.count>0?`${V.glide?'⤳ Enchaînement · '+fBpm(60/live.per)+' BPM':'Décompte'}${(live.countN||0)>live.bpb?` · mes. ${(V.cbar||0)+1}/${Math.round(live.countN/live.bpb)}`:''} · ${V.beat+1}`:`mes. ${V.bar+1} / ${bars}`;
  $('#hBeats').innerHTML=Array.from({length:bpb},(_,k)=>`<i class="${V.count>0?(k===V.beat?'on c':''):(k===V.beat?'on':'')}${k===0?' one':''}"></i>`).join('');
  $('#hCall').textContent=q.call||'';paintNash(q,s);
@@ -1328,7 +1332,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=79;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=80;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
@@ -1505,7 +1509,7 @@ function idleDraw(){const hud=$('#hud');if(!hud)return;document.querySelectorAll
  if((viewer&&!rep)||editing||!S){hud.hidden=true;document.body.classList.remove('idle');return}
  document.body.classList.add('idle');hud.hidden=false;live.si=state.songs.indexOf(S);selSec=clamp(selSec,0,S.sections.length-1);const q=S.sections[selSec];
  const b=document.querySelector(`#${S.id} .blk[data-i="${selSec}"]`);b&&b.classList.add('pick');
- $('#hSong').textContent=`${S.n}. ${S.title} · ${S.key}`;$('#hSec').textContent=SN(q);$('#hSec').style.color=`var(${KC[q.kind]||'--intro'})`;
+ $('#hSong').textContent=`${S.n}. ${S.title} · ${S.key}`;$('#hKey').textContent=S.key||'';$('#hSec').textContent=SN(q);$('#hSec').style.color=`var(${KC[q.kind]||'--intro'})`;
  $('#hBar').textContent=selSec?`départ à la section ${selSec+1}`:'départ au début';$('#hBeats').innerHTML='';$('#hImpro').hidden=true;
  $('#hCall').textContent=q.call||'';paintNash(q,S);
  const n=cinOf(S,selSec);$('#hNext').innerHTML=`<b>▶ Play</b> (ou L)${n?` · ${n} mes. de décompte`:''} · clique une case pour choisir où partir`;$('#hNext').classList.remove('soon');
