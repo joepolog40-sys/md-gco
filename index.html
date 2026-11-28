@@ -963,17 +963,17 @@ $('#bFile').onclick=async()=>{const html=cleanSrc();
 // metronome
 let mid=null,ac=null,beatN=0;
 // ---------- horloge audio précise (planification à l'avance, sans dérive) ----------
-const SCH={ahead:.12,iv:null,q:[],raf:null,fn:null,next:0,beats:[]};
+const SCH={ahead:.2,mute:false,iv:null,q:[],raf:null,fn:null,next:0,beats:[]};
 // iPhone : sans ça, le son Web Audio est coupé quand le bouton silencieux est activé
 function iosUnmute(){if(window.__unm)return;window.__unm=1;try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}try{const a=document.createElement('audio');a.src='data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';a.loop=true;a.setAttribute('playsinline','');a.setAttribute('x-webkit-airplay','deny');const p=a.play();if(p&&p.catch)p.catch(()=>{window.__unm=0});window.__unmA=a}catch(e){window.__unm=0}}
-function ensureAC(){iosUnmute();try{if(!ac)ac=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});if(ac.state!=='running')ac.resume()}catch(e){}if(ac&&!gReady)setTimeout(buildGuide,0);if(ac&&!fxP)setTimeout(buildFx,0);if(ac&&!padP)setTimeout(buildPad,0);return ac}
+function ensureAC(){iosUnmute();try{if(!ac)ac=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'balanced'});if(ac.state!=='running')ac.resume()}catch(e){}if(ac&&!gReady)setTimeout(buildGuide,0);if(ac&&!fxP)setTimeout(buildFx,0);if(ac&&!padP)setTimeout(buildPad,0);return ac}
 const CLK=Object.assign({type:'bois',accent:true,vol:.8},LS.get('clk',{}));let NOISE=null;
 const CLKS={bip:'Bip',bois:'Bois',clave:'Clave',rim:'Baguettes',hat:'Charley',cloche:'Cloche'};
 function env(g,t,peak,dec){g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+.0015);g.gain.exponentialRampToValueAtTime(.0001,t+dec)}
 function noise(){if(NOISE)return NOISE;const b=ac.createBuffer(1,ac.sampleRate*.5,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;return NOISE=b}
 function tone(t,type,f,peak,dec,f2){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dec);env(g,t,peak,dec);o.connect(g);g.connect(OUT||ac.destination);o.start(t);o.stop(t+dec+.02)}
 function nz(t,ftype,f,q,peak,dec){const n=ac.createBufferSource(),fl=ac.createBiquadFilter(),g=ac.createGain();n.buffer=noise();fl.type=ftype;fl.frequency.value=f;fl.Q.value=q;env(g,t,peak,dec);n.connect(fl);fl.connect(g);g.connect(OUT||ac.destination);n.start(t);n.stop(t+dec+.02)}
-function clickAt(t,acc){if(!sound||!ac)return;t=Math.max(t,ac.currentTime+.012);OUT=bus('clk');acc=acc&&CLK.accent;const v=CLK.vol*(acc?1:.62);try{
+function clickAt(t,acc){if(!sound||!ac||SCH.mute)return;t=Math.max(t,ac.currentTime+.012);OUT=bus('clk');acc=acc&&CLK.accent;const v=CLK.vol*(acc?1:.62);try{
  if(CLK.type==='bip')tone(t,'square',acc?1760:1180,.28*v,.035);
  else if(CLK.type==='bois'){tone(t,'triangle',acc?1250:900,.9*v,.05,acc?1000:720);nz(t,'bandpass',acc?2200:1700,4,.25*v,.02)}
  else if(CLK.type==='clave')tone(t,'sine',acc?2900:2300,.8*v,.045);
@@ -1005,7 +1005,7 @@ async function buildSamples(){if(smpReady||smpBusy||!window.PSAMP)return;ensureA
  SMP.shkc=[0,3,4].map(i=>SMP.shk[i]).filter(Boolean);if(!SMP.shkc.length)SMP.shkc=SMP.shk;smpReady=true}catch(e){console.warn(e)}smpBusy=false}
 let lastPick={};
 function pickS(k){const a=SMP[k];if(!a||!a.length)return null;let i=Math.floor(Math.random()*a.length);if(a.length>1&&i===lastPick[k])i=(i+1)%a.length;lastPick[k]=i;return a[i]}
-function playS(t,s,v){if(!s)return;const n=ac.createBufferSource(),g=ac.createGain();n.buffer=s.buf;g.gain.value=v*(.96+Math.random()*.08);n.connect(g);g.connect(bus('perc'));
+function playS(t,s,v){if(!s||SCH.mute)return;const n=ac.createBufferSource(),g=ac.createGain();n.buffer=s.buf;g.gain.value=v*(.96+Math.random()*.08);n.connect(g);g.connect(bus('perc'));
  const st=t-s.pre,now=ac.currentTime;if(st>=now)n.start(st);else if(now-st<s.pre+.05)n.start(now,now-st)}
 function percHit(t,P,v,strong){if(!smpReady)return;try{if(P.snd==='shk'&&!strong){playS(t,pickS('shkc'),v);return}
  if(P.snd==='tamb')playS(t,pickS(strong?'tamb':'tshk'),strong?v:v*1.1);else playS(t,pickS(P.snd),v)}catch(e){}}
@@ -1077,7 +1077,7 @@ async function buildGuide(){if(gReady||gBusy||!window.GSAMP||!ac)return;gBusy=tr
 const GRATE=1.18;// voix un peu accélérée : l'annonce tient dans le début de la dernière mesure
 var GACT=[];function gTrack(src){GACT.push(src);src.onended=()=>{const i=GACT.indexOf(src);if(i>=0)GACT.splice(i,1)}}
 function gHush(){GACT.splice(0).forEach(x=>{try{x.stop()}catch(e){}})}
-function say(k,t,r){r=r||1;const B=GBUF[GUIDE.voice]&&GBUF[GUIDE.voice][k];if(window.__gdLog)__gdLog.push([k,+(t-ac.currentTime).toFixed(2)]);if(!B||!ac)return 0;const src=ac.createBufferSource();src.buffer=B.buf;src.playbackRate.value=r;src.connect(bus('gd'));gTrack(src);src.start(Math.max(t,ac.currentTime+.01),B.off);return (B.buf.duration-B.off)/r}
+function say(k,t,r){r=r||1;if(SCH.mute)return 0;const B=GBUF[GUIDE.voice]&&GBUF[GUIDE.voice][k];if(window.__gdLog)__gdLog.push([k,+(t-ac.currentTime).toFixed(2)]);if(!B||!ac)return 0;const src=ac.createBufferSource();src.buffer=B.buf;src.playbackRate.value=r;src.connect(bus('gd'));gTrack(src);src.start(Math.max(t,ac.currentTime+.01),B.off);return (B.buf.duration-B.off)/r}
 function sayList(keys,t,r){let x=t;for(const k of keys){x+=say(k,x,r)*.92}return x+.04}
 // notes MD (même voix que le guide : enregistrée si dispo, sinon voix du navigateur du même genre, sinon rien)
 const NTYPE=/^\s*(pr[ée][- ]?refrain|pr[ée]|refrain|couplet|pont|bridge|intro|instrumental|instru|tag|vamp|turnaround|transition|interlude|outro|fin)(?=[\s·:\-–]|$)\s*(n°\s*)?\d*\s*[·:\-–]?\s*/i;
@@ -1089,7 +1089,7 @@ async function noteBuf(v,k){const id=v+':'+k;if(NBUF[id]!==undefined)return NBUF
 const FEM=/denise|julie|hortense|am[ée]lie|marie|audrey|aur[ée]lie|virginie|c[ée]line|chantal|sylvie|eloise|[ée]lo[ïi]se|yvette|brigitte|coralie|jacqueline|vivienne|female|femme|google fran/i,MAS=/henri|paul|claude|thomas|nicolas|daniel|guillaume|j[ée]r[ôo]me|alain|antoine|fabrice|jean|male\b|homme/i;
 function ttsVoice(){const vs=(window.speechSynthesis&&speechSynthesis.getVoices()||[]).filter(v=>/^fr/i.test(v.lang));return GUIDE.voice==='siwis'?vs.find(v=>FEM.test(v.name)&&!MAS.test(v.name)):vs.find(v=>MAS.test(v.name)&&!FEM.test(v.name))}
 function speakTxt(t,v){try{const u=new SpeechSynthesisUtterance(t.replace(/[«»]/g,'').replace(/·/g,',').toLowerCase());u.lang='fr-FR';u.rate=1.25;u.volume=Math.min(1,GUIDE.vol);u.voice=v;speechSynthesis.speak(u)}catch(e){}}
-function sayNote(q,x){if(!GUIDE.notes||!q)return x;const t=noteTxt(q);if(!t)return x;const k=nKey(t),v=GUIDE.voice,B=NBUF[v+':'+k];if(window.__gdLog)__gdLog.push(['note:'+t,B?'clip':nSrc(v,k)?'decode':'tts']);
+function sayNote(q,x){if(SCH.mute)return x;if(!GUIDE.notes||!q)return x;const t=noteTxt(q);if(!t)return x;const k=nKey(t),v=GUIDE.voice,B=NBUF[v+':'+k];if(window.__gdLog)__gdLog.push(['note:'+t,B?'clip':nSrc(v,k)?'decode':'tts']);
  if(B){const src=ac.createBufferSource();src.buffer=B.buf;src.playbackRate.value=GRATE;src.connect(bus('gd'));gTrack(src);const st=Math.max(x,ac.currentTime+.01);src.start(st,B.off);return st+(B.buf.duration-B.off)/GRATE+.04}
  if(nSrc(v,k)){noteBuf(v,k);return x}
  genMissing();return x}
@@ -1101,7 +1101,7 @@ function speechTxt(t){return t.replace(/[«»()]/g,'').replace(/·/g,',').replac
 function genMissing(){if(!GUIDE.on||(viewer&&!rep))return;const v=GUIDE.voice;for(const s of state.songs){const t=String(s.title||'').trim(),k=nKey(t),id=v+':'+k;if(t&&!nSrc(v,k)&&!NBUF[id]&&!genQ.some(x=>x.id===id))genQ.push({id,v,k,t})}if(!GUIDE.notes){genRun();return}for(const s of state.songs)for(const q of s.sections){const t=noteTxt(q);if(!t)continue;const k=nKey(t),id=v+':'+k;if(nSrc(v,k)||NBUF[id]||genQ.some(x=>x.id===id))continue;genQ.push({id,v,k,t})}genRun()}
 const TSESS={};function ttsSess(v){return TSESS[v]||(TSESS[v]=ttsMod.TtsSession.create({voiceId:PVOICE[v],progress:p=>{if(p&&p.total){genState=`téléchargement de la voix ${Math.round(p.loaded*100/p.total)} %`;paintGen()}},wasmPaths:{onnxWasm:'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.27.0/dist/',piperData:ttsMod.WASM_BASE+'.data',piperWasm:ttsMod.WASM_BASE+'.wasm'}}).catch(e=>{delete TSESS[v];throw e}))}
 async function genRun(){if(genBusy||!genQ.length||!ac)return;genBusy=true;try{if(!ttsMod){genState='chargement de la voix…';paintGen();ttsMod=await import('https://cdn.jsdelivr.net/npm/@mintplex-labs/piper-tts-web@1.0.5/+esm')}
- while(genQ.length){const j=genQ.shift();if(NBUF[j.id])continue;genState=`voix : « ${j.t} »…`;paintGen();
+ while(genQ.length){while(live.on&&!live.follow)await new Promise(r=>setTimeout(r,800));const j=genQ.shift();if(NBUF[j.id])continue;genState=`voix : « ${j.t} »…`;paintGen();
   const ss=await ttsSess(j.v);const wav=await ss.predict(speechTxt(j.t)+'.');
   const buf=await ac.decodeAudioData(await wav.arrayBuffer());const d=buf.getChannelData(0);let o=0;while(o<d.length&&Math.abs(d[o])<.03)o++;NBUF[j.id]={buf,off:Math.max(0,o/buf.sampleRate-.004)}}
  genState='✓ indications prêtes'}catch(e){genState='⚠ voix indisponible (connexion ?)';console.warn(e)}genBusy=false;paintGen()}
@@ -1115,13 +1115,13 @@ function gNext(s,si,sec){const q=s.sections[sec],L=live.loops[s.id+':'+sec],n=st
 // tout se passe dans la dernière mesure : sur le 1 on annonce vite ce qui vient (+ indication MD), puis le décompte continue sur les temps libres
 function gAnnounce(t,N){const T=N.q;let x=t;if(N.song){x=sayList(['next'],x,GRATE);x=sayText(N.song.title,x)}x=sayList(N.rep?['encore']:[...gKeys(T),...(T&&isDrop(T)?['drop']:T&&T.mark==='stop'?['stop']:[])],x,GRATE);if(!N.rep)x=sayNote(T,x);live.gEnd=x}
 // texte libre (titre du chant…) : voix enregistrée ou générée, même voix que le guide
-function sayText(t,x){t=String(t||'').trim();if(!t)return x;const k=nKey(t),v=GUIDE.voice,B=NBUF[v+':'+k];if(window.__gdLog)__gdLog.push(['text:'+t,B?'clip':nSrc(v,k)?'decode':'gen']);
+function sayText(t,x){if(SCH.mute)return x;t=String(t||'').trim();if(!t)return x;const k=nKey(t),v=GUIDE.voice,B=NBUF[v+':'+k];if(window.__gdLog)__gdLog.push(['text:'+t,B?'clip':nSrc(v,k)?'decode':'gen']);
  if(B){const src=ac.createBufferSource();src.buffer=B.buf;src.playbackRate.value=GRATE;src.connect(bus('gd'));gTrack(src);const st=Math.max(x,ac.currentTime+.01);src.start(st,B.off);return st+(B.buf.duration-B.off)/GRATE+.04}
  if(nSrc(v,k))noteBuf(v,k);else{const id=v+':'+k;if(!genQ.some(j=>j.id===id)){genQ.push({id,v,k,t});genRun()}}return x}
 // ---------- Subdrop (gros « baouum ») : sur le drop de la section si elle a un drop, sinon sur son 1 ----------
 const FXK=[['boom','Boum cinéma'],['ccm','⭐ Classique CCM : montée + sub drop'],['sub808','Sub 808 (low drop bass)'],['lowboom','Boum grave'],['swell','Montée cymbale + boum'],['sw808','Montée cymbale + 808'],['nz808','Riser bruit blanc + 808'],['snroll','Roulement caisse claire + boum'],['tamb','Roulement court tambourin + boum'],['noise','Riser bruit blanc (EDM) + boum'],['pitch','Riser qui monte + sub 808'],['revcym','Grande montée cymbale + gong'],['suck','Aspiration + boum (court)']];
 var FXB=null,fxP=null;function buildFx(){if(!window.FXSAMP||!ac)return Promise.resolve();if(fxP)return fxP;FXB={};fxP=(async()=>{for(const[k,v]of Object.entries(FXSAMP)){try{const b64=typeof v==='string'?v:v.b64,bin=atob(b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);FXB[k]={buf:await ac.decodeAudioData(u.buffer),hit:+(v.hit||0)}}catch(e){}}})();return fxP}
-function playSub(t,k){if(!FXB||!ac)return;const F=FXB[k]||FXB.boom||FXB.subdrop;if(!F)return;const src=ac.createBufferSource();src.buffer=F.buf;src.connect(bus('fx'));const st=t-F.hit,now=ac.currentTime+.005;if(st>=now)src.start(st);else src.start(now,Math.min(F.hit,now-st));if(window.__gdLog)__gdLog.push(['SUBDROP',+(t-ac.currentTime).toFixed(2)])}
+function playSub(t,k){if(!FXB||!ac)return;if(SCH.mute&&t<ac.currentTime)return;const F=FXB[k]||FXB.boom||FXB.subdrop;if(!F)return;const src=ac.createBufferSource();src.buffer=F.buf;src.connect(bus('fx'));const st=t-F.hit,now=ac.currentTime+.005;if(st>=now)src.start(st);else src.start(now,Math.min(F.hit,now-st));if(window.__gdLog)__gdLog.push(['SUBDROP',+(t-ac.currentTime).toFixed(2)])}
 function fxBeat(t,per,s,si,sec,bar,beat){if(!FXB)return;const q=s.sections[sec],bpb=live.bpb,bars=+q.bars||1,into=bar*bpb+beat,remain=bars*bpb-into,cur=s.id+':'+sec;
  if(into===0&&live.fxKey&&live.fxKey!==cur)live.fxKey=null;
  // déclenche une fois, assez tôt pour que la montée éventuelle finisse pile sur le drop
@@ -1185,12 +1185,14 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-clk]');if(
 document.addEventListener('change',e=>{const b=e.target.closest('[data-clk]');if(!b)return;if(b.dataset.clk==='type'){CLK.type=b.value;LS.set('clk',CLK);previewClk();paintClk()}if(b.dataset.clk==='vol'){CLK.vol=+b.value;LS.set('clk',CLK);previewClk()}});
 const outLat=()=>ac?(ac.outputLatency||ac.baseLatency||0):0;
 function drain(){if(!ac)return;const now=ac.currentTime-outLat();while(SCH.q.length&&SCH.q[0].t<=now)SCH.q.shift().run()}
-function pump(){if(!SCH.fn||!ac)return;drain();while(SCH.next<ac.currentTime+SCH.ahead){const p=SCH.fn(SCH.next);if(!p)return;SCH.beats.push(SCH.next);if(SCH.beats.length>8)SCH.beats.shift();SCH.next+=p}}
+// si l'ordi a été bloqué un instant, les temps déjà passés sont « sautés » en silence (on garde la grille, pas de rafale de clics)
+function pump(){if(!SCH.fn||!ac)return;drain();let guard=0;while(SCH.next<ac.currentTime+SCH.ahead&&guard++<64){SCH.mute=SCH.next<ac.currentTime-.015;let p;try{p=SCH.fn(SCH.next)}finally{SCH.mute=false}if(!p)return;SCH.beats.push(SCH.next);if(SCH.beats.length>8)SCH.beats.shift();SCH.next+=p}}
 function vis(){if(!SCH.fn)return;const now=ac.currentTime-outLat();while(SCH.q.length&&SCH.q[0].t<=now)SCH.q.shift().run();SCH.raf=requestAnimationFrame(vis)}
-function schedStart(fn){schedStop();ensureAC();if(!ac)return false;SCH.fn=fn;SCH.q=[];SCH.beats=[];SCH.next=ac.currentTime+(ac.state==='running'?.09:.16);pump();SCH.iv=setInterval(pump,20);SCH.raf=requestAnimationFrame(vis);return true}
-function schedStop(){clearInterval(SCH.iv);cancelAnimationFrame(SCH.raf);SCH.q=[];SCH.fn=null;SCH.beats=[]}
+var TW=null;function tickW(){try{if(!TW){const u=URL.createObjectURL(new Blob(["let i=null;onmessage=e=>{clearInterval(i);if(e.data)i=setInterval(()=>postMessage(1),e.data)}"],{type:'text/javascript'}));TW=new Worker(u);TW.onmessage=()=>pump()}TW.postMessage(15)}catch(e){TW=null}}
+function schedStart(fn){schedStop();ensureAC();if(!ac)return false;SCH.fn=fn;SCH.q=[];SCH.beats=[];SCH.next=ac.currentTime+(ac.state==='running'?.09:.16);pump();SCH.iv=setInterval(pump,25);tickW();SCH.raf=requestAnimationFrame(vis);return true}
+function schedStop(){clearInterval(SCH.iv);try{TW&&TW.postMessage(0)}catch(e){}cancelAnimationFrame(SCH.raf);SCH.q=[];SCH.fn=null;SCH.beats=[]}
 function schedRestart(t){if(!ac)return;SCH.q=[];SCH.beats=[];SCH.next=t??ac.currentTime+.05;pump()}
-document.addEventListener('visibilitychange',()=>{SCH.ahead=document.hidden?1.5:.12;pump()});
+document.addEventListener('visibilitychange',()=>{SCH.ahead=document.hidden?1.5:.2;pump()});
 function toggleMetro(id){const stop=mid===id;if(mid&&!live.on)schedStop();mid=null;document.querySelectorAll('[data-metro]').forEach(b=>b.textContent=b.textContent.replace(/^[▶■]/,'▶'));if(stop)return;
  if(live.on)liveStop(true);const s=state.songs.find(x=>x.id===id),bpm=num(String(s.bpm).split(' ')[0])||80;mid=id;beatN=0;const btn=document.querySelector(`[data-metro="${id}"]`);if(btn)btn.textContent=btn.textContent.replace(/^[▶■]/,'■');
  schedStart(t=>{const down=beatN%4===0;clickAt(t,down);SCH.q.push({t,run:()=>{const dot=document.getElementById('dot-'+id);if(dot){dot.className='dot '+(down?'down':'beat');setTimeout(()=>dot&&(dot.className='dot'),90)}}});beatN++;return 60/bpm})}
@@ -1348,7 +1350,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=86;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=87;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
