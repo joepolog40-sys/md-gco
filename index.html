@@ -627,6 +627,9 @@ body.locked [data-chk]{pointer-events:none;opacity:.6}
 /* tonalité toujours visible dans le live */
 .hkeyb{display:inline-flex;align-items:center;gap:6px;padding:2px 12px;border:2px solid var(--gold);border-radius:10px;color:var(--gold);line-height:1.1}.hkeyb small{font-size:11px;letter-spacing:.08em;opacity:.8}.hkeyb b{font-size:24px;font-weight:800;min-width:24px;text-align:center}
 @media (max-width:700px){.hkeyb b{font-size:18px}.hkeyb{padding:1px 8px}}
+
+/* accords de la section suivante pendant la dernière mesure (décompte) */
+.hnash .nnext{display:block;margin-top:6px;padding-top:6px;border-top:2px dashed currentColor;opacity:.95;animation:nnx .5s ease}.hnash .nnext small{display:block;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}.hud .hnash .nnext b{font-size:34px;line-height:1.1}body.viewer .hud .hnash .nnext b{font-size:22px}@keyframes nnx{from{opacity:0;transform:translateY(6px)}}
 </style>
 </head>
 <body>
@@ -1026,8 +1029,9 @@ const LBR=/\s*\n\s*|\s+·\s+|\s*\|\s*/;
 function NL(t){return esc(t).split(LBR).map(l=>`<span class="nl">${l}</span>`).join('')}
 function fitNash(root){(root||document).querySelectorAll('.blk .nash,.blk .chd').forEach(el=>{el.style.fontSize='';const w=el.clientWidth,sw=el.scrollWidth;if(w>0&&sw>w+1){const f=parseFloat(getComputedStyle(el).fontSize);el.style.fontSize=Math.max(11,Math.floor(f*w/sw*10)/10)+'px'}})}
 var fitT=0;function fitSoon(){cancelAnimationFrame(fitT);fitT=requestAnimationFrame(()=>fitNash())}window.addEventListener('resize',fitSoon);
-function paintNash(q,s){const el=$('#hNash');if(!el)return;const n=q&&q.nash?q.nash:'';el.hidden=!n;if(!n)return;const big=show(n,s.key),small=chords?n:toChords(n,s.key);
- el.innerHTML=`<b>${esc(big).split(LBR).join('<br>')}</b>${viewer&&small!==big?`<span>${esc(small).split(LBR).join('<br>')}</span>`:''}`;el.style.color=`var(${KC[q.kind]||'--intro'})`}
+function paintNash(q,s,nx,nk){const el=$('#hNash');if(!el)return;const n=q&&q.nash?q.nash:'',hasN=!!(nx&&nx.nash);el.hidden=!n&&!hasN;if(el.hidden)return;el.innerHTML='';
+ if(n){const big=show(n,s.key),small=chords?n:toChords(n,s.key);el.innerHTML=`<b>${esc(big).split(LBR).join('<br>')}</b>${viewer&&small!==big?`<span>${esc(small).split(LBR).join('<br>')}</span>`:''}`;el.style.color=`var(${KC[q.kind]||'--intro'})`}
+ if(hasN){const nb=show(nx.nash,nk||s.key);el.insertAdjacentHTML('beforeend',`<div class="nnext" style="color:var(${KC[nx.kind]||'--intro'})"><small>→ ${esc(SN(nx))}${nk&&nk!==s.key?' · '+esc(nk):''}</small><b>${esc(nb).split(LBR).join('<br>')}</b></div>`)}}
 // où tombe le drop : 0 = sur le 1 de la section, 1 = sur le dernier temps avant, 2 = l'avant-dernier, 0.5 = sur le « et » du dernier temps
 const DROPAT={1:'sur le 4 de la dernière mesure avant (par défaut)',0.5:'sur le « et » du 4',2:'sur le 3 de la dernière mesure avant',3:'sur le 2 de la dernière mesure avant',0:'sur le 1 de la section'};
 // dropAt = nombre de temps AVANT le 1 de la section (1 = sur le 4 de la dernière mesure d'avant ; 0 = sur le 1 ; négatif = dans la 1re mesure de la section ; demi-temps = « et »)
@@ -1273,7 +1277,7 @@ function liveDraw(force){if(!live.on)return;if(live.sb||(live.follow&&fol.sb)){s
  $('#hSong').textContent=live.follow?'👁 En direct avec le MD':`${s.n}. ${s.title} · ${s.key}`;$('#hKey').textContent=s.key||'';$('#hSec').textContent=SN(q);$('#hSec').style.color=`var(${KC[q.kind]||'--intro'})`;
  $('#hBar').textContent=V.count>0?`${V.glide?'⤳ Enchaînement · '+fBpm(60/live.per)+' BPM':'Décompte'}${(live.countN||0)>live.bpb?` · mes. ${(V.cbar||0)+1}/${Math.round(live.countN/live.bpb)}`:''} · ${V.beat+1}`:`mes. ${V.bar+1} / ${bars}`;
  $('#hBeats').innerHTML=Array.from({length:bpb},(_,k)=>`<i class="${V.count>0?(k===V.beat?'on c':''):(k===V.beat?'on':'')}${k===0?' one':''}"></i>`).join('');
- $('#hCall').textContent=q.call||'';paintNash(q,s);
+ $('#hCall').textContent=q.call||'';paintNash(q,s,V.count===0&&left<=1&&!L&&nx?nx:null,nsOn&&JT==null?NSS.key:null);
  $('#hNext').innerHTML=JT!=null&&S[JT]&&V.count===0?`<b class="jumpi">⤳ SAUT → ${esc(SN(S[JT]))}</b> à la fin de la section · dans ${left} mes.`:L==='inf'?(live.follow?'<b class="loopi">∞ en boucle</b> · on sort sur signe du MD':'<b class="loopi">∞ en boucle</b> · Maj+Espace pour sortir'):typeof L==='number'?`<b class="loopi">↻ encore ${L}×</b> ${live.follow?'':'(Espace = annuler)'} puis → ${esc(nx?SN(nx):'fin')}`:nx?`→ <b>${esc(SN(nx))}</b> dans ${left} mes.${nx.call?` · ${esc(nx.call)}`:''}`:`→ <b>fin</b> dans ${left} mes.`;
  $('#hNext').classList.toggle('soon',(JT!=null||!L)&&left<=2&&V.count===0);paintDrop(q,nx,left,V,L);{const MAN=live.follow?fol.ns:live.glideEnd,NS=MAN||(q.toNext&&!L&&JT==null&&!!state.songs[live.si+1]),ns=NS&&V.count===0?state.songs[live.si+1]:null,st=ns?clamp(MAN?0:(+q.toNextSec||0),0,ns.sections.length-1):0;paintJumpHud(ns?{name:`${ns.title} · ${SN(ns.sections[st])}`,kind:'intro',ns:1}:JT!=null&&V.count===0?S[JT]:null,(bars-V.bar)*bpb-V.beat-1,bpb)}
  $('#hProg').style.width=(done/tot*100).toFixed(1)+'%';$('#hBpm').textContent=fBpm(60/live.per);
@@ -1332,7 +1336,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=80;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=81;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
