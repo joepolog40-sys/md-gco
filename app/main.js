@@ -27,6 +27,15 @@ function initStore() {
   let cfg = readJSON(cfgF, null);
   if (!cfg) { cfg = { installId: rid(6), ownerKey: rid(12), created: Date.now() }; writeJSON(cfgF, cfg); }
   const libF = path.join(DIR, 'bibliotheque.json');
+  if (fs.existsSync(libF)) { // nouvelle bibliothèque par défaut : on met à jour les chants que tu n'as pas modifiés
+    const def = readJSON(path.join(__dirname, 'default', 'bibliotheque.json'), { songs: [] }), lib = readJSON(libF, { songs: [] });
+    if ((lib.version || 1) < (def.version || 1)) {
+      try { fs.copyFileSync(libF, path.join(DIR, 'sauvegardes', 'bibliotheque-avant-v' + def.version + '.json')); } catch (e) {}
+      const byId = new Map(lib.songs.map((x, i) => [x.id, i]));
+      for (const s of def.songs) { const i = byId.get(s.id); if (i == null) lib.songs.push(s); else if (!lib.songs[i].edited) lib.songs[i] = s; }
+      lib.version = def.version; writeJSON(libF, lib);
+    }
+  }
   if (!fs.existsSync(libF)) {
     const def = readJSON(path.join(__dirname, 'default', 'bibliotheque.json'), { songs: [] });
     writeJSON(libF, def);

@@ -139,7 +139,7 @@ function bindRows() {
   });
 }
 function toLib(s) { // copie « propre » d'un chant pour la bibliothèque
-  const c = clone(s); c.id = s.libId || ('lib-' + slug(s.title) + '-' + rid());
+  const c = clone(s); c.id = s.libId || ('lib-' + slug(s.title) + '-' + rid()); c.edited = true;
   delete c.libId; delete c.n; delete c.slot; (c.sections || []).forEach(q => { q.t = null; }); return c;
 }
 function fromLib(L) { // copie d'un chant de la bibliothèque dans la setlist
@@ -178,7 +178,7 @@ function renderLib() {
 }
 $('#libQ').oninput = renderLib;
 $('#bNewSong').onclick = () => { const s = { id: 'lib-nouveau-' + rid(), title: 'Nouveau chant', orig: '', key: 'G', bpm: '72', meter: '4/4', lead: '', sections: [{ name: 'Intro', kind: 'intro', bars: 4, nash: '1', i0: 2, i1: 3, call: '', cue: '', note: '', mark: 'none', t: null }], bass: [], drums: [], tips: [], next: '' }; LIB.songs.push(s); SONG = s; saveLib(); $('#libQ').value = ''; renderLib(); setTimeout(() => $('#gTitle') && $('#gTitle').select(), 30); };
-let libT = null; const libSave = () => { clearTimeout(libT); libT = setTimeout(saveLib, 400); };
+let libT = null; const libSave = () => { if (SONG) SONG.edited = true; clearTimeout(libT); libT = setTimeout(saveLib, 400); };
 function renderSong() {
   const el = $('#songDetail'); const s = SONG;
   if (!s) { el.innerHTML = `<div class="hero"><h2>📚 Ta bibliothèque</h2><p>${LIB.songs.length} chants. Choisis-en un à gauche pour le voir ou le modifier.</p><p class="muted">Ce que tu changes ici sert de point de départ quand tu ajoutes le chant à une setlist. Les setlists déjà faites ne bougent pas.</p></div>`; return; }

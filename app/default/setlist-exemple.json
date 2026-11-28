@@ -637,7 +637,7 @@
 "drums": [],
 "tips": [],
 "next": "",
-"libId": "lib-j-eleve-un-alleluia"
+"libId": "lib-j-eleve-un-alleluia-29nov"
 },
 {
 "id": "r10k",
@@ -828,7 +828,7 @@
 "Si on manque de temps : couper spontané + vamp (≈ 1:10)."
 ],
 "next": "Enchaîner direct : même tonalité (**G**), 72 → 74. Ketsia garde le G et lance l'intro de Gloire au Roi Jésus (1 6 5 4).",
-"libId": "lib-beni-dieu"
+"libId": "lib-beni-dieu-29nov"
 },
 {
 "id": "ahkj",
@@ -1090,7 +1090,7 @@
 ],
 "next": "Enchaîner direct : **G** → **G**, 74 → 70. Dès la fin des voix, Ketsia lance le couplet 1 de Holy and Anointed One.",
 "cin": 2,
-"libId": "lib-gloire-au-roi-jesus"
+"libId": "lib-gloire-au-roi-jesus-29nov"
 },
 {
 "id": "holy",
@@ -1342,7 +1342,7 @@
 "Fin : grille de fin 1 3 4 2 1 5 4 5 1, on peut ralentir sur le dernier 5 → 1."
 ],
 "next": "Enchaîner : **G** → **G**, 70 → 67. Sur le dernier 1, Ketsia reste et part en ad lib pour l'intro de Prosterné.",
-"libId": "lib-holy-and-anointed-one"
+"libId": "lib-holy-and-anointed-one-29nov"
 },
 {
 "id": "wfd",
@@ -1671,7 +1671,7 @@
 "Le plus lent du jour (64) : laisser de l'espace, basse en notes longues."
 ],
 "next": "Boucle outro, fin du live.",
-"libId": "lib-jesus-tu-es-si-beau"
+"libId": "lib-jesus-tu-es-si-beau-29nov"
 }
 ],
 "rev": 1795894981726,

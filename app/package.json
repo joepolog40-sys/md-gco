@@ -1,7 +1,7 @@
 {
   "name": "md-setlists",
   "productName": "MD",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Feuille MD, setlists et live (clic, guide vocal, synchro musiciens)",
   "author": "Jo",
   "main": "main.js",
