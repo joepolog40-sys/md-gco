@@ -7,7 +7,7 @@ lib=open(MD+'/site/mqtt.min.js').read().replace('</script','<\\/script')
 empty=json.dumps({"meta":{"date":""},"songs":[],"rev":0})
 html=re.sub(r'(<script id="data"[^>]*>)[\s\S]*?(</script>)',lambda m:m.group(1)+empty+m.group(2),html,count=1)
 html=html.replace('<script id="data"','<script data-md>'+lib+'</script>\n<script id="data"',1)
-assert 'jo-f8abceb659c1' not in html
+K=json.load(open(MD+'/site-config.json'))['ownerKey'];assert K not in html
 os.makedirs(APP+'/renderer',exist_ok=True)
 open(APP+'/renderer/sheet.html','w').write(html)
 os.makedirs('/home/claude/work/mdapp/live',exist_ok=True)
