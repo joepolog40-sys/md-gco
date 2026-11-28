@@ -1124,8 +1124,8 @@ function fxBeat(t,per,s,si,sec,bar,beat){if(!FXB)return;const q=s.sections[sec],
  // déclenche une fois, assez tôt pour que la montée éventuelle finisse pile sur le drop
  const fire=(key,dt,k)=>{if(live.fxKey===key)return;const F=FXB[k]||FXB.boom;const pre=F?F.hit:0;if(dt<=pre+per*.999){live.fxKey=key;playSub(t+dt,k)}};
  if(q.sub){if(!isDrop(q)){if(into===0)fire(cur,0,q.subk)}else if(dAt(q)<=0){const dt=(-dAt(q)-into)*per;if(dt>=-1e-6)fire(cur,dt,q.subk)}else if(into===0)fire(cur,0,q.subk)}
- const N=gNext(s,si,sec);if(N&&N.q&&!N.rep&&N.q.sub){const ns=N.song||s,key=ns.id+':'+ns.sections.indexOf(N.q);const d=isDrop(N.q)?dAt(N.q):0;const dt=(remain-Math.max(0,d))*per;
-  if(d>0||!isDrop(N.q)){const F=FXB[N.q.subk]||FXB.boom;if(dt>=0&&(d>0||F&&F.hit>0))fire(key,dt,N.q.subk)}}}
+ const N=gNext(s,si,sec);if(N&&N.q&&!N.rep&&N.q.sub){const ns=N.song||s,key=ns.id+':'+ns.sections.indexOf(N.q);const d=isDrop(N.q)?dAt(N.q):0;const dt=(remain-d)*per;
+  {const F=FXB[N.q.subk]||FXB.boom;if(dt>=0&&(d>0||F&&F.hit>0))fire(key,dt,N.q.subk)}}}
 // ---------- Pad ambiant (façon pads worship) : nappe tonique + quinte + octave dans la tonalité du chant, synthétisée ----------
 var PAD=Object.assign({on:false,vol:.45,when:'count',bright:.5},LS.get('pad')||{}),padCur=null,padIR=null;
 const KEYI={C:0,'C#':1,Db:1,D:2,'D#':3,Eb:3,E:4,F:5,'F#':6,Gb:6,G:7,'G#':8,Ab:8,A:9,'A#':10,Bb:10,B:11};
@@ -1336,7 +1336,7 @@ const cin=()=>{const n=CIN();$('#bCount').textContent=n?`Décompte : ${n} mes.`:
 $('#bCount').onclick=()=>{LS.set('countin2',(CIN()+2)%3);cin()};cin();
 
 // ---------- MD → musiciens : ils suivent ton live en direct (capacité room) ----------
-const VER=81;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
+const VER=82;// à augmenter à chaque livraison : les musiciens restés sur une ancienne page se rechargent tout seuls
 let room=null,remoteRev=0,rep=false,mdSel=null;const fol={optOut:false,last:0,raf:null,a:null};
 const unwrap=(a)=>a&&typeof a==='object'&&'data'in a&&('from'in a||'peer'in a||'topic'in a||'sender'in a)?a.data:a;
 (async()=>{if(HOSTED){room=await mqttBus();if(!room){status('err','Relais injoignable : feuille seule, pas de suivi en direct');const n=$('#anon');if(n)n.hidden=false;return}
